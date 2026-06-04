@@ -988,6 +988,8 @@
   padding: 0.65rem 1.4rem;
   border-radius: 50px;
   text-decoration: none;
+  width: auto !important;
+  height: auto !important;
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .insta-prominent:hover {
