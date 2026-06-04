@@ -202,6 +202,10 @@ function runGenerator(products) {
   <url>
     <loc>${siteUrl}/storefront.html</loc>
     <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>${siteUrl}/influencers.html</loc>
+    <priority>0.70</priority>
   </url>`;
 
   products.forEach(p => {

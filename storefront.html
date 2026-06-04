@@ -398,6 +398,59 @@
   @media (max-width: 380px) {
     section { padding: 3rem 4.5vw; }
   }
+
+  /* Search bar styles */
+  .search-container {
+    margin-bottom: 2rem;
+    position: relative;
+    max-width: 480px;
+    width: 100%;
+  }
+  .search-input {
+    width: 100%;
+    padding: 0.9rem 1rem 0.9rem 2.8rem;
+    font-size: 0.95rem;
+    background-color: var(--white);
+    border: 1px solid var(--sage-light);
+    color: var(--text);
+    border-radius: 4px;
+    outline: none;
+    font-family: inherit;
+    transition: all 0.3s ease;
+  }
+  .search-input:focus {
+    border-color: var(--sage);
+    box-shadow: 0 5px 15px rgba(107,143,107,0.06);
+  }
+  .search-icon-svg {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-soft);
+    pointer-events: none;
+    transition: color 0.3s;
+  }
+  .search-input:focus + .search-icon-svg {
+    color: var(--sage);
+  }
+  .search-clear-btn {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--text-soft);
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .search-clear-btn.active {
+    display: flex;
+  }
 </style>
 </head>
 <body>
@@ -417,6 +470,7 @@
     <li><a href="index.html">Home</a></li>
     <li><a href="index.html#routine">Routine</a></li>
     <li><a href="index.html#watch">Learn</a></li>
+    <li><a href="influencers.html">Creators</a></li>
     <li><a href="storefront.html" class="nav-cta">Shop Now</a></li>
   </ul>
   <div class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('mopen')">
@@ -431,6 +485,12 @@
       <p class="section-label">Pure Skincare Collection</p>
       <h2 class="section-title">SHUCHI Storefront — <br><em>Honestly curated.</em></h2>
     </div>
+  </div>
+
+  <div class="search-container fi vis" style="margin-top: 2rem;">
+    <input type="text" id="storefrontSearch" class="search-input" placeholder="Search by title, brand, ingredient, or concern..." oninput="handleSearch(this.value)">
+    <svg class="search-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <button id="searchClearBtn" class="search-clear-btn" onclick="clearSearch()">×</button>
   </div>
 
   <div class="filter-bar fi vis" id="brandFilterBar">
@@ -500,9 +560,13 @@
     </div>
   </div>
   <div class="footer-bottom">
-    <p class="fcopy">© 2025 SHUCHI শুচি · Chittagong & Dhaka, Bangladesh</p>
+    <p class="fcopy">© 2026 SHUCHI শুচি · Chittagong & Dhaka, Bangladesh</p>
     <div class="fsocial">
-      <a href="#" class="slink">IG</a><a href="#" class="slink">FB</a><a href="#" class="slink">YT</a><a href="#" class="slink">TK</a>
+      <a href="https://instagram.com/shuchi.bd" target="_blank" class="slink" style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.82rem;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+        @shuchi.bd
+      </a>
+      <a href="#" class="slink">FB</a><a href="#" class="slink">YT</a><a href="#" class="slink">TK</a>
     </div>
   </div>
 </footer>
@@ -515,6 +579,7 @@ const SHEET_API_URL = "";
 let allProducts = [];
 let filteredProducts = [];
 let currentBrand = 'all';
+let currentSearchQuery = '';
 let currentPage = 1;
 const itemsPerPage = 15; // 5 rows of 3 items each
 
@@ -540,9 +605,9 @@ async function loadStorefrontProducts() {
           }
         });
         allProducts = uniqueProducts;
-        filteredProducts = uniqueProducts;
+        applyFilters(false);
+        checkUrlSearchQuery();
         generateBrandFilters(parsed);
-        renderStorefrontGrid();
         hasCache = true;
       }
     } catch(e) {
@@ -581,8 +646,8 @@ async function loadStorefrontProducts() {
     });
 
     allProducts = uniqueProducts;
-    // Apply current filter in case user toggled it before fetch completes
-    filterBrand(currentBrand, null, false); 
+    applyFilters(false);
+    checkUrlSearchQuery();
     generateBrandFilters(liveProducts);
   } catch (error) {
     console.error("Error fetching live products:", error);
@@ -598,6 +663,45 @@ async function loadStorefrontProducts() {
   }
 }
 
+// Unified filtering function
+function applyFilters(resetPage = true) {
+  let tempProducts = allProducts;
+
+  // 1. Filter by Brand
+  if (currentBrand !== 'all') {
+    tempProducts = tempProducts.filter(p => {
+      const norm = {};
+      Object.keys(p).forEach(k => { norm[k.trim().toLowerCase()] = p[k]; });
+      const pBrand = norm.brand || '';
+      return pBrand.toLowerCase() === currentBrand.toLowerCase();
+    });
+  }
+
+  // 2. Filter by Search Query
+  if (currentSearchQuery.trim() !== '') {
+    const query = currentSearchQuery.toLowerCase().trim();
+    tempProducts = tempProducts.filter(p => {
+      const norm = {};
+      Object.keys(p).forEach(k => { norm[k.trim().toLowerCase()] = p[k]; });
+      
+      const pTitle = (norm.title || '').toLowerCase();
+      const pBrand = (norm.brand || '').toLowerCase();
+      const pDesc = (norm.desc || '').toLowerCase();
+      const pSkinType = (norm.skintype || '').toLowerCase();
+
+      return pTitle.includes(query) || 
+             pBrand.includes(query) || 
+             pDesc.includes(query) || 
+             pSkinType.includes(query);
+    });
+  }
+
+  filteredProducts = tempProducts;
+
+  if (resetPage) currentPage = 1;
+  renderStorefrontGrid();
+}
+
 // Brand Filter
 function filterBrand(brand, btn, resetPage = true) {
   currentBrand = brand;
@@ -605,21 +709,48 @@ function filterBrand(brand, btn, resetPage = true) {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
   }
+  applyFilters(resetPage);
+}
+
+// Search Logic
+let searchTimeout;
+function handleSearch(query) {
+  currentSearchQuery = query;
   
-  if (brand === 'all') {
-    filteredProducts = allProducts;
-  } else {
-    filteredProducts = allProducts.filter(p => {
-      // Normalize to handle column spaces
-      const norm = {};
-      Object.keys(p).forEach(k => { norm[k.trim().toLowerCase()] = p[k]; });
-      const pBrand = norm.brand || '';
-      return pBrand.toLowerCase() === brand.toLowerCase();
-    });
+  const clearBtn = document.getElementById('searchClearBtn');
+  if (clearBtn) {
+    if (query.length > 0) {
+      clearBtn.classList.add('active');
+    } else {
+      clearBtn.classList.remove('active');
+    }
   }
-  
-  if (resetPage) currentPage = 1;
-  renderStorefrontGrid();
+
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    applyFilters(true);
+  }, 200);
+}
+
+function clearSearch() {
+  const searchInput = document.getElementById('storefrontSearch');
+  if (searchInput) {
+    searchInput.value = '';
+  }
+  handleSearch('');
+}
+
+// Check URL Search query
+function checkUrlSearchQuery() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const q = urlParams.get('q');
+  if (q) {
+    const searchInput = document.getElementById('storefrontSearch');
+    if (searchInput) {
+      searchInput.value = q;
+      handleSearch(q);
+    }
+  }
 }
 
 // Dynamic brand filters
