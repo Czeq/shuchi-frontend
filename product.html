@@ -93,7 +93,7 @@
   #product-hero { padding-top: 120px; display: grid; grid-template-columns: 1fr 1fr; gap: 5vw; background: var(--white); min-height: 90vh; }
   
   .phero-image-wrapper { background: linear-gradient(135deg, var(--sage-pale), var(--cream-deep)); display: flex; align-items: center; justify-content: center; position: relative; border: 1px solid rgba(107,143,107,0.15); padding: 4rem; aspect-ratio: 1 / 1; }
-  .phero-svg { width: 100%; max-width: 300px; height: auto; filter: drop-shadow(0 20px 40px rgba(26,43,27,0.1)); animation: floatUp 6s ease-in-out infinite alternate; }
+  .phero-svg { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 20px 40px rgba(26,43,27,0.1)); animation: floatUp 6s ease-in-out infinite alternate; }
   @keyframes floatUp { from { transform: translateY(0); } to { transform: translateY(-10px); } }
 
   .phero-content { display: flex; flex-direction: column; justify-content: center; }
@@ -262,11 +262,11 @@
 <section id="product-hero">
   <div class="phero-image-wrapper fi" id="imageContainer">
     <!-- SVG Placeholder for Product -->
-    <svg class="phero-svg" viewBox="0 0 200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="50" y="40" width="100" height="220" rx="8" fill="#A8C4A2" opacity="0.4"/>
-      <rect x="65" y="20" width="70" height="20" rx="4" fill="#6B8F6B" opacity="0.6"/>
-      <rect x="60" y="150" width="80" height="2" fill="white" opacity="0.8"/>
-      <rect x="70" y="160" width="60" height="1.5" fill="white" opacity="0.5"/>
+    <svg class="phero-svg" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="100" y="40" width="100" height="220" rx="8" fill="#A8C4A2" opacity="0.4"/>
+      <rect x="115" y="20" width="70" height="20" rx="4" fill="#6B8F6B" opacity="0.6"/>
+      <rect x="110" y="150" width="80" height="2" fill="white" opacity="0.8"/>
+      <rect x="120" y="160" width="60" height="1.5" fill="white" opacity="0.5"/>
     </svg>
   </div>
   
@@ -526,11 +526,11 @@ function hydrateHTML(rawProduct) {
       imgContainer.innerHTML = `<img src="${pImage}" alt="${pTitle}" class="phero-svg" style="width: 100%; height: 100%; object-fit: contain;" onerror="handleDetailImgError(this)">`;
     } else {
       imgContainer.innerHTML = `
-        <svg class="phero-svg" viewBox="0 0 200 300" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="50" y="40" width="100" height="220" rx="8" fill="#A8C4A2" opacity="0.4"/>
-          <rect x="65" y="20" width="70" height="20" rx="4" fill="#6B8F6B" opacity="0.6"/>
-          <rect x="60" y="150" width="80" height="2" fill="white" opacity="0.8"/>
-          <rect x="70" y="160" width="60" height="1.5" fill="white" opacity="0.5"/>
+        <svg class="phero-svg" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="100" y="40" width="100" height="220" rx="8" fill="#A8C4A2" opacity="0.4"/>
+          <rect x="115" y="20" width="70" height="20" rx="4" fill="#6B8F6B" opacity="0.6"/>
+          <rect x="110" y="150" width="80" height="2" fill="white" opacity="0.8"/>
+          <rect x="120" y="160" width="60" height="1.5" fill="white" opacity="0.5"/>
         </svg>
       `;
     }
