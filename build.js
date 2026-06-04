@@ -55,10 +55,23 @@ function parseCSV(csvText) {
   return lines;
 }
 
-// Fetch Google Sheet CSV data
-function fetchGoogleSheetCSV() {
+// Fetch Google Sheet CSV data (with redirect support)
+function fetchGoogleSheetCSV(url = GOOGLE_SHEET_CSV_URL, redirectLimit = 5) {
   return new Promise((resolve, reject) => {
-    https.get(GOOGLE_SHEET_CSV_URL, res => {
+    if (redirectLimit <= 0) {
+      return reject(new Error("Too many HTTP redirects when fetching spreadsheet"));
+    }
+
+    https.get(url, res => {
+      // Follow HTTP redirects (301, 302, 307, 308)
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        let redirectUrl = res.headers.location;
+        if (!redirectUrl.startsWith("http")) {
+          redirectUrl = new URL(redirectUrl, url).href;
+        }
+        return resolve(fetchGoogleSheetCSV(redirectUrl, redirectLimit - 1));
+      }
+
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
