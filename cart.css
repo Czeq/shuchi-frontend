@@ -982,28 +982,28 @@
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.05em;
-  color: var(--dark) !important;
-  background: var(--cream);
-  border: 1px solid var(--cream) !important;
+  color: var(--cream) !important;
+  background: rgba(245, 239, 228, 0.08);
+  border: 1.5px solid var(--cream) !important;
   padding: 0.65rem 1.4rem;
   border-radius: 50px;
   text-decoration: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .insta-prominent:hover {
-  background: var(--white) !important;
+  background: var(--cream) !important;
   color: var(--dark) !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25), 0 0 10px rgba(245, 239, 228, 0.4);
 }
 .insta-prominent svg {
-  stroke: var(--dark);
-  width: 15px;
-  height: 15px;
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  stroke: var(--cream);
+  width: 16px;
+  height: 16px;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .insta-prominent:hover svg {
+  stroke: var(--dark);
   transform: scale(1.2) rotate(-10deg);
 }
 
