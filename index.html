@@ -1315,6 +1315,14 @@ async function loadHomepageProducts() {
             uniqueProducts.push(p);
           }
         });
+        // Prioritize 3W Clinic and COSRX to fill the first row
+        uniqueProducts.sort((a, b) => {
+          const aBrand = (a.brand || '').toLowerCase().trim();
+          const bBrand = (b.brand || '').toLowerCase().trim();
+          const aPriority = (aBrand.includes('3w clinic') || aBrand.includes('3wclinic') || aBrand.includes('cosrx')) ? 1 : 0;
+          const bPriority = (bBrand.includes('3w clinic') || bBrand.includes('3wclinic') || bBrand.includes('cosrx')) ? 1 : 0;
+          return bPriority - aPriority;
+        });
         const topSix = uniqueProducts.slice(0, 6);
         renderHomepageCards(topSix);
         generateBrandFilters(topSix);
@@ -1356,6 +1364,14 @@ async function loadHomepageProducts() {
         seen.add(baseId);
         uniqueProducts.push(p);
       }
+    });
+    // Prioritize 3W Clinic and COSRX to fill the first row
+    uniqueProducts.sort((a, b) => {
+      const aBrand = (a.brand || '').toLowerCase().trim();
+      const bBrand = (b.brand || '').toLowerCase().trim();
+      const aPriority = (aBrand.includes('3w clinic') || aBrand.includes('3wclinic') || aBrand.includes('cosrx')) ? 1 : 0;
+      const bPriority = (bBrand.includes('3w clinic') || bBrand.includes('3wclinic') || bBrand.includes('cosrx')) ? 1 : 0;
+      return bPriority - aPriority;
     });
 
     // Render fresh cards (top 6 only)
