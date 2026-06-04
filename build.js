@@ -324,6 +324,7 @@ function runGenerator(products) {
       const pBrand = p.brand || '[Brand]';
       const pDesc = p.desc || '';
       const pPrice = p.price || '';
+      const pVolume = p.volume ? `${p.volume} ${p.volume_unit || ''}`.trim() : '';
 
       const imgHTML = pImage ? 
         `<img src="${pImage}" alt="${pTitle}" style="width: 100%; height: 100%; object-fit: contain; padding: 1.5rem; display: block;" onerror="handleImgError(this)">` :
@@ -342,7 +343,7 @@ function runGenerator(products) {
             ${imgHTML}
           </div>
           <div class="product-card-body">
-            <p class="product-brand">${pBrand}</p>
+            <p class="product-brand">${pBrand}${pVolume ? ` · ${pVolume}` : ''}</p>
             <h3 class="product-title-card">${pTitle}</h3>
             <p class="product-desc-card">${pDesc.substring(0, 75)}${pDesc.length > 75 ? '...' : ''}</p>
             <div class="product-footer-card">

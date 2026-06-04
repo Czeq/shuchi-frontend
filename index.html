@@ -1241,6 +1241,7 @@ function renderHomepageCards(products) {
     const pBrand = p.brand || '[Brand]';
     const pDesc = p.desc || '';
     const pPrice = p.price || '';
+    const pVolume = p.volume ? `${p.volume} ${p.volume_unit || ''}`.trim() : '';
 
     const pImage = p.image || p.img || p.imageurl || p.imgurl || p.photo || '';
     const imgHTML = pImage ? 
@@ -1261,7 +1262,7 @@ function renderHomepageCards(products) {
             ${imgHTML}
           </div>
           <div class="product-card-body">
-            <p class="product-brand">${pBrand}</p>
+            <p class="product-brand">${pBrand}${pVolume ? ` · ${pVolume}` : ''}</p>
             <h3 class="product-title-card">${pTitle}</h3>
             <p class="product-desc-card">${pDesc.substring(0, 75)}${pDesc.length > 75 ? '...' : ''}</p>
             <div class="product-footer-card">
