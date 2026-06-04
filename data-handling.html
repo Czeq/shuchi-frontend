@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Creators & Experts — SHUCHI শুচি</title>
-<meta name="description" content="Meet the skincare creators, experts, and advocates in Bangladesh who trust and partner with SHUCHI.">
+<title>Data Handling & Cookies — SHUCHI শুচি</title>
+<meta name="description" content="Learn how SHUCHI handles customer names, phone numbers, and addresses securely to facilitate simple order management and checkouts.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://shuchi-frontend.vercel.app/influencers.html">
-<meta property="og:title" content="Creators & Experts — SHUCHI শুচি">
-<meta property="og:description" content="Meet the skincare creators, experts, and advocates in Bangladesh who trust and partner with SHUCHI.">
+<meta property="og:url" content="https://shuchi-frontend.vercel.app/data-handling.html">
+<meta property="og:title" content="Data Handling & Cookies — SHUCHI শুচি">
+<meta property="og:description" content="Learn how SHUCHI handles customer names, phone numbers, and addresses securely.">
 <meta property="og:image" content="https://shuchi-frontend.vercel.app/shuchi_banner.png">
 <meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://shuchi-frontend.vercel.app/influencers.html">
-<meta property="twitter:title" content="Creators & Experts — SHUCHI শুচি">
-<meta property="twitter:description" content="Meet the skincare creators, experts, and advocates in Bangladesh who trust and partner with SHUCHI.">
+<meta property="twitter:url" content="https://shuchi-frontend.vercel.app/data-handling.html">
+<meta property="twitter:title" content="Data Handling & Cookies — SHUCHI শুচি">
+<meta property="twitter:description" content="Learn how SHUCHI handles customer names, phone numbers, and addresses securely.">
 <meta property="twitter:image" content="https://shuchi-frontend.vercel.app/shuchi_banner.png">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="cart.css">
@@ -70,7 +70,6 @@
   .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
   .hamburger span { display: block; width: 24px; height: 1.5px; background: var(--cream); }
 
-  /* Navbar button overrides for dark background */
   nav .nav-cart-btn, nav .nav-auth-btn { color: var(--cream); }
   nav .nav-cart-btn:hover, nav .nav-auth-btn:hover { color: var(--white); }
 
@@ -86,42 +85,40 @@
     color: var(--dark) !important;
   }
 
-  /* COMMON COMPONENTS */
+  /* MAIN CONTENT */
   section { padding: 7rem 8vw; }
   .section-label { font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--sage); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.8rem; }
   .section-label::before { content: ''; display: block; width: 2rem; height: 1px; background: var(--sage); }
   .section-title { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(2rem, 3.5vw, 3.2rem); font-weight: 300; line-height: 1.15; color: var(--dark); }
   .section-title em { font-style: italic; color: var(--sage); }
-  
-  .fi { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
-  .fi.vis { opacity: 1; transform: translateY(0); }
 
-  /* CREATOR INTRO */
-  #creator-hero { padding-top: 150px; background: var(--white); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #policy-hero { padding-top: 150px; background: var(--white); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   .chero-subtitle { font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--sage); margin-bottom: 1rem; }
   .chero-title { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(2.4rem, 5vw, 4.2rem); font-weight: 300; line-height: 1.1; color: var(--dark); max-width: 20ch; margin-bottom: 1.5rem; }
   .chero-desc { font-size: 1.05rem; color: var(--text-soft); max-width: 55ch; line-height: 1.8; margin-bottom: 3rem; }
 
-  /* CREATORS GRID */
-  .creators-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem; margin-top: 4rem; }
-  .creator-card { background: var(--white); border: 1px solid rgba(107,143,107,0.15); padding: 3rem 2.5rem; border-radius: 4px; box-shadow: 0 15px 45px rgba(26,43,27,0.02); display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.4s ease, box-shadow 0.4s ease; }
-  .creator-card:hover { transform: translateY(-5px); box-shadow: 0 25px 60px rgba(26,43,27,0.06); }
-  
-  .creator-quote { font-size: 1rem; font-style: italic; color: var(--text-soft); line-height: 1.8; margin-bottom: 2.5rem; position: relative; }
-  .creator-quote::before { content: '“'; font-family: Georgia, serif; font-size: 4rem; color: var(--sage-pale); position: absolute; top: -2.5rem; left: -1rem; opacity: 0.6; z-index: -1; }
-  
-  .creator-profile { display: flex; align-items: center; gap: 1.2rem; }
-  .creator-avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--sage-pale); color: var(--dark); display: flex; align-items: center; justify-content: center; font-family: Georgia, serif; font-weight: bold; font-size: 1.4rem; border: 1px solid rgba(107,143,107,0.2); }
-  .creator-name { font-family: Georgia, 'Times New Roman', serif; font-size: 1.1rem; color: var(--dark); font-weight: 600; margin-bottom: 0.2rem; }
-  .creator-handle { font-size: 0.78rem; color: var(--sage); letter-spacing: 0.05em; text-transform: uppercase; font-weight: 500; text-decoration: none; }
-  .creator-handle:hover { text-decoration: underline; }
+  .policy-container { max-width: 800px; margin: 0 auto 4rem; background: var(--white); border: 1px solid rgba(107,143,107,0.15); padding: 4rem 3.5rem; border-radius: 4px; box-shadow: 0 15px 45px rgba(26,43,27,0.02); }
+  .policy-block { margin-bottom: 3rem; }
+  .policy-block:last-child { margin-bottom: 0; }
+  .policy-h3 { font-family: Georgia, serif; font-size: 1.5rem; font-weight: 500; color: var(--dark); margin-bottom: 1rem; }
+  .policy-p { font-size: 0.95rem; color: var(--text-soft); line-height: 1.8; margin-bottom: 1.2rem; }
+  .policy-list { list-style: none; margin-left: 1rem; margin-bottom: 1.5rem; }
+  .policy-list li { font-size: 0.92rem; color: var(--text); position: relative; padding-left: 1.5rem; margin-bottom: 0.8rem; line-height: 1.6; }
+  .policy-list li::before { content: '✓'; color: var(--sage); position: absolute; left: 0; font-weight: bold; }
 
-  /* JOIN PROGRAM */
-  #join-program { background: var(--cream-deep); text-align: center; }
-  .join-box { max-width: 60ch; margin: 0 auto; }
-  .join-box p { color: var(--text-soft); margin-bottom: 2.5rem; }
-  .btn-primary { background: var(--dark); color: var(--cream); padding: 0.9rem 2.2rem; font-family: inherit; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; border: none; cursor: pointer; text-decoration: none; transition: all 0.35s; display: inline-block; }
-  .btn-primary:hover { background: var(--sage); transform: translateY(-2px); }
+  /* PAYMENT */
+  .payment-strip {
+    background: var(--white);
+    padding: 2.5rem 8vw;
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid var(--cream-deep); border-bottom: 1px solid var(--cream-deep);
+    gap: 2rem; flex-wrap: wrap;
+  }
+  .payment-label { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-soft); white-space: nowrap; }
+  .payment-methods { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center; }
+  .ppill { background: var(--cream); border: 1.5px solid var(--cream-deep); padding: 0.45rem 1.1rem; font-size: 0.8rem; font-weight: 500; color: var(--dark); border-radius: 4px; }
+  .ppill.bkash { border-color: #E2136E; color: #E2136E; background: rgba(226,19,110,0.04); }
+  .payment-note { font-size: 0.72rem; color: var(--text-soft); white-space: nowrap; }
 
   /* FOOTER */
   footer { background: var(--dark); color: rgba(245,239,228,0.55); padding: 5rem 8vw 3rem; }
@@ -136,8 +133,6 @@
   .footer-bottom { padding-top: 2.5rem; border-top: 1px solid rgba(107,143,107,0.15); display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
   .fcopy { font-size: 0.72rem; color: rgba(245,239,228,0.28); letter-spacing: 0.05em; }
   .fsocial { display: flex; gap: 1.5rem; align-items: center; }
-  .slink { text-decoration: none; font-size: 0.78rem; color: rgba(245,239,228,0.45); transition: color 0.3s; }
-  .slink:hover { color: var(--sage-light); }
 
   /* MOBILE NAV OPEN */
   nav.mopen .nav-links {
@@ -169,6 +164,7 @@
   }
 
   @media (max-width: 600px) {
+    .policy-container { padding: 2.2rem 1.8rem; }
     .footer-top { grid-template-columns: 1fr; }
     .footer-bottom { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
   }
@@ -192,7 +188,7 @@
     <li><a href="storefront.html">Shop</a></li>
     <li><a href="index.html#routine">Routine</a></li>
     <li><a href="index.html#watch">Learn</a></li>
-    <li><a href="influencers.html" style="color: var(--sage-light); font-weight: 500;">Creators</a></li>
+    <li><a href="influencers.html">Creators</a></li>
     <li><a href="storefront.html" class="nav-cta">Shop Now</a></li>
   </ul>
   <div class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('mopen')">
@@ -200,68 +196,67 @@
   </div>
 </nav>
 
-<!-- CREATOR HERO -->
-<section id="creator-hero" class="fi">
-  <p class="chero-subtitle">Skincare Community</p>
-  <h1 class="chero-title">Pure transparency, <em>approved by creators.</em></h1>
-  <p class="chero-desc">Meet the skincare creators, advocates, and health experts who align with SHUCHI's mission of honest ingredient curation and climate-adapted skincare for Bangladesh.</p>
+<!-- POLICY HERO -->
+<section id="policy-hero">
+  <p class="chero-subtitle">Data & Transparency</p>
+  <h1 class="chero-title">How we use and <em>handle your data.</em></h1>
+  <p class="chero-desc">At SHUCHI, data handling is simple, secure, and fully transparent. Here is exactly what we store, why we store it, and how your privacy is protected.</p>
 </section>
 
-<!-- TESTIMONIALS SECTION -->
-<section id="creators-section" style="background: var(--cream);">
-  <div class="fi">
-    <p class="section-label">Creator Voices</p>
-    <h2 class="section-title">Why they partner<br><em>with SHUCHI.</em></h2>
-  </div>
-
-  <div class="creators-grid fi">
-    <!-- Creator 1 -->
-    <div class="creator-card">
-      <p class="creator-quote">"SHUCHI's complete ingredient transparency is a game-changer for the Bangladeshi community. We finally have direct imports we can trust without guessing."</p>
-      <div class="creator-profile">
-        <div class="creator-avatar">TR</div>
-        <div>
-          <h4 class="creator-name">Tasnim Rahman</h4>
-          <a href="#" class="creator-handle">@tasnim.skin</a>
-        </div>
-      </div>
+<!-- POLICY DETAILS -->
+<section style="background: var(--cream); padding: 2rem 8vw 5rem;">
+  <div class="policy-container">
+    
+    <div class="policy-block">
+      <h3 class="policy-h3">1. What Data We Store</h3>
+      <p class="policy-p">We collect and store only the minimal information required to complete your checkout and manage your customer account. This is strictly limited to:</p>
+      <ul class="policy-list">
+        <li><strong>Full Name:</strong> To address your delivery packages.</li>
+        <li><strong>Phone Number:</strong> To contact you for order verification and login authentication (no passwords required).</li>
+        <li><strong>Delivery Address:</strong> To deliver your skincare products to your home or office.</li>
+      </ul>
+      <p class="policy-p">We do <strong>not</strong> request, store, or process any payment credentials, passwords, or secondary personal identifiers.</p>
     </div>
 
-    <!-- Creator 2 -->
-    <div class="creator-card">
-      <p class="creator-quote">"Under Dhaka's extreme humidity, finding lightweight, non-comedogenic formulas that are 100% authentic is key. SHUCHI makes matching ingredients to skin types effortless."</p>
-      <div class="creator-profile">
-        <div class="creator-avatar">RZ</div>
-        <div>
-          <h4 class="creator-name">Raheed Zaman</h4>
-          <a href="#" class="creator-handle">@raheed_beauty</a>
-        </div>
-      </div>
+    <div class="policy-block">
+      <h3 class="policy-h3">2. Why We Store It</h3>
+      <p class="policy-p">Your data is stored solely to improve your shopping experience and manage logistics:</p>
+      <ul class="policy-list">
+        <li><strong>Ease of Checkout:</strong> When you sign in with your phone number, your default name and address automatically pre-fill on the delivery details form so you don't have to type them every time.</li>
+        <li><strong>Purchase History:</strong> Logging in allows you to securely view your past order records, delivery status, and order IDs.</li>
+        <li><strong>Logistics:</strong> To coordinate physical shipping within Dhaka and outer districts in Bangladesh.</li>
+      </ul>
     </div>
 
-    <!-- Creator 3 -->
-    <div class="creator-card">
-      <p class="creator-quote">"I appreciate that they formulate their routines based on Bangladesh's climate rather than generic skincare trends. It's thoughtful science that works."</p>
-      <div class="creator-profile">
-        <div class="creator-avatar">NI</div>
-        <div>
-          <h4 class="creator-name">Nabila Islam</h4>
-          <a href="#" class="creator-handle">@nabila.glows</a>
-        </div>
-      </div>
+    <div class="policy-block">
+      <h3 class="policy-h3">3. How Cookies Are Used</h3>
+      <p class="policy-p">Cookies are tiny text files stored in your web browser. SHUCHI uses cookies for structural functionality only:</p>
+      <ul class="policy-list">
+        <li><strong>Session Persistence (`shuchi_user`):</strong> We set a secure cookie containing your name, phone, and address once you authenticate. This tells our website that you are logged in and keeps you signed in across pages.</li>
+        <li><strong>Bag State Storage (`shuchi_cart`):</strong> We utilize standard browser local storage to remember what skincare products are currently inside your shopping bag, even if you close the tab.</li>
+      </ul>
+      <p class="policy-p">We do <strong>not</strong> use third-party marketing, analytics, profiling, or tracking cookies of any kind.</p>
     </div>
-  </div>
-</section>
 
-<!-- JOIN CREATOR PROGRAM -->
-<section id="join-program" class="fi">
-  <div class="join-box">
-    <p class="section-label" style="display:inline-flex; margin-bottom:1.5rem;">Collaboration</p>
-    <h2 class="section-title" style="margin-bottom: 1.5rem;">Are you a skincare creator?<br><em>Let's build trust together.</em></h2>
-    <p style="font-size: 0.95rem; line-height: 1.8; margin-bottom: 2rem;">If you share our passion for clinical transparency, clean formulations, and scientific routines, we would love to collaborate. Join our affiliated creator program today.</p>
-    <a href="mailto:collabs@shuchibd.com" class="btn-primary">Apply To Collaborate</a>
+    <div class="policy-block" style="border-top: 1px dashed rgba(107, 143, 107, 0.25); padding-top: 2rem;">
+      <h3 class="policy-h3">Our Privacy Promise</h3>
+      <p class="policy-p" style="font-style: italic;">
+        "We treat your information with the same honesty we apply to our skincare curation. We will never sell, lease, share, or monetize your phone number, address, or purchase history with third-party advertising companies. Your records are private and securely stored inside the Shuchi User database."
+      </p>
+    </div>
+
   </div>
 </section>
+
+<!-- PAYMENT STRIP -->
+<div class="payment-strip">
+  <p class="payment-label">Accepted Payment Methods</p>
+  <div class="payment-methods">
+    <span class="ppill bkash">bKash</span>
+    <span class="ppill cod">COD</span>
+  </div>
+  <p class="payment-note">60-second checkout · No hidden fees</p>
+</div>
 
 <!-- FOOTER -->
 <footer>
@@ -307,21 +302,9 @@
 </footer>
 
 <script>
-// Observe fade ins
-const obs = new IntersectionObserver(entries => {
-  entries.forEach((e, i) => {
-    if (e.isIntersecting) {
-      setTimeout(() => e.target.classList.add('vis'), i * 80);
-      obs.unobserve(e.target);
-    }
+  window.addEventListener('scroll', () => {
+    document.getElementById('mainNav').style.padding = scrollY > 60 ? '0.75rem 4vw' : '';
   });
-}, { threshold: 0.1 });
-
-document.querySelectorAll('.fi').forEach(el => obs.observe(el));
-
-window.addEventListener('scroll', () => {
-  document.getElementById('mainNav').style.padding = scrollY > 60 ? '0.75rem 4vw' : '';
-});
 </script>
 </body>
 </html>

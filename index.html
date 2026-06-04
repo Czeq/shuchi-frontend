@@ -590,10 +590,8 @@
   }
   .payment-label { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-soft); white-space: nowrap; }
   .payment-methods { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center; }
-  .ppill { background: var(--cream); border: 1.5px solid var(--cream-deep); padding: 0.45rem 1.1rem; font-size: 0.8rem; font-weight: 500; color: var(--dark); }
+  .ppill { background: var(--cream); border: 1.5px solid var(--cream-deep); padding: 0.45rem 1.1rem; font-size: 0.8rem; font-weight: 500; color: var(--dark); border-radius: 4px; }
   .ppill.bkash { border-color: #E2136E; color: #E2136E; background: rgba(226,19,110,0.04); }
-  .ppill.nagad { border-color: #F05829; color: #F05829; background: rgba(240,88,41,0.04); }
-  .ppill.rocket { border-color: #8B3FA8; color: #8B3FA8; background: rgba(139,63,168,0.04); }
   .payment-note { font-size: 0.72rem; color: var(--text-soft); white-space: nowrap; }
 
   /* FOOTER */
@@ -862,7 +860,7 @@
     </div>
     <div class="hero-badges">
       <div><div class="badge-number">100%</div><div class="badge-label">Verified Imports</div></div>
-      <div><div class="badge-number">48h</div><div class="badge-label">Dhaka Delivery</div></div>
+      <div><div class="badge-number">48-72h</div><div class="badge-label">Fast Delivery</div></div>
       <div><div class="badge-number">0</div><div class="badge-label">Hidden Ingredients</div></div>
     </div>
   </div>
@@ -954,7 +952,7 @@
 <!-- MARQUEE -->
 <div class="marquee-strip">
   <div class="marquee-inner">
-    <span>Verified Korean Import</span><span class="mdot"> ◆ </span><span>Ingredient Transparency</span><span class="mdot"> ◆ </span><span>bKash · Nagad · Rocket</span><span class="mdot"> ◆ </span><span>48hr Dhaka Delivery</span><span class="mdot"> ◆ </span><span>No Counterfeit Policy</span><span class="mdot"> ◆ </span><span>Dermatologist Reviewed</span><span class="mdot"> ◆ </span><span>Humidity-Adapted Routines</span><span class="mdot"> ◆ </span><span>Verified Korean Import</span><span class="mdot"> ◆ </span><span>Ingredient Transparency</span><span class="mdot"> ◆ </span><span>bKash · Nagad · Rocket</span><span class="mdot"> ◆ </span><span>48hr Dhaka Delivery</span><span class="mdot"> ◆ </span><span>No Counterfeit Policy</span><span class="mdot"> ◆ </span><span>Dermatologist Reviewed</span><span class="mdot"> ◆ </span><span>Humidity-Adapted Routines</span><span class="mdot"> ◆ </span>
+    <span>Verified Korean Import</span><span class="mdot"> ◆ </span><span>Ingredient Transparency</span><span class="mdot"> ◆ </span><span>bKash · COD</span><span class="mdot"> ◆ </span><span>48-72hr Delivery</span><span class="mdot"> ◆ </span><span>No Counterfeit Policy</span><span class="mdot"> ◆ </span><span>Dermatologist Reviewed</span><span class="mdot"> ◆ </span><span>Humidity-Adapted Routines</span><span class="mdot"> ◆ </span><span>Verified Korean Import</span><span class="mdot"> ◆ </span><span>Ingredient Transparency</span><span class="mdot"> ◆ </span><span>bKash · COD</span><span class="mdot"> ◆ </span><span>48-72hr Delivery</span><span class="mdot"> ◆ </span><span>No Counterfeit Policy</span><span class="mdot"> ◆ </span><span>Dermatologist Reviewed</span><span class="mdot"> ◆ </span><span>Humidity-Adapted Routines</span><span class="mdot"> ◆ </span>
   </div>
 </div>
 
@@ -1127,10 +1125,7 @@
   <p class="payment-label">Accepted Payment Methods</p>
   <div class="payment-methods">
     <span class="ppill bkash">bKash</span>
-    <span class="ppill nagad">Nagad</span>
-    <span class="ppill rocket">Rocket</span>
-    <span class="ppill">Visa / Mastercard</span>
-    <span class="ppill">Cash on Delivery</span>
+    <span class="ppill cod">COD</span>
   </div>
   <p class="payment-note">60-second checkout · No hidden fees</p>
 </div>
@@ -1145,30 +1140,35 @@
     <div>
       <p class="fcol-title">Shop</p>
       <ul class="flinks">
-        <li><a href="#">All Products</a></li><li><a href="#">Serums</a></li><li><a href="#">Cleansers</a></li><li><a href="#">Sunscreen</a></li><li><a href="#">New Arrivals</a></li>
+        <li><a href="storefront.html">All Products</a></li>
+        <li><a href="index.html#products">Featured Items</a></li>
+        <li><a href="index.html#routine">Routine Builder</a></li>
       </ul>
     </div>
     <div>
       <p class="fcol-title">Learn</p>
       <ul class="flinks">
-        <li><a href="#">Ingredient Wiki</a></li><li><a href="#">Watch & Learn</a></li><li><a href="#">Routine Builder</a></li><li><a href="#">Skin Type Guide</a></li><li><a href="#">Blog</a></li>
+        <li><a href="index.html#watch">Ingredient Wiki</a></li>
+        <li><a href="index.html#watch">Watch & Learn</a></li>
       </ul>
     </div>
     <div>
       <p class="fcol-title">Support</p>
       <ul class="flinks">
-        <li><a href="#">Track My Order</a></li><li><a href="#">Shipping Policy</a></li><li><a href="#">Returns</a></li><li><a href="#">Contact Us</a></li><li><a href="#">FAQ</a></li>
+        <li><a href="data-handling.html">Privacy & Data Handling</a></li>
+        <li><a href="#">Track My Order</a></li>
+        <li><a href="#">Shipping Policy</a></li>
+        <li><a href="#">FAQ</a></li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom">
     <p class="fcopy">© 2026 SHUCHI শুচি · Chittagong & Dhaka, Bangladesh</p>
     <div class="fsocial">
-      <a href="https://instagram.com/shuchi.bd" target="_blank" class="slink" style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.82rem;">
+      <a href="https://instagram.com/shuchi.bd" target="_blank" class="slink insta-prominent">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-        @shuchi.bd
+        Follow @shuchi.bd
       </a>
-      <a href="#" class="slink">FB</a><a href="#" class="slink">YT</a><a href="#" class="slink">TK</a>
     </div>
   </div>
 </footer>
