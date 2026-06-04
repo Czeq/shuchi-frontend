@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SHUCHI শুচি — Pure Korean Skincare, Bangladesh</title>
+<meta name="description" content="Pure Korean skincare, honestly delivered in Bangladesh. Discover authentic Korean serums, cleansers, and routines curated for our climate.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://shuchibd.com/">
+<meta property="og:title" content="SHUCHI শুচি — Pure Korean Skincare, Bangladesh">
+<meta property="og:description" content="Pure Korean skincare, honestly delivered. Curated formulas and scientific routines adapted for Bangladesh's climate.">
+<meta property="og:image" content="https://shuchibd.com/favicon.svg">
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://shuchibd.com/">
+<meta property="twitter:title" content="SHUCHI শুচি — Pure Korean Skincare, Bangladesh">
+<meta property="twitter:description" content="Pure Korean skincare, honestly delivered. Curated formulas and scientific routines adapted for Bangladesh's climate.">
+<meta property="twitter:image" content="https://shuchibd.com/favicon.svg">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="cart.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1262,7 +1273,7 @@ function renderHomepageCards(products) {
             ${imgHTML}
           </div>
           <div class="product-card-body">
-            <p class="product-brand">${pBrand}${pVolume ? ` · ${pVolume}` : ''}</p>
+            <p class="product-brand">${pBrand}${pVolume ? ` · <span style="color: var(--text-soft); text-transform: none; font-weight: 500; opacity: 0.85;">${pVolume}</span>` : ''}</p>
             <h3 class="product-title-card">${pTitle}</h3>
             <p class="product-desc-card">${pDesc.substring(0, 75)}${pDesc.length > 75 ? '...' : ''}</p>
             <div class="product-footer-card">

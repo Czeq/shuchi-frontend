@@ -260,6 +260,12 @@ function runGenerator(products) {
     // Replace product ID placeholder
     html = html.replace(/<!-- PRODUCT_ID -->/g, id);
 
+    // Replace Open Graph placeholders
+    const cleanDesc = desc.replace(/"/g, '&quot;').replace(/\n/g, ' ').substring(0, 150) + (desc.length > 150 ? '...' : '');
+    html = html.replace(/<!-- OG_TITLE -->/g, `${title} — SHUCHI শুচি`);
+    html = html.replace(/<!-- OG_DESC -->/g, cleanDesc);
+    html = html.replace(/<!-- OG_IMAGE -->/g, image || `https://shuchibd.com/favicon.svg`);
+
     // Replace HTML content placeholders
     html = html.replace(
       /<p class="p-brand" id="brandPlaceholder">\[Brand Name\]<\/p>/g,
@@ -343,7 +349,7 @@ function runGenerator(products) {
             ${imgHTML}
           </div>
           <div class="product-card-body">
-            <p class="product-brand">${pBrand}${pVolume ? ` · ${pVolume}` : ''}</p>
+            <p class="product-brand">${pBrand}${pVolume ? ` · <span style="color: var(--text-soft); text-transform: none; font-weight: 500; opacity: 0.85;">${pVolume}</span>` : ''}</p>
             <h3 class="product-title-card">${pTitle}</h3>
             <p class="product-desc-card">${pDesc.substring(0, 75)}${pDesc.length > 75 ? '...' : ''}</p>
             <div class="product-footer-card">
