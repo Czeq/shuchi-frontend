@@ -586,6 +586,7 @@ const SHEET_API_URL = "";
 
 let allProducts = [];
 let filteredProducts = [];
+let rawProductsList = [];
 let currentBrand = 'all';
 let currentSearchQuery = '';
 let currentPage = 1;
@@ -603,6 +604,7 @@ async function loadStorefrontProducts() {
     try {
       const parsed = JSON.parse(cachedProducts);
       if (parsed && parsed.length > 0) {
+        rawProductsList = parsed;
         const seen = new Set();
         const uniqueProducts = [];
         parsed.forEach(p => {
@@ -642,6 +644,7 @@ async function loadStorefrontProducts() {
   try {
     const liveProducts = await fetchProductsWithRetry(SHEET_API_URL);
     sessionStorage.setItem('shuchi_products', JSON.stringify(liveProducts));
+    rawProductsList = liveProducts;
     
     const seen = new Set();
     const uniqueProducts = [];
@@ -836,7 +839,7 @@ function renderStorefrontGrid() {
       </svg>`;
 
     const baseId = getBaseProductId(p.id);
-    const hasVariants = productsList && productsList.filter(item => getBaseProductId(item.id || item.ID || item.Id) === baseId).length > 1;
+    const hasVariants = rawProductsList && rawProductsList.filter(item => getBaseProductId(item.id || item.ID || item.Id) === baseId).length > 1;
     const variantsBadge = hasVariants ? `<span class="product-badge options-badge">✦ Options Available</span>` : '';
 
     const cardHTML = `
