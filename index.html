@@ -967,15 +967,12 @@
     </div>
     <a href="storefront.html" class="btn-outline">View All Products</a>
   </div>
-  <div class="filter-bar fi" id="brandFilterBar">
-    <button class="filter-btn active" onclick="filterBrand('all',this)">All</button>
-  </div>
   
   <div class="products-grid" id="prodGrid">
     <!-- Products dynamically injected via Google Sheets API -->
   </div>
-  <div class="products-footer-action fi" style="text-align: center; margin-top: 3.5rem; margin-bottom: 2rem;">
-    <a href="storefront.html" class="btn-primary" style="display: inline-block;">Discover Full Collection &rarr;</a>
+  <div class="products-footer-action fi" style="text-align: center; margin-top: 4rem; margin-bottom: 2.5rem;">
+    <a href="storefront.html" class="btn-primary" style="display: inline-block; padding: 1.1rem 3.5rem; font-size: 0.85rem; letter-spacing: 0.16em; font-weight: 600; box-shadow: 0 10px 25px rgba(26, 43, 27, 0.15); border-radius: 4px;">Explore Storefront — View All Products &rarr;</a>
   </div>
 </section>
 
@@ -1325,7 +1322,6 @@ async function loadHomepageProducts() {
         });
         const topSix = uniqueProducts.slice(0, 6);
         renderHomepageCards(topSix);
-        generateBrandFilters(topSix);
         hasCache = true;
       }
     } catch(e) {
@@ -1377,7 +1373,6 @@ async function loadHomepageProducts() {
     // Render fresh cards (top 6 only)
     const topSix = uniqueProducts.slice(0, 6);
     renderHomepageCards(topSix);
-    generateBrandFilters(topSix);
 
   } catch (error) {
     console.error("Error loading homepage products:", error);
