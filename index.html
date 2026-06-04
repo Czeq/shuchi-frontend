@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHUCHI শুচি — Pure Korean Skincare, Bangladesh</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="cart.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="cart.js" defer></script>
+<style>
+  /* Self-contained font stack — no external requests, works in WhatsApp WebView */
+  @font-face {
+    font-family: 'DisplaySerif';
+    src: local('Georgia'), local('Times New Roman');
+    font-weight: 300 600;
+  }
+</style>
+<style>
+  :root {
+    --sage: #6B8F6B;
+    --sage-light: #A8C4A2;
+    --sage-pale: #D6E8D4;
+    --cream: #F5EFE4;
+    --cream-deep: #EDE4D4;
+    --white: #FAFAF7;
+    --dark: #1A2B1B;
+    --dark-mid: #2F4030;
+    --gold: #B8975A;
+    --gold-light: #D4B47A;
+    --text: #2C3A2D;
+    --text-soft: #5A6E5B;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    overflow-x: hidden;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 4vw;
+    background: rgba(245, 239, 228, 0.88);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(107, 143, 107, 0.15);
+    transition: all 0.4s ease;
+  }
+
+  .nav-logo {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--dark);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+  .nav-logo span { color: var(--sage); font-style: italic; }
+
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--sage); }
+  .nav-cta {
+    background: var(--dark);
+    color: var(--cream) !important;
+    padding: 0.55rem 1.4rem;
+  }
+  .nav-cta:hover { background: var(--sage) !important; }
+
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+  .hamburger span { display: block; width: 24px; height: 1.5px; background: var(--dark); }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-top: 80px;
+    overflow: hidden;
+  }
+
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 5vw 4vw 5vw 8vw;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--sage);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .hero-eyebrow::before { content: ''; display: block; width: 2rem; height: 1px; background: var(--sage); }
+
+  .hero-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(3.2rem, 5.5vw, 5rem);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--dark);
+    margin-bottom: 0.2rem;
+  }
+  .hero-title em { font-style: italic; color: var(--sage); }
+
+  .hero-bangla {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(1.6rem, 2.8vw, 2.5rem);
+    font-weight: 300;
+    color: var(--text-soft);
+    margin-bottom: 2rem;
+    font-style: italic;
+  }
+
+  .hero-desc {
+    font-size: 0.95rem;
+    color: var(--text-soft);
+    max-width: 36ch;
+    margin-bottom: 2.8rem;
+    line-height: 1.8;
+  }
+
+  .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+  .btn-primary {
+    background: var(--dark);
+    color: var(--cream);
+    padding: 0.9rem 2.2rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.35s;
+    display: inline-block;
+  }
+  .btn-primary:hover { background: var(--sage); transform: translateY(-2px); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--dark);
+    padding: 0.9rem 2.2rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border: 1.5px solid var(--dark);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.35s;
+    display: inline-block;
+  }
+  .btn-outline:hover { background: var(--dark); color: var(--cream); }
+
+  .hero-badges {
+    display: flex;
+    gap: 2rem;
+    margin-top: 3.5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--cream-deep);
+  }
+  .badge-number {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--sage);
+    line-height: 1;
+  }
+  .badge-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin-top: 0.3rem;
+  }
+
+  .hero-right {
+    background: var(--cream-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-botanical {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.12;
+  }
+
+  .hero-product-stack {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.2rem;
+    animation: floatUp 6s ease-in-out infinite alternate;
+  }
+  @keyframes floatUp { from { transform: translateY(0); } to { transform: translateY(-14px); } }
+
+  .product-card-hero {
+    background: var(--white);
+    border: 1px solid rgba(107,143,107,0.2);
+    padding: 1.5rem;
+    width: 210px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(26,43,27,0.12);
+  }
+  .product-card-hero.off1 { transform: translateX(38px) rotate(2.5deg); }
+  .product-card-hero.off2 { transform: translateX(-28px) rotate(-2deg); }
+
+  .pimg {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: linear-gradient(135deg, var(--sage-pale), var(--cream-deep));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  .pname { font-family: Georgia, 'Times New Roman', serif; font-size: 1rem; color: var(--dark); }
+  .pprice { font-size: 0.78rem; color: var(--sage); margin-top: 0.2rem; }
+
+  /* MARQUEE */
+  .marquee-strip {
+    background: var(--dark);
+    color: var(--sage-pale);
+    padding: 0.9rem 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .marquee-inner {
+    display: inline-flex;
+    gap: 3rem;
+    animation: marquee 22s linear infinite;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .mdot { color: var(--gold); }
+
+  /* SECTIONS */
+  section { padding: 7rem 8vw; }
+
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--sage);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .section-label::before { content: ''; display: block; width: 2rem; height: 1px; background: var(--sage); }
+
+  .section-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(2rem, 3.5vw, 3.2rem);
+    font-weight: 300;
+    line-height: 1.15;
+    color: var(--dark);
+    max-width: 18ch;
+  }
+  .section-title em { font-style: italic; color: var(--sage); }
+
+  /* PRODUCTS */
+  #products { background: var(--white); }
+
+  .products-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 3rem;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-bar { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 2rem; }
+  .filter-btn {
+    background: transparent;
+    border: 1.5px solid var(--cream-deep);
+    color: var(--text-soft);
+    padding: 0.45rem 1rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .filter-btn:hover, .filter-btn.active { background: var(--dark); border-color: var(--dark); color: var(--cream); }
+
+  .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+
+  .product-card {
+    background: var(--cream);
+    border: 1px solid transparent;
+    transition: all 0.4s;
+    cursor: pointer;
+    position: relative;
+    min-width: 0;
+  }
+  .product-card:hover {
+    border-color: var(--sage-light);
+    transform: translateY(-6px);
+    box-shadow: 0 24px 60px rgba(107,143,107,0.15);
+  }
+
+  .product-card-img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: linear-gradient(135deg, var(--sage-pale), var(--cream-deep));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .product-badge {
+    position: absolute;
+    top: 1rem; left: 1rem;
+    background: var(--dark);
+    color: var(--cream);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.7rem;
+  }
+  .product-badge.authentic { background: var(--sage); }
+
+  .product-card-body { padding: 1.5rem; }
+  .product-brand { font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--sage); margin-bottom: 0.4rem; }
+  .product-title-card { font-family: Georgia, 'Times New Roman', serif; font-size: 1.2rem; font-weight: 400; color: var(--dark); margin-bottom: 0.6rem; line-height: 1.3; }
+  .product-desc-card { font-size: 0.8rem; color: var(--text-soft); line-height: 1.7; margin-bottom: 1.2rem; }
+
+  .product-footer-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--cream-deep);
+  }
+  .product-price { font-family: Georgia, 'Times New Roman', serif; font-size: 1.3rem; font-weight: 600; color: var(--dark); }
+
+  .wiki-btn {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sage);
+    border: 1px solid var(--sage-pale);
+    padding: 0.35rem 0.8rem;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  .wiki-btn:hover { background: var(--sage); color: white; border-color: var(--sage); }
+
+  /* WHY */
+  #why { background: var(--cream); position: relative; overflow: hidden; }
+  #why::before {
+    content: 'শুচি';
+    position: absolute;
+    right: -2vw; top: 50%;
+    transform: translateY(-50%);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 22vw; font-weight: 600;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(107,143,107,0.09);
+    pointer-events: none; line-height: 1; user-select: none;
+  }
+
+  .why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+
+  .why-pillars { display: flex; flex-direction: column; gap: 2.5rem; margin-top: 2.5rem; }
+  .pillar { display: grid; grid-template-columns: 56px 1fr; gap: 1.5rem; align-items: start; }
+  .pillar-icon {
+    width: 46px; height: 46px;
+    border: 1.5px solid var(--sage-light);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pillar-title { font-family: Georgia, 'Times New Roman', serif; font-size: 1.15rem; font-weight: 600; color: var(--dark); margin-bottom: 0.3rem; }
+  .pillar-desc { font-size: 0.83rem; color: var(--text-soft); line-height: 1.75; }
+
+  .why-right { background: var(--cream-deep); padding: 2.5rem; border: 1px solid var(--sage-pale); position: relative; }
+
+  .tracker-title { font-family: Georgia, 'Times New Roman', serif; font-size: 1.4rem; color: var(--dark); margin-bottom: 0.4rem; }
+  .tracker-sub { font-size: 0.76rem; color: var(--text-soft); margin-bottom: 2.2rem; }
+
+  .tracker-step {
+    display: flex; align-items: flex-start; gap: 1.1rem;
+    padding-bottom: 1.6rem; position: relative;
+  }
+  .tracker-step:last-child { padding-bottom: 0; }
+  .tracker-step::before {
+    content: ''; position: absolute;
+    left: 16px; top: 34px; bottom: 0;
+    width: 1.5px; background: var(--sage-pale);
+  }
+  .tracker-step:last-child::before { display: none; }
+
+  .step-dot {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--sage);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 0.74rem; flex-shrink: 0;
+  }
+  .step-dot.v { background: var(--dark); }
+
+  .step-title { font-size: 0.84rem; font-weight: 500; color: var(--dark); line-height: 1; margin-bottom: 0.2rem; margin-top: 0.45rem; }
+  .step-desc { font-size: 0.74rem; color: var(--text-soft); }
+
+  /* ROUTINE */
+  #routine { background: var(--dark); color: var(--cream); position: relative; overflow: hidden; }
+  #routine::after {
+    content: ''; position: absolute; top: -40%; right: -20%;
+    width: 70%; height: 180%;
+    background: radial-gradient(ellipse, rgba(107,143,107,0.13) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .routine-inner { display: grid; grid-template-columns: 1fr 1.2fr; gap: 5rem; align-items: center; position: relative; z-index: 2; }
+
+  .routine-left .section-label { color: var(--sage-light); }
+  .routine-left .section-label::before { background: var(--sage-light); }
+  .routine-left .section-title { color: var(--cream); max-width: 20ch; }
+
+  .routine-desc { font-size: 0.9rem; color: rgba(245,239,228,0.6); margin: 1.5rem 0 2.5rem; line-height: 1.8; max-width: 38ch; }
+
+  .quiz-widget { background: rgba(255,255,255,0.04); border: 1px solid rgba(107,143,107,0.25); padding: 2.5rem; }
+  .quiz-step { display: none; }
+  .quiz-step.active { display: block; }
+  .quiz-q { font-family: Georgia, 'Times New Roman', serif; font-size: 1.25rem; color: var(--cream); margin-bottom: 1.4rem; line-height: 1.4; }
+  .quiz-progress { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(168,196,162,0.6); margin-bottom: 0.8rem; }
+  .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+  .qopt {
+    border: 1.5px solid rgba(107,143,107,0.3); background: transparent;
+    color: rgba(245,239,228,0.7); padding: 0.8rem 1rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 0.8rem;
+    cursor: pointer; transition: all 0.3s; text-align: left;
+  }
+  .qopt:hover, .qopt.sel { border-color: var(--sage-light); background: rgba(107,143,107,0.15); color: var(--cream); }
+
+  .routine-result { display: none; }
+  .routine-result.active { display: block; }
+  .result-title { font-family: Georgia, 'Times New Roman', serif; font-size: 1.2rem; color: var(--cream); margin: 0.8rem 0 1.2rem; line-height: 1.4; }
+
+  .routine-steps { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.5rem; }
+  .rsi {
+    display: flex; align-items: center; gap: 1rem;
+    background: rgba(107,143,107,0.1); border: 1px solid rgba(107,143,107,0.2);
+    padding: 0.85rem 1.1rem;
+  }
+  .rnum {
+    width: 26px; height: 26px; border-radius: 50%; background: var(--sage);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; color: white; flex-shrink: 0;
+  }
+  .rtype { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sage-light); }
+  .rname { font-size: 0.84rem; color: var(--cream); }
+
+  /* REVIEWS */
+  #reviews { background: var(--white); }
+  .reviews-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3.5rem; flex-wrap: wrap; gap: 1.5rem; }
+  .reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+
+  .review-card { background: var(--cream); padding: 2rem; border: 1px solid var(--cream-deep); transition: all 0.3s; }
+  .review-card:hover { border-color: var(--sage-pale); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(107,143,107,0.1); }
+  .review-card.feat { background: var(--dark); border-color: var(--dark); grid-row: span 2; }
+
+  .review-stars { color: var(--gold); font-size: 0.85rem; margin-bottom: 1rem; letter-spacing: 0.1em; }
+  .review-text { font-family: Georgia, 'Times New Roman', serif; font-size: 1.05rem; line-height: 1.65; color: var(--text); margin-bottom: 1.5rem; }
+  .review-card.feat .review-text { color: rgba(245,239,228,0.82); font-size: 1.18rem; }
+  .review-product-tag { display: inline-block; background: var(--sage-pale); color: var(--dark-mid); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.2rem 0.6rem; margin-bottom: 1rem; }
+  .review-card.feat .review-product-tag { background: rgba(107,143,107,0.2); color: var(--sage-light); }
+
+  .review-author { display: flex; align-items: center; gap: 0.8rem; }
+  .author-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--sage-pale); display: flex; align-items: center; justify-content: center; font-size: 0.82rem; color: var(--sage); font-weight: 500; flex-shrink: 0; }
+  .review-card.feat .author-avatar { background: rgba(107,143,107,0.25); color: var(--sage-light); }
+  .author-name { font-size: 0.82rem; font-weight: 500; color: var(--dark); }
+  .review-card.feat .author-name { color: var(--cream); }
+  .author-loc { font-size: 0.72rem; color: var(--text-soft); }
+  .review-card.feat .author-loc { color: rgba(245,239,228,0.45); }
+
+  /* WATCH */
+  #watch { background: var(--cream-deep); }
+  .watch-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 1.5rem; margin-top: 3.5rem; }
+
+  .video-card { cursor: pointer; overflow: hidden; }
+  .video-thumb {
+    width: 100%; aspect-ratio: 16/10;
+    background: linear-gradient(135deg, var(--sage-pale), var(--cream-deep));
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .video-card:first-child .video-thumb { aspect-ratio: 16/12; }
+
+  .vplay {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: rgba(26,43,27,0.72);
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    transition: all 0.3s;
+  }
+  .video-card:hover .vplay { transform: scale(1.1); background: var(--sage); }
+  .play-tri { width: 0; height: 0; border-style: solid; border-width: 8px 0 8px 15px; border-color: transparent transparent transparent white; margin-left: 3px; }
+
+  .video-info { background: var(--white); padding: 1.1rem; border: 1px solid var(--cream-deep); border-top: none; }
+  .video-cat { font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sage); margin-bottom: 0.3rem; }
+  .video-title { font-family: Georgia, 'Times New Roman', serif; font-size: 1.02rem; color: var(--dark); line-height: 1.35; margin-bottom: 0.4rem; }
+  .video-meta { font-size: 0.72rem; color: var(--text-soft); }
+
+  /* PAYMENT */
+  .payment-strip {
+    background: var(--white);
+    padding: 2.5rem 8vw;
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid var(--cream-deep); border-bottom: 1px solid var(--cream-deep);
+    gap: 2rem; flex-wrap: wrap;
+  }
+  .payment-label { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-soft); white-space: nowrap; }
+  .payment-methods { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center; }
+  .ppill { background: var(--cream); border: 1.5px solid var(--cream-deep); padding: 0.45rem 1.1rem; font-size: 0.8rem; font-weight: 500; color: var(--dark); }
+  .ppill.bkash { border-color: #E2136E; color: #E2136E; background: rgba(226,19,110,0.04); }
+  .ppill.nagad { border-color: #F05829; color: #F05829; background: rgba(240,88,41,0.04); }
+  .ppill.rocket { border-color: #8B3FA8; color: #8B3FA8; background: rgba(139,63,168,0.04); }
+  .payment-note { font-size: 0.72rem; color: var(--text-soft); white-space: nowrap; }
+
+  /* FOOTER */
+  footer { background: var(--dark); color: rgba(245,239,228,0.55); padding: 5rem 8vw 3rem; }
+  .footer-top { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 4rem; }
+  .fbrand { font-family: Georgia, 'Times New Roman', serif; font-size: 2rem; color: var(--cream); font-weight: 300; margin-bottom: 0.5rem; }
+  .fbrand span { color: var(--sage-light); font-style: italic; }
+  .ftagline { font-size: 0.78rem; line-height: 1.7; max-width: 26ch; color: rgba(245,239,228,0.45); margin-top: 1rem; }
+  .fcol-title { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--sage-light); margin-bottom: 1.5rem; }
+  .flinks { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; }
+  .flinks a { text-decoration: none; font-size: 0.83rem; color: rgba(245,239,228,0.45); transition: color 0.3s; }
+  .flinks a:hover { color: var(--sage-light); }
+
+  .footer-bottom {
+    padding-top: 2.5rem; border-top: 1px solid rgba(107,143,107,0.15);
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 1rem; flex-wrap: wrap;
+  }
+  .fcopy { font-size: 0.72rem; color: rgba(245,239,228,0.28); letter-spacing: 0.05em; }
+  .fsocial { display: flex; gap: 1rem; }
+  .slink {
+    width: 34px; height: 34px;
+    border: 1px solid rgba(107,143,107,0.3);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(245,239,228,0.35); text-decoration: none; font-size: 0.75rem;
+    transition: all 0.3s;
+  }
+  .slink:hover { border-color: var(--sage-light); color: var(--sage-light); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(26,43,27,0.6);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.35s;
+    padding: 2rem;
+  }
+  .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+  .modal-box {
+    background: var(--white); max-width: 540px; width: 100%;
+    padding: 2.5rem; position: relative;
+    transform: translateY(20px); transition: transform 0.35s;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-overlay.active .modal-box { transform: translateY(0); }
+
+  .modal-close {
+    position: absolute; top: 1.2rem; right: 1.5rem;
+    font-size: 1.4rem; color: var(--text-soft); cursor: pointer;
+    background: none; border: none; transition: color 0.3s;
+  }
+  .modal-close:hover { color: var(--dark); }
+
+  .modal-product-title { font-family: Georgia, 'Times New Roman', serif; font-size: 1.5rem; color: var(--dark); margin-bottom: 0.3rem; }
+  .modal-label { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--sage); margin-bottom: 1.5rem; }
+
+  .ingredient-list { list-style: none; }
+  .ingredient-item { padding: 1rem 0; border-bottom: 1px solid var(--cream-deep); display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; }
+  .ingredient-name { font-family: Georgia, 'Times New Roman', serif; font-size: 1rem; font-weight: 600; color: var(--dark); }
+  .ingredient-desc-modal { font-size: 0.82rem; color: var(--text-soft); line-height: 1.6; }
+  .itag { display: inline-block; background: var(--sage-pale); color: var(--dark-mid); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.15rem 0.5rem; margin-top: 0.3rem; }
+
+  /* FADE IN */
+  .fi { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .fi.vis { opacity: 1; transform: translateY(0); }
+
+  /* ── MOBILE NAV OPEN ── */
+  nav.mopen .nav-links {
+    display: flex; flex-direction: column;
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--cream);
+    padding: 1.2rem 5vw 1.5rem; gap: 0;
+    border-bottom: 1px solid var(--cream-deep);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    z-index: 99;
+  }
+  nav.mopen .nav-links li { border-bottom: 1px solid var(--cream-deep); }
+  nav.mopen .nav-links a {
+    display: block; padding: 0.9rem 0;
+    font-size: 0.82rem; color: var(--text);
+  }
+  nav.mopen .nav-links .nav-cta {
+    display: block; text-align: center;
+    margin-top: 0.8rem; padding: 0.9rem;
+    background: var(--dark); color: var(--cream) !important;
+  }
+
+  /* ── TABLET (≤900px) ── */
+  @media (max-width: 900px) {
+    /* Nav */
+    nav { padding: 1rem 5vw; }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+
+    /* Hero */
+    #hero { grid-template-columns: 1fr; min-height: auto; padding-top: 64px; }
+    .hero-right { display: none; }
+    .hero-left { padding: 3rem 6vw 4rem; }
+    .hero-title { font-size: clamp(2.8rem, 8vw, 4rem); }
+
+    /* Sections */
+    section { padding: 4.5rem 6vw; }
+
+    /* Products */
+    .products-grid { grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+
+    /* Why */
+    .why-grid { grid-template-columns: 1fr; gap: 3rem; }
+    #why::before { font-size: 38vw; }
+
+    /* Routine */
+    .routine-inner { grid-template-columns: 1fr; gap: 3rem; }
+    .quiz-widget { padding: 1.8rem; }
+
+    /* Reviews */
+    .reviews-grid { grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .review-card.feat { grid-row: auto; }
+
+    /* Watch */
+    .watch-grid { grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .video-card:first-child .video-thumb { aspect-ratio: 16/10; }
+
+    /* Footer */
+    .footer-top { grid-template-columns: 1fr 1fr; gap: 2rem; }
+
+    /* Payment */
+    .payment-strip { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
+  }
+
+  /* ── MOBILE (≤600px) ── */
+  @media (max-width: 600px) {
+    /* Nav */
+    nav { padding: 0.9rem 5vw; }
+    .nav-logo { font-size: 1.3rem; }
+
+    /* Hero */
+    #hero { padding-top: 60px; }
+    .hero-left { padding: 2.2rem 5vw 3rem; }
+    .hero-title { font-size: 2.6rem; line-height: 1.08; }
+    .hero-bangla { font-size: 1.4rem; margin-bottom: 1.4rem; }
+    .hero-desc { font-size: 0.88rem; max-width: 100%; margin-bottom: 2rem; }
+    .hero-actions { flex-direction: column; gap: 0.8rem; }
+    .btn-primary, .btn-outline {
+      width: 100%; text-align: center;
+      padding: 1rem 1.5rem; font-size: 0.8rem;
+      min-height: 48px; display: flex; align-items: center; justify-content: center;
+    }
+    .hero-badges { gap: 1.2rem; margin-top: 2.5rem; padding-top: 2rem; flex-wrap: wrap; }
+    .badge-number { font-size: 1.6rem; }
+    .badge-label { font-size: 0.62rem; }
+
+    /* Marquee smaller on mobile */
+    .marquee-inner { font-size: 0.62rem; gap: 2rem; }
+
+    /* Sections */
+    section { padding: 3.5rem 5vw; }
+    .section-title { font-size: clamp(1.8rem, 7vw, 2.5rem); }
+
+    /* Products */
+    .products-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+    .product-card-img { height: auto; aspect-ratio: 1 / 1; }
+    .product-card-body { padding: 1.2rem; }
+    .product-footer-card { flex-direction: column; align-items: flex-start; gap: 0.8rem; }
+    .wiki-btn { width: 100%; text-align: center; padding: 0.6rem; min-height: 44px; }
+
+    /* Filter bar — horizontal scroll */
+    .filter-bar { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0.5rem; -webkit-overflow-scrolling: touch; }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-btn { flex-shrink: 0; white-space: nowrap; min-height: 44px; }
+
+    /* Why */
+    #why::before { display: none; }
+    .why-grid { gap: 2.5rem; }
+    .why-pillars { gap: 2rem; }
+    .pillar { grid-template-columns: 44px 1fr; gap: 1rem; }
+    .why-right { padding: 1.5rem; }
+    .tracker-step { gap: 0.8rem; }
+
+    /* Routine */
+    .routine-inner { gap: 2.5rem; }
+    .quiz-widget { padding: 1.4rem; }
+    .quiz-q { font-size: 1.1rem; }
+    .quiz-options { grid-template-columns: 1fr; gap: 0.6rem; }
+    .qopt { min-height: 48px; padding: 0.9rem 1rem; }
+    .routine-left .section-title { font-size: clamp(1.8rem, 7vw, 2.5rem); }
+
+    /* Reviews */
+    .reviews-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .review-card.feat { grid-row: auto; }
+    .reviews-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .reviews-header .btn-outline { width: 100%; text-align: center; min-height: 48px; }
+
+    /* Watch */
+    .watch-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .watch-grid .fi { margin-bottom: 0; }
+
+    /* Payment */
+    .payment-strip { padding: 1.8rem 5vw; gap: 1rem; }
+    .ppill { min-height: 40px; display: flex; align-items: center; }
+    .pmethods { gap: 0.6rem; }
+
+    /* Footer */
+    .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+    footer { padding: 3.5rem 5vw 2rem; }
+    .footer-bottom { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
+
+    /* Modal — full screen on mobile */
+    .modal-overlay { padding: 0; align-items: flex-end; }
+    .modal-box {
+      max-width: 100%; max-height: 92vh;
+      border-radius: 16px 16px 0 0;
+      padding: 1.8rem 1.5rem;
+    }
+    .ingredient-item { grid-template-columns: 1fr; gap: 0.4rem; }
+
+    /* Products header */
+    .products-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .products-header .btn-outline { width: 100%; text-align: center; min-height: 48px; }
+  }
+
+  /* ── VERY SMALL (≤380px) ── */
+  @media (max-width: 380px) {
+    .hero-title { font-size: 2.2rem; }
+    .hero-badges { gap: 0.8rem; }
+    .badge-number { font-size: 1.4rem; }
+    section { padding: 3rem 4.5vw; }
+  }
+</style>
+</head>
+<body>
+
+<nav id="mainNav">
+  <a href="#" class="nav-logo">
+    <svg class="logo-icon" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 1.4em; height: 1.4em; vertical-align: middle; margin-right: 0.4rem; flex-shrink: 0;">
+      <path d="M428.393 458.741C397.367 442.352 389.639 455.699 350.257 463.372C297.897 480.729 273.085 493.192 219.832 520.489L270.021 623.63C288.39 656.569 303.786 659.091 332.525 683.826C379.073 693.884 408.435 692.732 468.538 674.586L591.894 632.338L521.57 537.477L428.393 458.741Z" fill="currentColor"/>
+      <path d="M573.217 875.61C558.753 907.579 544.465 901.772 508.648 919.854C456.64 938.242 429.398 943.607 370.592 954.689L347.01 842.436C341.328 805.152 351.945 793.721 359.486 756.56C390.094 720.077 413.996 702.986 472.604 680.474L595.96 638.226L598.559 756.283L573.217 875.61Z" fill="currentColor"/>
+      <path d="M838.875 684.401C873.212 680.144 872.05 664.541 899.764 635.376C932.621 590.63 945.829 565.89 973.871 512.335L875.613 455.277C842.332 438.408 828.42 445.201 791.288 441.173C747.87 459.682 724.662 477.614 685.954 527.493L609.301 634.042L719.3 672.554L838.875 684.401Z" fill="currentColor"/>
+      <path d="M633.551 876.431C648.671 908.629 662.802 902.957 698.928 921.458C751.214 940.435 778.511 946.098 837.423 957.823L858.536 845.541C863.402 808.225 852.564 796.654 844.24 759.324C812.915 722.431 788.698 705.048 729.738 681.868L605.75 638.226L605.698 756.545L633.551 876.431Z" fill="currentColor"/>
+      <path d="M478.04 427.924C470.246 393.217 484.887 389.034 502.085 352.27C531.758 305.223 549.852 284.014 589.206 238.634L674.723 314.396C701.444 340.894 699.975 356.68 716.285 391.275C714.156 439.626 705.68 468.205 673.311 522.665L602.112 633.156L529.533 539.712L478.04 427.924Z" fill="currentColor"/>
+    </svg>SHUCHI <span>শুচি</span></a>
+  <ul class="nav-links">
+    <li><a href="storefront.html">Shop</a></li>
+    <li><a href="#routine">Routine</a></li>
+    <li><a href="#watch">Learn</a></li>
+    <li><a href="storefront.html" class="nav-cta">Shop Now</a></li>
+  </ul>
+  <div class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('mopen')">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <p class="hero-eyebrow">Pure Korean Skincare · Bangladesh</p>
+    <p class="hero-bangla" style="margin-bottom: 0.8rem; font-size: clamp(1.2rem, 2vw, 1.6rem); color: var(--sage); font-weight: 500; font-family: Georgia, serif; font-style: italic;">শুচি — পবিত্র, স্বচ্ছ</p>
+    <h1 class="hero-title" style="margin-top: 0; margin-bottom: 1.5rem;">Skin that speaks<br><em>the truth.</em></h1>
+    <p class="hero-desc">No myths. No shortcuts. Only verified Korean ingredients and the science behind every drop — curated for Bangladesh's skin, climate, and conscience.</p>
+    <div class="hero-actions">
+      <a href="storefront.html" class="btn-primary">Shop Now</a>
+      <a href="#routine" class="btn-outline">Build My Routine</a>
+    </div>
+    <div class="hero-badges">
+      <div><div class="badge-number">100%</div><div class="badge-label">Verified Imports</div></div>
+      <div><div class="badge-number">48h</div><div class="badge-label">Dhaka Delivery</div></div>
+      <div><div class="badge-number">0</div><div class="badge-label">Hidden Ingredients</div></div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <svg class="hero-botanical" viewBox="0 0 600 700" xmlns="http://www.w3.org/2000/svg">
+      <g fill="none" stroke="#6B8F6B" stroke-width="1.5">
+        <ellipse cx="300" cy="520" rx="40" ry="20"/>
+        <path d="M300 520 Q280 490 300 470 Q320 490 300 520"/>
+        <path d="M300 520 Q260 485 250 460 Q280 470 300 520"/>
+        <path d="M300 520 Q340 485 350 460 Q320 470 300 520"/>
+        <path d="M300 520 Q245 500 240 475 Q265 480 300 520"/>
+        <path d="M300 520 Q355 500 360 475 Q335 480 300 520"/>
+        <path d="M300 520 Q295 580 290 640" stroke-width="2"/>
+        <path d="M100 200 Q140 160 180 200 Q140 220 100 200"/>
+        <path d="M110 220 Q155 185 190 230 Q150 245 110 220"/>
+        <path d="M90 250 Q135 215 165 260 Q125 270 90 250"/>
+        <line x1="130" y1="190" x2="200" y2="330" stroke-width="2"/>
+        <circle cx="480" cy="160" r="30"/>
+        <circle cx="480" cy="160" r="18"/>
+        <path d="M480 130 L480 100"/>
+        <path d="M510 160 L540 160"/>
+        <path d="M503 137 L524 116"/>
+        <path d="M503 183 L524 204"/>
+        <path d="M457 137 L436 116"/>
+        <path d="M457 183 L436 204"/>
+        <path d="M400 350 Q420 330 440 350 Q420 365 400 350"/>
+        <path d="M405 365 Q428 345 445 370 Q425 380 405 365"/>
+        <line x1="425" y1="340" x2="430" y2="420" stroke-width="1.5"/>
+      </g>
+    </svg>
+    <div class="hero-product-stack">
+      <div class="product-card-hero off1">
+        <div class="pimg">
+          <svg width="50" height="70" viewBox="0 0 50 70" fill="none"><rect x="11" y="6" width="28" height="58" rx="4" fill="#A8C4A2" opacity="0.5"/><rect x="16" y="2" width="18" height="8" rx="2" fill="#6B8F6B" opacity="0.4"/><rect x="13" y="32" width="24" height="1.5" fill="white" opacity="0.5"/><rect x="15" y="36" width="20" height="1" fill="white" opacity="0.3"/></svg>
+        </div>
+        <div class="pname">COSRX Snail 96</div>
+        <div class="pprice">৳ 1,450</div>
+      </div>
+      <div class="product-card-hero off2">
+        <div class="pimg">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none"><circle cx="28" cy="28" r="22" fill="#D6E8D4" opacity="0.6"/><circle cx="28" cy="28" r="14" fill="#A8C4A2" opacity="0.4"/><rect x="23" y="4" width="10" height="6" rx="2" fill="#6B8F6B" opacity="0.5"/></svg>
+        </div>
+        <div class="pname">Innisfree Green Tea</div>
+        <div class="pprice">৳ 1,890</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-strip">
+  <div class="marquee-inner">
+    <span>Verified Korean Import</span><span class="mdot"> ◆ </span><span>Ingredient Transparency</span><span class="mdot"> ◆ </span><span>bKash · Nagad · Rocket</span><span class="mdot"> ◆ </span><span>48hr Dhaka Delivery</span><span class="mdot"> ◆ </span><span>No Counterfeit Policy</span><span class="mdot"> ◆ </span><span>Dermatologist Reviewed</span><span class="mdot"> ◆ </span><span>Humidity-Adapted Routines</span><span class="mdot"> ◆ </span><span>Verified Korean Import</span><span class="mdot"> ◆ </span><span>Ingredient Transparency</span><span class="mdot"> ◆ </span><span>bKash · Nagad · Rocket</span><span class="mdot"> ◆ </span><span>48hr Dhaka Delivery</span><span class="mdot"> ◆ </span><span>No Counterfeit Policy</span><span class="mdot"> ◆ </span><span>Dermatologist Reviewed</span><span class="mdot"> ◆ </span><span>Humidity-Adapted Routines</span><span class="mdot"> ◆ </span>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<section id="products">
+  <div class="products-header fi">
+    <div>
+      <p class="section-label">Curated Selection</p>
+      <h2 class="section-title">Pure ingredients,<br><em>proven results.</em></h2>
+    </div>
+    <a href="storefront.html" class="btn-outline">View All Products</a>
+  </div>
+  <div class="filter-bar fi" id="brandFilterBar">
+    <button class="filter-btn active" onclick="filterBrand('all',this)">All</button>
+  </div>
+  
+  <div class="products-grid" id="prodGrid">
+    <!-- Products dynamically injected via Google Sheets API -->
+  </div>
+</section>
+
+<!-- WHY SHUCHI -->
+<section id="why">
+  <div class="why-grid">
+    <div class="fi">
+      <p class="section-label">Why SHUCHI</p>
+      <h2 class="section-title">Purity is not a<br><em>marketing word.</em></h2>
+      <div class="why-pillars">
+        <div class="pillar">
+          <div class="pillar-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6B8F6B" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div>
+            <h4 class="pillar-title">Ingredient Transparency</h4>
+            <p class="pillar-desc">Every product page breaks down what each ingredient does — in plain Bangla and English. You know exactly what you're putting on your skin.</p>
+          </div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6B8F6B" stroke-width="1.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          </div>
+          <div>
+            <h4 class="pillar-title">Zero Counterfeit Policy</h4>
+            <p class="pillar-desc">Direct-sourced from verified Korean distributors. We guarantee 100% original, fresh formulations direct from Seoul to your door.</p>
+          </div>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6B8F6B" stroke-width="1.5"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          </div>
+          <div>
+            <h4 class="pillar-title">Education-First</h4>
+            <p class="pillar-desc">We don't just sell. Our Ingredient Wiki and Watch & Learn section are free for everyone — because informed customers make better choices.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="why-right fi" style="background: var(--white); padding: 3rem; border: 1px solid var(--sage-pale); text-align: center;">
+      <span style="font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--sage); display: block; margin-bottom: 0.8rem;">Pure & Honest</span>
+      <h3 class="tracker-title" style="font-family: Georgia, serif; font-size: 1.8rem; font-weight: 300; margin-bottom: 1.5rem; color: var(--dark);">The SHUCHI Promise</h3>
+      <svg width="120" height="120" viewBox="0 0 100 100" fill="none" stroke="var(--sage)" stroke-width="1.2" style="margin: 1rem auto 1.5rem; display: block; opacity: 0.85;">
+        <!-- Delicate botanical leaf line-art -->
+        <path d="M50 85 C50 60, 40 40, 20 30 C45 35, 48 55, 50 85 Z" />
+        <path d="M50 85 C50 60, 60 40, 80 30 C55 35, 52 55, 50 85 Z" />
+        <path d="M50 85 L50 92" stroke-width="2" />
+        <path d="M50 55 C52 40, 58 30, 70 22" stroke="var(--sage-light)" />
+        <path d="M50 65 C48 50, 42 40, 30 32" stroke="var(--sage-light)" />
+        <circle cx="50" cy="85" r="2" fill="var(--sage)" />
+      </svg>
+      <p style="font-size: 0.85rem; color: var(--text-soft); line-height: 1.8; max-width: 32ch; margin: 0 auto;">
+        We believe skincare is a ritual of truth. No empty marketing, no counterfeit risks — just pristine Korean skincare curated thoughtfully for your skin's well-being.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ROUTINE BUILDER -->
+<section id="routine">
+  <div class="routine-inner">
+    <div class="routine-left fi">
+      <p class="section-label">Routine Builder</p>
+      <h2 class="section-title">Your skin.<br><em>Your climate.</em><br>Your routine.</h2>
+      <p class="routine-desc">Bangladesh's heat and humidity demand a different approach than what Western or even Korean routines prescribe. Our quiz builds a 3–5 step routine for your skin type and local conditions.</p>
+      <a href="#" class="btn-primary" style="background:var(--sage)">Take the Full Quiz</a>
+    </div>
+
+    <div class="fi">
+      <div id="quizWidget" class="quiz-widget">
+        <div class="quiz-step active" id="q1">
+          <p class="quiz-progress">Step 1 of 3</p>
+          <p class="quiz-q">How does your skin feel by mid-afternoon?</p>
+          <div class="quiz-options">
+            <button class="qopt" onclick="pick(this,'oily')">Shiny and oily</button>
+            <button class="qopt" onclick="pick(this,'dry')">Tight and dry</button>
+            <button class="qopt" onclick="pick(this,'combo')">Oily T-zone, dry cheeks</button>
+            <button class="qopt" onclick="pick(this,'normal')">Pretty balanced</button>
+          </div>
+        </div>
+        <div class="quiz-step" id="q2">
+          <p class="quiz-progress">Step 2 of 3</p>
+          <p class="quiz-q">Any skin concerns you're targeting?</p>
+          <div class="quiz-options">
+            <button class="qopt" onclick="pick(this,'acne')">Acne / Breakouts</button>
+            <button class="qopt" onclick="pick(this,'pigmentation')">Uneven tone / Dark spots</button>
+            <button class="qopt" onclick="pick(this,'sensitivity')">Redness / Sensitivity</button>
+            <button class="qopt" onclick="pick(this,'aging')">Fine lines / Texture</button>
+          </div>
+        </div>
+        <div class="quiz-step" id="q3">
+          <p class="quiz-progress">Step 3 of 3</p>
+          <p class="quiz-q">How many steps can you commit to daily?</p>
+          <div class="quiz-options">
+            <button class="qopt" onclick="pick(this,'3');setTimeout(showResult,400)">3 steps — keep it simple</button>
+            <button class="qopt" onclick="pick(this,'5');setTimeout(showResult,400)">5 steps — full routine</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="routine-result" id="routineResult">
+        <p class="quiz-progress" style="color:var(--sage-light)">Your Recommended Routine</p>
+        <p class="result-title">For oily, acne-prone skin<br>in humid conditions</p>
+        <div class="routine-steps">
+          <div class="rsi"><div class="rnum">1</div><div><div class="rtype">Cleanse</div><div class="rname">COSRX Low pH Good Morning Gel Cleanser</div></div></div>
+          <div class="rsi"><div class="rnum">2</div><div><div class="rtype">Tone</div><div class="rname">Some By Mi AHA BHA PHA 30 Days Toner</div></div></div>
+          <div class="rsi"><div class="rnum">3</div><div><div class="rtype">Treat</div><div class="rname">COSRX Snail 96 Mucin Essence</div></div></div>
+          <div class="rsi"><div class="rnum">4</div><div><div class="rtype">Moisturize</div><div class="rname">Etude House Soon Jung Emulsion</div></div></div>
+          <div class="rsi"><div class="rnum">5</div><div><div class="rtype">Protect</div><div class="rname">ISNTREE Hyaluronic Acid Watery Sun Gel SPF50</div></div></div>
+        </div>
+        <button class="btn-primary" onclick="shopRoutine()" style="background:var(--sage);width:100%;text-align:center;border:none">Shop This Routine →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- WATCH & LEARN -->
+<section id="watch">
+  <div class="fi">
+    <p class="section-label">Watch & Learn</p>
+    <h2 class="section-title">See it on skin<br><em>like yours.</em></h2>
+  </div>
+  <div class="watch-grid fi">
+    <div class="video-card">
+      <div class="video-thumb">
+        <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.1" viewBox="0 0 600 400"><circle cx="300" cy="200" r="100" stroke="#6B8F6B" stroke-width="1.5" fill="none"/><circle cx="300" cy="200" r="60" stroke="#A8C4A2" stroke-width="1" fill="none"/><path d="M80 350 Q200 260 320 310 Q440 360 540 270" stroke="#6B8F6B" stroke-width="2" fill="none"/></svg>
+        <div class="vplay"><div class="play-tri"></div></div>
+      </div>
+      <div class="video-info"><p class="video-cat">Routine · Application</p><h3 class="video-title">Full AM Routine for Bangladesh Humidity — 5 Step Glass Skin</h3><p class="video-meta">12:34 · 48K views</p></div>
+    </div>
+    <div class="video-card">
+      <div class="video-thumb">
+        <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.1" viewBox="0 0 400 280"><rect x="60" y="50" width="280" height="180" rx="8" stroke="#6B8F6B" stroke-width="1.5" fill="none"/><rect x="80" y="70" width="90" height="130" rx="4" fill="#A8C4A2" opacity="0.4"/></svg>
+        <div class="vplay"><div class="play-tri"></div></div>
+      </div>
+      <div class="video-info"><p class="video-cat">Unboxing · Review</p><h3 class="video-title">COSRX Snail 96 — Real Texture on South Asian Skin</h3><p class="video-meta">6:18 · 22K views</p></div>
+    </div>
+    <div class="video-card">
+      <div class="video-thumb">
+        <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.1" viewBox="0 0 400 280"><circle cx="200" cy="140" r="70" stroke="#6B8F6B" stroke-width="1.5" fill="none"/><path d="M150 140 Q175 105 200 140 Q225 175 250 140" stroke="#A8C4A2" stroke-width="2" fill="none"/></svg>
+        <div class="vplay"><div class="play-tri"></div></div>
+      </div>
+      <div class="video-info"><p class="video-cat">Education · Ingredients</p><h3 class="video-title">What is Niacinamide? A Bengali Explainer</h3><p class="video-meta">8:52 · 35K views</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PAYMENT -->
+<div class="payment-strip">
+  <p class="payment-label">Accepted Payment Methods</p>
+  <div class="payment-methods">
+    <span class="ppill bkash">bKash</span>
+    <span class="ppill nagad">Nagad</span>
+    <span class="ppill rocket">Rocket</span>
+    <span class="ppill">Visa / Mastercard</span>
+    <span class="ppill">Cash on Delivery</span>
+  </div>
+  <p class="payment-note">60-second checkout · No hidden fees</p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="fbrand">SHUCHI <span>শুচি</span></div>
+      <p class="ftagline">Pure Korean skincare, honestly delivered. We don't sell myths — just ingredients that work.</p>
+    </div>
+    <div>
+      <p class="fcol-title">Shop</p>
+      <ul class="flinks">
+        <li><a href="#">All Products</a></li><li><a href="#">Serums</a></li><li><a href="#">Cleansers</a></li><li><a href="#">Sunscreen</a></li><li><a href="#">New Arrivals</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="fcol-title">Learn</p>
+      <ul class="flinks">
+        <li><a href="#">Ingredient Wiki</a></li><li><a href="#">Watch & Learn</a></li><li><a href="#">Routine Builder</a></li><li><a href="#">Skin Type Guide</a></li><li><a href="#">Blog</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="fcol-title">Support</p>
+      <ul class="flinks">
+        <li><a href="#">Track My Order</a></li><li><a href="#">Shipping Policy</a></li><li><a href="#">Returns</a></li><li><a href="#">Contact Us</a></li><li><a href="#">FAQ</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="fcopy">© 2025 SHUCHI শুচি · Chittagong & Dhaka, Bangladesh</p>
+    <div class="fsocial">
+      <a href="#" class="slink">IG</a><a href="#" class="slink">FB</a><a href="#" class="slink">YT</a><a href="#" class="slink">TK</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+
+// Quiz
+let cq = 1;
+function pick(btn, val) {
+  btn.parentElement.querySelectorAll('.qopt').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  if (cq < 3) {
+    setTimeout(() => {
+      document.getElementById('q' + cq).classList.remove('active');
+      cq++;
+      document.getElementById('q' + cq).classList.add('active');
+    }, 320);
+  }
+}
+function showResult() {
+  document.getElementById('quizWidget').style.display = 'none';
+  document.getElementById('routineResult').classList.add('active');
+}
+
+// Filter by Brand
+function filterBrand(brand, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.product-card').forEach(c => {
+    c.style.display = (brand === 'all' || c.dataset.brand.toLowerCase() === brand.toLowerCase()) ? 'block' : 'none';
+  });
+}
+
+// Dynamically generate brand filter buttons
+function generateBrandFilters(products) {
+  const filterBar = document.getElementById('brandFilterBar');
+  if (!filterBar) return;
+
+  filterBar.innerHTML = '<button class="filter-btn active" onclick="filterBrand(\'all\',this)">All</button>';
+
+  const brands = [];
+  products.forEach(product => {
+    const p = {};
+    Object.keys(product).forEach(k => {
+      p[k.trim().toLowerCase()] = product[k];
+    });
+    const pBrand = p.brand || '';
+    if (pBrand && !brands.includes(pBrand)) {
+      brands.push(pBrand);
+    }
+  });
+
+  brands.sort().forEach(brand => {
+    filterBar.innerHTML += `<button class="filter-btn" onclick="filterBrand('${brand.replace(/'/g, "\\'")}',this)">${brand}</button>`;
+  });
+}
+
+// 1. Your API configuration (Supabase handled globally in cart.js)
+const SHEET_API_URL = "";
+
+// 2. Fetch all products and build the cards dynamically
+// Helper to render the product cards safely
+function renderHomepageCards(products) {
+  const grid = document.getElementById('prodGrid');
+  grid.innerHTML = '';
+
+  products.forEach(product => {
+    // Normalize keys to prevent spreadsheet column spacing/capitalization issues (e.g. "title ")
+    const p = {};
+    Object.keys(product).forEach(k => {
+      p[k.trim().toLowerCase()] = product[k];
+    });
+
+    // Skip empty rows to prevent errors
+    if (!p.id) return; 
+
+    const pTitle = p.title || '[Product Title]';
+    const pBrand = p.brand || '[Brand]';
+    const pDesc = p.desc || '';
+    const pPrice = p.price || '';
+
+    const pImage = p.image || p.img || p.imageurl || p.imgurl || p.photo || '';
+    const imgHTML = pImage ? 
+      `<img src="${pImage}" alt="${pTitle}" style="width: 100%; height: 100%; object-fit: contain; padding: 1.5rem; display: block;" onerror="handleImgError(this)">` :
+      `<svg width="50" height="76" viewBox="0 0 50 76" fill="none">
+        <rect x="11" y="8" width="28" height="62" rx="4" fill="#A8C4A2" opacity="0.5"/>
+        <rect x="16" y="3" width="18" height="8" rx="2" fill="#6B8F6B" opacity="0.4"/>
+        <rect x="13" y="34" width="24" height="1.5" fill="white" opacity="0.5"/>
+        <rect x="15" y="38" width="20" height="1" fill="white" opacity="0.35"/>
+      </svg>`;
+
+    // Build the HTML for a single card with dynamic e-commerce actions
+    const cardHTML = `
+      <div class="product-card fi" data-brand="${pBrand.replace(/"/g, '&quot;')}">
+        <a href="./${p.id}.html" style="text-decoration: none; color: inherit; display: block;">
+          <div class="product-card-img">
+            <span class="product-badge authentic">✓ Direct Import</span>
+            ${imgHTML}
+          </div>
+          <div class="product-card-body">
+            <p class="product-brand">${pBrand}</p>
+            <h3 class="product-title-card">${pTitle}</h3>
+            <p class="product-desc-card">${pDesc.substring(0, 75)}${pDesc.length > 75 ? '...' : ''}</p>
+            <div class="product-footer-card">
+              <span class="product-price">৳ ${pPrice}</span>
+            </div>
+          </div>
+        </a>
+        <div class="product-card-actions" style="padding: 0 1.5rem 1.5rem;">
+          <button class="card-btn-add" onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Add To Bag</button>
+          <button class="card-btn-buy" onclick="event.preventDefault(); event.stopPropagation(); buyNow('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Buy Now</button>
+        </div>
+      </div>
+    `;
+    grid.insertAdjacentHTML('beforeend', cardHTML);
+  });
+
+  // Re-trigger the fade-in animations for the newly created cards
+  document.querySelectorAll('.fi').forEach(el => obs.observe(el));
+}
+
+// 2. Fetch all products and build the cards dynamically
+async function loadHomepageProducts() {
+  const grid = document.getElementById('prodGrid');
+  
+  // A. Try loading instantly from sessionStorage cache
+  const cachedProducts = sessionStorage.getItem('shuchi_products');
+  let hasCache = false;
+  
+  if (cachedProducts) {
+    try {
+      const parsed = JSON.parse(cachedProducts);
+      if (parsed && parsed.length > 0) {
+        const seen = new Set();
+        const uniqueProducts = [];
+        parsed.forEach(p => {
+          const baseId = getBaseProductId(p.id);
+          if (!seen.has(baseId)) {
+            seen.add(baseId);
+            uniqueProducts.push(p);
+          }
+        });
+        const topTen = uniqueProducts.slice(0, 10);
+        renderHomepageCards(topTen);
+        generateBrandFilters(topTen);
+        hasCache = true;
+      }
+    } catch(e) {
+      console.error("Error parsing cached products:", e);
+    }
+  }
+
+  // B. Show loading animation only if we don't have cache
+  if (!hasCache) {
+    grid.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 3rem;">
+        <svg class="logo-loader" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M428.393 458.741C397.367 442.352 389.639 455.699 350.257 463.372C297.897 480.729 273.085 493.192 219.832 520.489L270.021 623.63C288.39 656.569 303.786 659.091 332.525 683.826C379.073 693.884 408.435 692.732 468.538 674.586L591.894 632.338L521.57 537.477L428.393 458.741Z" fill="currentColor"/>
+          <path d="M573.217 875.61C558.753 907.579 544.465 901.772 508.648 919.854C456.64 938.242 429.398 943.607 370.592 954.689L347.01 842.436C341.328 805.152 351.945 793.721 359.486 756.56C390.094 720.077 413.996 702.986 472.604 680.474L595.96 638.226L598.559 756.283L573.217 875.61Z" fill="currentColor"/>
+          <path d="M838.875 684.401C873.212 680.144 872.05 664.541 899.764 635.376C932.621 590.63 945.829 565.89 973.871 512.335L875.613 455.277C842.332 438.408 828.42 445.201 791.288 441.173C747.87 459.682 724.662 477.614 685.954 527.493L609.301 634.042L719.3 672.554L838.875 684.401Z" fill="currentColor"/>
+          <path d="M633.551 876.431C648.671 908.629 662.802 902.957 698.928 921.458C751.214 940.435 778.511 946.098 837.423 957.823L858.536 845.541C863.402 808.225 852.564 796.654 844.24 759.324C812.915 722.431 788.698 705.048 729.738 681.868L605.75 638.226L605.698 756.545L633.551 876.431Z" fill="currentColor"/>
+          <path d="M478.04 427.924C470.246 393.217 484.887 389.034 502.085 352.27C531.758 305.223 549.852 284.014 589.206 238.634L674.723 314.396C701.444 340.894 699.975 356.68 716.285 391.275C714.156 439.626 705.68 468.205 673.311 522.665L602.112 633.156L529.533 539.712L478.04 427.924Z" fill="currentColor"/>
+        </svg>
+        <p style="color: var(--sage); font-size: 0.85rem; letter-spacing: 0.05em; margin-top: 1rem;">Loading pure ingredients...</p>
+      </div>
+    `;
+  }
+
+  // C. Background fetch live data with retry
+  try {
+    const liveProducts = await fetchProductsWithRetry(SHEET_API_URL);
+    
+    // Save to Cache for future instant loads
+    sessionStorage.setItem('shuchi_products', JSON.stringify(liveProducts));
+
+    const seen = new Set();
+    const uniqueProducts = [];
+    liveProducts.forEach(p => {
+      const baseId = getBaseProductId(p.id);
+      if (!seen.has(baseId)) {
+        seen.add(baseId);
+        uniqueProducts.push(p);
+      }
+    });
+
+    // Render fresh cards (top 10 only)
+    const topTen = uniqueProducts.slice(0, 10);
+    renderHomepageCards(topTen);
+    generateBrandFilters(topTen);
+
+  } catch (error) {
+    console.error("Error loading homepage products:", error);
+    if (!hasCache) {
+      grid.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; color: var(--text-soft); padding: 2rem;">
+          <p style="margin-bottom: 1rem;">Unable to load products right now.</p>
+          <button class="wiki-btn" onclick="loadHomepageProducts()" style="pointer-events: auto;">Try Again</button>
+        </div>
+      `;
+    }
+  }
+}
+
+// Fire the function when the page loads
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadHomepageProducts);
+} else {
+  loadHomepageProducts();
+}
+
+// Existing Scroll Fade & Nav Scripts
+const obs = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('vis'), i * 80);
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+// Observe existing static elements immediately on page load
+document.querySelectorAll('.fi').forEach(el => obs.observe(el));
+
+window.addEventListener('scroll', () => {
+  document.getElementById('mainNav').style.padding = scrollY > 60 ? '0.75rem 4vw' : '';
+});
+
+// Shop Recommended Routine items in cart
+function shopRoutine() {
+  addToCart('cosrx-lowpH', 'Low pH Good Morning Gel Cleanser', 'COSRX', 1200, '');
+  addToCart('somebymi-aha', 'AHA BHA PHA 30 Days Toner', 'Some By Mi', 1550, '');
+  addToCart('snail96', 'Advanced Snail 96 Mucin Essence', 'COSRX', 1450, '');
+  addToCart('soonjung-emulsion', 'Soon Jung Emulsion', 'Etude House', 1750, '');
+  addToCart('isntree-sungel', 'Hyaluronic Acid Watery Sun Gel SPF50', 'ISNTREE', 1890, '');
+  toggleCartDrawer();
+}
+</script>
+</body>
+</html>

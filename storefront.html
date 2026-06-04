@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storefront — SHUCHI শুচি</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="cart.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="cart.js" defer></script>
+<style>
+  /* Self-contained font stack — no external requests, works in WhatsApp WebView */
+  @font-face {
+    font-family: 'DisplaySerif';
+    src: local('Georgia'), local('Times New Roman');
+    font-weight: 300 600;
+  }
+</style>
+<style>
+  :root {
+    --sage: #6B8F6B;
+    --sage-light: #A8C4A2;
+    --sage-pale: #D6E8D4;
+    --cream: #F5EFE4;
+    --cream-deep: #EDE4D4;
+    --white: #FAFAF7;
+    --dark: #1A2B1B;
+    --dark-mid: #2F4030;
+    --gold: #B8975A;
+    --gold-light: #D4B47A;
+    --text: #2C3A2D;
+    --text-soft: #5A6E5B;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    overflow-x: hidden;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 4vw;
+    background: rgba(245, 239, 228, 0.88);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(107, 143, 107, 0.15);
+    transition: all 0.4s ease;
+  }
+
+  .nav-logo {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--dark);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+  .nav-logo span { color: var(--sage); font-style: italic; }
+
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--sage); }
+  .nav-cta {
+    background: var(--dark);
+    color: var(--cream) !important;
+    padding: 0.55rem 1.4rem;
+  }
+  .nav-cta:hover { background: var(--sage) !important; }
+
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+  .hamburger span { display: block; width: 24px; height: 1.5px; background: var(--dark); }
+
+  /* SECTIONS */
+  section { padding: 7rem 8vw; }
+
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--sage);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .section-label::before { content: ''; display: block; width: 2rem; height: 1px; background: var(--sage); }
+
+  .section-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(2rem, 3.5vw, 3.2rem);
+    font-weight: 300;
+    line-height: 1.15;
+    color: var(--dark);
+    max-width: 25ch;
+  }
+  .section-title em { font-style: italic; color: var(--sage); }
+
+  /* PRODUCTS */
+  #storefront-products { background: var(--white); padding-top: 120px; min-height: 100vh; }
+
+  .products-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 3rem;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-bar { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 2rem; }
+  .filter-btn {
+    background: transparent;
+    border: 1.5px solid var(--cream-deep);
+    color: var(--text-soft);
+    padding: 0.45rem 1rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .filter-btn:hover, .filter-btn.active { background: var(--dark); border-color: var(--dark); color: var(--cream); }
+
+  .products-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+
+  .product-card {
+    background: var(--cream);
+    border: 1px solid transparent;
+    transition: all 0.4s;
+    cursor: pointer;
+    position: relative;
+    min-width: 0;
+  }
+  .product-card:hover {
+    border-color: var(--sage-light);
+    transform: translateY(-6px);
+    box-shadow: 0 24px 60px rgba(107,143,107,0.15);
+  }
+
+  .product-card-img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: linear-gradient(135deg, var(--sage-pale), var(--cream-deep));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .product-badge {
+    position: absolute;
+    top: 1rem; left: 1rem;
+    background: var(--dark);
+    color: var(--cream);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.7rem;
+  }
+  .product-badge.authentic { background: var(--sage); }
+
+  .product-card-body { padding: 1.5rem; }
+  .product-brand { font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--sage); margin-bottom: 0.4rem; }
+  .product-title-card { font-family: Georgia, 'Times New Roman', serif; font-size: 1.2rem; font-weight: 400; color: var(--dark); margin-bottom: 0.6rem; line-height: 1.3; }
+  .product-desc-card { font-size: 0.8rem; color: var(--text-soft); line-height: 1.7; margin-bottom: 1.2rem; }
+
+  .product-footer-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--cream-deep);
+  }
+  .product-price { font-family: Georgia, 'Times New Roman', serif; font-size: 1.3rem; font-weight: 600; color: var(--dark); }
+
+  .wiki-btn {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sage);
+    border: 1px solid var(--sage-pale);
+    padding: 0.35rem 0.8rem;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  .wiki-btn:hover { background: var(--sage); color: white; border-color: var(--sage); }
+
+  /* PAGINATION */
+  .pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--cream-deep);
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .pagination-status {
+    font-size: 0.82rem;
+    color: var(--text-soft);
+    font-weight: 400;
+    letter-spacing: 0.05em;
+  }
+  .pagination-actions {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+  }
+  .pagination-btn {
+    background: transparent;
+    border: 1.5px solid var(--dark);
+    color: var(--dark);
+    padding: 0.6rem 1.4rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 0.74rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+  }
+  .pagination-btn:hover {
+    background: var(--dark);
+    color: var(--cream);
+  }
+  .pagination-btn:disabled {
+    border-color: var(--cream-deep);
+    color: var(--text-soft);
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  /* PAYMENT */
+  .payment-strip {
+    background: var(--white);
+    padding: 2.5rem 8vw;
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid var(--cream-deep); border-bottom: 1px solid var(--cream-deep);
+    gap: 2rem; flex-wrap: wrap;
+  }
+  .payment-label { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-soft); white-space: nowrap; }
+  .payment-methods { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center; }
+  .ppill { background: var(--cream); border: 1.5px solid var(--cream-deep); padding: 0.45rem 1.1rem; font-size: 0.8rem; font-weight: 500; color: var(--dark); }
+  .ppill.bkash { border-color: #E2136E; color: #E2136E; background: rgba(226,19,110,0.04); }
+  .ppill.nagad { border-color: #F05829; color: #F05829; background: rgba(240,88,41,0.04); }
+  .ppill.rocket { border-color: #8B3FA8; color: #8B3FA8; background: rgba(139,63,168,0.04); }
+  .payment-note { font-size: 0.72rem; color: var(--text-soft); white-space: nowrap; }
+
+  /* FOOTER */
+  footer { background: var(--dark); color: rgba(245,239,228,0.55); padding: 5rem 8vw 3rem; }
+  .footer-top { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 4rem; }
+  .fbrand { font-family: Georgia, 'Times New Roman', serif; font-size: 2rem; color: var(--cream); font-weight: 300; margin-bottom: 0.5rem; }
+  .fbrand span { color: var(--sage-light); font-style: italic; }
+  .ftagline { font-size: 0.78rem; line-height: 1.7; max-width: 26ch; color: rgba(245,239,228,0.45); margin-top: 1rem; }
+  .fcol-title { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--sage-light); margin-bottom: 1.5rem; }
+  .flinks { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; }
+  .flinks a { text-decoration: none; font-size: 0.83rem; color: rgba(245,239,228,0.45); transition: color 0.3s; }
+  .flinks a:hover { color: var(--sage-light); }
+
+  .footer-bottom {
+    padding-top: 2.5rem; border-top: 1px solid rgba(107,143,107,0.15);
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 1rem; flex-wrap: wrap;
+  }
+  .fcopy { font-size: 0.72rem; color: rgba(245,239,228,0.28); letter-spacing: 0.05em; }
+  .fsocial { display: flex; gap: 1rem; }
+  .slink {
+    width: 34px; height: 34px;
+    border: 1px solid rgba(107,143,107,0.3);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(245,239,228,0.35); text-decoration: none; font-size: 0.75rem;
+    transition: all 0.3s;
+  }
+  .slink:hover { border-color: var(--sage-light); color: var(--sage-light); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(26,43,27,0.6);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.35s;
+    padding: 2rem;
+  }
+  .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+  .modal-box {
+    background: var(--white); max-width: 540px; width: 100%;
+    padding: 2.5rem; position: relative;
+    transform: translateY(20px); transition: transform 0.35s;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-overlay.active .modal-box { transform: translateY(0); }
+
+  .modal-close {
+    position: absolute; top: 1.2rem; right: 1.5rem;
+    font-size: 1.4rem; color: var(--text-soft); cursor: pointer;
+    background: none; border: none; transition: color 0.3s;
+  }
+  .modal-close:hover { color: var(--dark); }
+
+  .modal-product-title { font-family: Georgia, 'Times New Roman', serif; font-size: 1.5rem; color: var(--dark); margin-bottom: 0.3rem; }
+  .modal-label { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--sage); margin-bottom: 1.5rem; }
+
+  .ingredient-list { list-style: none; }
+  .ingredient-item { padding: 1rem 0; border-bottom: 1px solid var(--cream-deep); display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; }
+  .ingredient-name { font-family: Georgia, 'Times New Roman', serif; font-size: 1rem; font-weight: 600; color: var(--dark); }
+  .ingredient-desc-modal { font-size: 0.82rem; color: var(--text-soft); line-height: 1.6; }
+  .itag { display: inline-block; background: var(--sage-pale); color: var(--dark-mid); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.15rem 0.5rem; margin-top: 0.3rem; }
+
+  /* FADE IN / ACTIVE VIEWS */
+  .fi { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .fi.vis { opacity: 1; transform: translateY(0); }
+
+  /* MOBILE NAV OPEN */
+  nav.mopen .nav-links {
+    display: flex; flex-direction: column;
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--cream);
+    padding: 1.2rem 5vw 1.5rem; gap: 0;
+    border-bottom: 1px solid var(--cream-deep);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    z-index: 99;
+  }
+  nav.mopen .nav-links li { border-bottom: 1px solid var(--cream-deep); }
+  nav.mopen .nav-links a {
+    display: block; padding: 0.9rem 0;
+    font-size: 0.82rem; color: var(--text);
+  }
+  nav.mopen .nav-links .nav-cta {
+    display: block; text-align: center;
+    margin-top: 0.8rem; padding: 0.9rem;
+    background: var(--dark); color: var(--cream) !important;
+  }
+
+  /* RESPONSIVE TABLET (≤900px) */
+  @media (max-width: 900px) {
+    nav { padding: 1rem 5vw; }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    section { padding: 4.5rem 6vw; }
+    .products-grid { grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+    .footer-top { grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .payment-strip { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
+  }
+
+  /* RESPONSIVE MOBILE (≤600px) */
+  @media (max-width: 600px) {
+    nav { padding: 0.9rem 5vw; }
+    .nav-logo { font-size: 1.3rem; }
+    section { padding: 3.5rem 5vw; }
+    .products-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+    .product-card-img { height: auto; aspect-ratio: 1 / 1; }
+    .product-card-body { padding: 1.2rem; }
+    .product-footer-card { flex-direction: column; align-items: flex-start; gap: 0.8rem; }
+    .wiki-btn { width: 100%; text-align: center; padding: 0.6rem; min-height: 44px; }
+    .filter-bar { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0.5rem; -webkit-overflow-scrolling: touch; }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-btn { flex-shrink: 0; white-space: nowrap; min-height: 44px; }
+    .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+    footer { padding: 3.5rem 5vw 2rem; }
+    .footer-bottom { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
+    .modal-overlay { padding: 0; align-items: flex-end; }
+    .modal-box { max-width: 100%; max-height: 92vh; border-radius: 16px 16px 0 0; padding: 1.8rem 1.5rem; }
+    .ingredient-item { grid-template-columns: 1fr; gap: 0.4rem; }
+    .products-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .pagination-container { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .pagination-btn { width: 100%; text-align: center; }
+    .pagination-actions { width: 100%; }
+  }
+
+  @media (max-width: 380px) {
+    section { padding: 3rem 4.5vw; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav id="mainNav">
+  <a href="index.html" class="nav-logo">
+    <svg class="logo-icon" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 1.4em; height: 1.4em; vertical-align: middle; margin-right: 0.4rem; flex-shrink: 0;">
+      <path d="M428.393 458.741C397.367 442.352 389.639 455.699 350.257 463.372C297.897 480.729 273.085 493.192 219.832 520.489L270.021 623.63C288.39 656.569 303.786 659.091 332.525 683.826C379.073 693.884 408.435 692.732 468.538 674.586L591.894 632.338L521.57 537.477L428.393 458.741Z" fill="currentColor"/>
+      <path d="M573.217 875.61C558.753 907.579 544.465 901.772 508.648 919.854C456.64 938.242 429.398 943.607 370.592 954.689L347.01 842.436C341.328 805.152 351.945 793.721 359.486 756.56C390.094 720.077 413.996 702.986 472.604 680.474L595.96 638.226L598.559 756.283L573.217 875.61Z" fill="currentColor"/>
+      <path d="M838.875 684.401C873.212 680.144 872.05 664.541 899.764 635.376C932.621 590.63 945.829 565.89 973.871 512.335L875.613 455.277C842.332 438.408 828.42 445.201 791.288 441.173C747.87 459.682 724.662 477.614 685.954 527.493L609.301 634.042L719.3 672.554L838.875 684.401Z" fill="currentColor"/>
+      <path d="M633.551 876.431C648.671 908.629 662.802 902.957 698.928 921.458C751.214 940.435 778.511 946.098 837.423 957.823L858.536 845.541C863.402 808.225 852.564 796.654 844.24 759.324C812.915 722.431 788.698 705.048 729.738 681.868L605.75 638.226L605.698 756.545L633.551 876.431Z" fill="currentColor"/>
+      <path d="M478.04 427.924C470.246 393.217 484.887 389.034 502.085 352.27C531.758 305.223 549.852 284.014 589.206 238.634L674.723 314.396C701.444 340.894 699.975 356.68 716.285 391.275C714.156 439.626 705.68 468.205 673.311 522.665L602.112 633.156L529.533 539.712L478.04 427.924Z" fill="currentColor"/>
+    </svg>SHUCHI <span>শুচি</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="index.html#routine">Routine</a></li>
+    <li><a href="index.html#watch">Learn</a></li>
+    <li><a href="storefront.html" class="nav-cta">Shop Now</a></li>
+  </ul>
+  <div class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('mopen')">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- STOREFRONT PRODUCTS -->
+<section id="storefront-products">
+  <div class="products-header fi vis">
+    <div>
+      <p class="section-label">Pure Skincare Collection</p>
+      <h2 class="section-title">SHUCHI Storefront — <br><em>Honestly curated.</em></h2>
+    </div>
+  </div>
+
+  <div class="filter-bar fi vis" id="brandFilterBar">
+    <button class="filter-btn active">All</button>
+  </div>
+  
+  <div class="products-grid" id="prodGrid">
+    <!-- PRERENDER_START -->
+    <!-- PRERENDER_END -->
+  </div>
+
+  <!-- PAGINATION CONTROLS -->
+  <div class="pagination-container fi vis">
+    <div class="pagination-status" id="paginationStatus">
+      Loading products...
+    </div>
+    <div class="pagination-actions">
+      <button class="pagination-btn" id="btnPrev" onclick="prevPage()">&lt; Previous Page</button>
+      <button class="pagination-btn" id="btnNext" onclick="nextPage()">Next Page &gt;</button>
+    </div>
+  </div>
+</section>
+
+<!-- PAYMENT METHODS -->
+<div class="payment-strip">
+  <p class="payment-label">Accepted Payment Methods</p>
+  <div class="payment-methods">
+    <span class="ppill bkash">bKash</span>
+    <span class="ppill nagad">Nagad</span>
+    <span class="ppill rocket">Rocket</span>
+    <span class="ppill">Visa / Mastercard</span>
+    <span class="ppill">Cash on Delivery</span>
+  </div>
+  <p class="payment-note">60-second checkout · No hidden fees</p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="fbrand">SHUCHI <span>শুচি</span></div>
+      <p class="ftagline">Pure Korean skincare, honestly delivered. We don't sell myths — just ingredients that work.</p>
+    </div>
+    <div>
+      <p class="fcol-title">Shop</p>
+      <ul class="flinks">
+        <li><a href="storefront.html">All Products</a></li>
+        <li><a href="index.html#products">Featured Items</a></li>
+        <li><a href="index.html#routine">Routine Builder</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="fcol-title">Learn</p>
+      <ul class="flinks">
+        <li><a href="index.html#watch">Ingredient Wiki</a></li>
+        <li><a href="index.html#watch">Watch & Learn</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="fcol-title">Support</p>
+      <ul class="flinks">
+        <li><a href="#">Track My Order</a></li>
+        <li><a href="#">Shipping Policy</a></li>
+        <li><a href="#">Returns</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p class="fcopy">© 2025 SHUCHI শুচি · Chittagong & Dhaka, Bangladesh</p>
+    <div class="fsocial">
+      <a href="#" class="slink">IG</a><a href="#" class="slink">FB</a><a href="#" class="slink">YT</a><a href="#" class="slink">TK</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+
+// 1. API configuration (Supabase handled globally in cart.js)
+const SHEET_API_URL = "";
+
+let allProducts = [];
+let filteredProducts = [];
+let currentBrand = 'all';
+let currentPage = 1;
+const itemsPerPage = 15; // 5 rows of 3 items each
+
+// Fetch and load
+async function loadStorefrontProducts() {
+  const grid = document.getElementById('prodGrid');
+  
+  // A. Check if we have pre-rendered cards or cache
+  const hasPrerender = grid.querySelector('.product-card') !== null;
+  const cachedProducts = sessionStorage.getItem('shuchi_products');
+  let hasCache = hasPrerender;
+  if (cachedProducts) {
+    try {
+      const parsed = JSON.parse(cachedProducts);
+      if (parsed && parsed.length > 0) {
+        const seen = new Set();
+        const uniqueProducts = [];
+        parsed.forEach(p => {
+          const baseId = getBaseProductId(p.id);
+          if (!seen.has(baseId)) {
+            seen.add(baseId);
+            uniqueProducts.push(p);
+          }
+        });
+        allProducts = uniqueProducts;
+        filteredProducts = uniqueProducts;
+        generateBrandFilters(parsed);
+        renderStorefrontGrid();
+        hasCache = true;
+      }
+    } catch(e) {
+      console.error("Error reading cache:", e);
+    }
+  }
+
+  if (!hasCache) {
+    grid.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; padding: 4rem 2rem;">
+        <svg class="logo-loader" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M428.393 458.741C397.367 442.352 389.639 455.699 350.257 463.372C297.897 480.729 273.085 493.192 219.832 520.489L270.021 623.63C288.39 656.569 303.786 659.091 332.525 683.826C379.073 693.884 408.435 692.732 468.538 674.586L591.894 632.338L521.57 537.477L428.393 458.741Z" fill="currentColor"/>
+          <path d="M573.217 875.61C558.753 907.579 544.465 901.772 508.648 919.854C456.64 938.242 429.398 943.607 370.592 954.689L347.01 842.436C341.328 805.152 351.945 793.721 359.486 756.56C390.094 720.077 413.996 702.986 472.604 680.474L595.96 638.226L598.559 756.283L573.217 875.61Z" fill="currentColor"/>
+          <path d="M838.875 684.401C873.212 680.144 872.05 664.541 899.764 635.376C932.621 590.63 945.829 565.89 973.871 512.335L875.613 455.277C842.332 438.408 828.42 445.201 791.288 441.173C747.87 459.682 724.662 477.614 685.954 527.493L609.301 634.042L719.3 672.554L838.875 684.401Z" fill="currentColor"/>
+          <path d="M633.551 876.431C648.671 908.629 662.802 902.957 698.928 921.458C751.214 940.435 778.511 946.098 837.423 957.823L858.536 845.541C863.402 808.225 852.564 796.654 844.24 759.324C812.915 722.431 788.698 705.048 729.738 681.868L605.75 638.226L605.698 756.545L633.551 876.431Z" fill="currentColor"/>
+          <path d="M478.04 427.924C470.246 393.217 484.887 389.034 502.085 352.27C531.758 305.223 549.852 284.014 589.206 238.634L674.723 314.396C701.444 340.894 699.975 356.68 716.285 391.275C714.156 439.626 705.68 468.205 673.311 522.665L602.112 633.156L529.533 539.712L478.04 427.924Z" fill="currentColor"/>
+        </svg>
+        <p style="color: var(--sage); font-size: 0.85rem; letter-spacing: 0.05em; margin-top: 1rem;">Loading pure ingredients...</p>
+      </div>
+    `;
+  }
+
+  // B. Live fetch with retry
+  try {
+    const liveProducts = await fetchProductsWithRetry(SHEET_API_URL);
+    sessionStorage.setItem('shuchi_products', JSON.stringify(liveProducts));
+    
+    const seen = new Set();
+    const uniqueProducts = [];
+    liveProducts.forEach(p => {
+      const baseId = getBaseProductId(p.id);
+      if (!seen.has(baseId)) {
+        seen.add(baseId);
+        uniqueProducts.push(p);
+      }
+    });
+
+    allProducts = uniqueProducts;
+    // Apply current filter in case user toggled it before fetch completes
+    filterBrand(currentBrand, null, false); 
+    generateBrandFilters(liveProducts);
+  } catch (error) {
+    console.error("Error fetching live products:", error);
+    if (!hasCache) {
+      grid.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; color: var(--text-soft); padding: 4rem 2rem;">
+          <p style="margin-bottom: 1rem;">Unable to load products right now.</p>
+          <button class="wiki-btn" onclick="loadStorefrontProducts()" style="pointer-events: auto;">Try Again</button>
+        </div>
+      `;
+      updatePaginationControls(0, 0);
+    }
+  }
+}
+
+// Brand Filter
+function filterBrand(brand, btn, resetPage = true) {
+  currentBrand = brand;
+  if (btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  
+  if (brand === 'all') {
+    filteredProducts = allProducts;
+  } else {
+    filteredProducts = allProducts.filter(p => {
+      // Normalize to handle column spaces
+      const norm = {};
+      Object.keys(p).forEach(k => { norm[k.trim().toLowerCase()] = p[k]; });
+      const pBrand = norm.brand || '';
+      return pBrand.toLowerCase() === brand.toLowerCase();
+    });
+  }
+  
+  if (resetPage) currentPage = 1;
+  renderStorefrontGrid();
+}
+
+// Dynamic brand filters
+function generateBrandFilters(products) {
+  const filterBar = document.getElementById('brandFilterBar');
+  if (!filterBar) return;
+  
+  const activeBrand = currentBrand;
+
+  filterBar.innerHTML = '';
+  const btnAll = document.createElement('button');
+  btnAll.className = `filter-btn ${activeBrand === 'all' ? 'active' : ''}`;
+  btnAll.textContent = 'All';
+  btnAll.onclick = function() { filterBrand('all', this); };
+  filterBar.appendChild(btnAll);
+
+  const brands = [];
+  products.forEach(product => {
+    const p = {};
+    Object.keys(product).forEach(k => {
+      p[k.trim().toLowerCase()] = product[k];
+    });
+    const pBrand = p.brand || '';
+    if (pBrand && !brands.includes(pBrand)) {
+      brands.push(pBrand);
+    }
+  });
+
+  brands.sort().forEach(brand => {
+    const btn = document.createElement('button');
+    btn.className = `filter-btn ${activeBrand.toLowerCase() === brand.toLowerCase() ? 'active' : ''}`;
+    btn.textContent = brand;
+    btn.onclick = function() { filterBrand(brand, this); };
+    filterBar.appendChild(btn);
+  });
+}
+
+// Render grid page
+function renderStorefrontGrid() {
+  const grid = document.getElementById('prodGrid');
+  grid.innerHTML = '';
+
+  if (filteredProducts.length === 0) {
+    grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-soft); padding: 4rem 2rem;">No products found in this category.</p>';
+    updatePaginationControls(0, 0);
+    return;
+  }
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length);
+  const pageItems = filteredProducts.slice(startIndex, endIndex);
+
+  pageItems.forEach(product => {
+    const p = {};
+    Object.keys(product).forEach(k => {
+      p[k.trim().toLowerCase()] = product[k];
+    });
+
+    if (!p.id) return; 
+
+    const pTitle = p.title || '[Product Title]';
+    const pBrand = p.brand || '[Brand]';
+    const pDesc = p.desc || '';
+    const pPrice = p.price || '';
+
+
+
+    const pImage = p.image || p.img || p.imageurl || p.imgurl || p.photo || '';
+    const imgHTML = pImage ? 
+      `<img src="${pImage}" alt="${pTitle}" style="width: 100%; height: 100%; object-fit: contain; padding: 1.5rem; display: block;" onerror="handleImgError(this)">` :
+      `<svg width="50" height="76" viewBox="0 0 50 76" fill="none">
+        <rect x="11" y="8" width="28" height="62" rx="4" fill="#A8C4A2" opacity="0.5"/>
+        <rect x="16" y="3" width="18" height="8" rx="2" fill="#6B8F6B" opacity="0.4"/>
+        <rect x="13" y="34" width="24" height="1.5" fill="white" opacity="0.5"/>
+        <rect x="15" y="38" width="20" height="1" fill="white" opacity="0.35"/>
+      </svg>`;
+
+    const cardHTML = `
+      <div class="product-card" data-brand="${pBrand.replace(/"/g, '&quot;')}">
+        <a href="./${p.id}.html" style="text-decoration: none; color: inherit; display: block;">
+          <div class="product-card-img">
+            <span class="product-badge authentic">✓ Direct Import</span>
+            ${imgHTML}
+          </div>
+          <div class="product-card-body">
+            <p class="product-brand">${pBrand}</p>
+            <h3 class="product-title-card">${pTitle}</h3>
+            <p class="product-desc-card">${pDesc.substring(0, 75)}${pDesc.length > 75 ? '...' : ''}</p>
+            <div class="product-footer-card">
+              <span class="product-price">৳ ${pPrice}</span>
+            </div>
+          </div>
+        </a>
+        <div class="product-card-actions" style="padding: 0 1.5rem 1.5rem;">
+          <button class="card-btn-add" onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Add To Bag</button>
+          <button class="card-btn-buy" onclick="event.preventDefault(); event.stopPropagation(); buyNow('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Buy Now</button>
+        </div>
+      </div>
+    `;
+    grid.insertAdjacentHTML('beforeend', cardHTML);
+  });
+
+  updatePaginationControls(startIndex + 1, endIndex);
+
+  // Smooth scroll to top of products grid when changing page (after first load)
+  const header = document.getElementById('storefront-products');
+  if (header && window.scrollY > header.offsetTop) {
+    const yOffset = -90; // account for fixed nav
+    const y = header.getBoundingClientRect().top + window.pageYOffset + yOffset;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  }
+}
+
+// Update controls
+function updatePaginationControls(start, end) {
+  const totalItems = filteredProducts.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  
+  const statusText = document.getElementById('paginationStatus');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+  
+  if (totalItems === 0) {
+    statusText.textContent = 'No products';
+    btnPrev.disabled = true;
+    btnNext.disabled = true;
+    return;
+  }
+  
+  statusText.textContent = `Showing ${start}–${end} of ${totalItems} products (Page ${currentPage} of ${totalPages})`;
+  
+  btnPrev.disabled = currentPage === 1;
+  btnNext.disabled = currentPage === totalPages || totalPages === 0;
+  
+  btnPrev.style.opacity = btnPrev.disabled ? '0.4' : '1';
+  btnPrev.style.pointerEvents = btnPrev.disabled ? 'none' : 'auto';
+  
+  btnNext.style.opacity = btnNext.disabled ? '0.4' : '1';
+  btnNext.style.pointerEvents = btnNext.disabled ? 'none' : 'auto';
+}
+
+function prevPage() {
+  if (currentPage > 1) {
+    currentPage--;
+    renderStorefrontGrid();
+  }
+}
+
+function nextPage() {
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  if (currentPage < totalPages) {
+    currentPage++;
+    renderStorefrontGrid();
+  }
+}
+
+// Observe fade ins
+const obs = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('vis'), i * 80);
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fi').forEach(el => obs.observe(el));
+
+window.addEventListener('scroll', () => {
+  document.getElementById('mainNav').style.padding = scrollY > 60 ? '0.75rem 4vw' : '';
+});
+
+// Run
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadStorefrontProducts);
+} else {
+  loadStorefrontProducts();
+}
+</script>
+</body>
+</html>
