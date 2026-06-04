@@ -264,7 +264,7 @@ function runGenerator(products) {
     const cleanDesc = desc.replace(/"/g, '&quot;').replace(/\n/g, ' ').substring(0, 150) + (desc.length > 150 ? '...' : '');
     html = html.replace(/<!-- OG_TITLE -->/g, `${title} — SHUCHI শুচি`);
     html = html.replace(/<!-- OG_DESC -->/g, cleanDesc);
-    html = html.replace(/<!-- OG_IMAGE -->/g, image || `https://shuchibd.com/favicon.svg`);
+    html = html.replace(/<!-- OG_IMAGE -->/g, image || `https://shuchi-frontend.vercel.app/shuchi_banner.png`);
 
     // Replace HTML content placeholders
     html = html.replace(
@@ -376,7 +376,7 @@ function runGenerator(products) {
 
   // --- C. DYNAMIC SITEMAP GENERATION ---
   console.log("🗺️ Creating sitemap.xml...");
-  const siteUrl = "https://shuchibd.com"; // Default base, Googlebot indexes relative schema too
+  const siteUrl = "https://shuchi-frontend.vercel.app"; // Default base, Googlebot indexes relative schema too
   
   let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
