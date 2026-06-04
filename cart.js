@@ -372,25 +372,58 @@ function injectAuthUI() {
 
         <!-- Auth state panel: Authenticated (Account Profiles Screen) -->
         <div id="authAuthenticatedPanel" style="display: none;">
-          <div class="user-account-info">
-            <div class="user-avatar-large" id="userAvatarPlaceholder">U</div>
-            <h3 class="user-name-title" id="userNameTitle">Customer Name</h3>
-            <p class="user-phone-sub" id="userPhoneSub">017XXXXXXXX</p>
-            
-            <div class="user-details-card">
-              <div class="ud-label">Default Address</div>
-              <div class="ud-value" id="userAddressVal">Delivery Address here</div>
-            </div>
+          <!-- Profile View Mode -->
+          <div id="authProfileViewPanel">
+            <div class="user-account-info">
+              <div class="user-avatar-large" id="userAvatarPlaceholder">U</div>
+              <h3 class="user-name-title" id="userNameTitle">Customer Name</h3>
+              <p class="user-phone-sub" id="userPhoneSub">017XXXXXXXX</p>
+              
+              <div class="user-details-card">
+                <div class="ud-label">Default Address</div>
+                <div class="ud-value" id="userAddressVal">Delivery Address here</div>
+              </div>
 
-            <!-- Purchase History -->
-            <div class="purchase-history-section">
-              <h4 class="history-title">Purchase History</h4>
-              <div id="purchaseHistoryList" class="purchase-history-list">
-                <p class="history-empty">Loading history...</p>
+              <!-- Edit & Sign Out Actions -->
+              <div class="auth-actions" style="margin-top: 1.2rem; display: flex; gap: 0.8rem;">
+                <button class="cart-checkout-btn" style="flex: 1; margin: 0; padding: 0.6rem 1rem;" onclick="enableProfileEdit()">Edit Details</button>
+                <button class="checkout-cancel-btn" style="flex: 1; margin: 0; padding: 0.6rem 1rem;" onclick="signOutUser()">Sign Out</button>
+              </div>
+
+              <!-- Purchase History -->
+              <div class="purchase-history-section">
+                <h4 class="history-title">Purchase History</h4>
+                <div id="purchaseHistoryList" class="purchase-history-list">
+                  <p class="history-empty">Loading history...</p>
+                </div>
               </div>
             </div>
-            
-            <button class="checkout-cancel-btn" style="width: 100%; margin-top: 1.5rem;" onclick="signOutUser()">Sign Out Account</button>
+          </div>
+
+          <!-- Profile Edit Mode -->
+          <div id="authProfileEditPanel" style="display: none;">
+            <h3 class="checkout-title" style="margin-top: 0; margin-bottom: 1.5rem; text-align: center;">Edit Account Details</h3>
+            <form id="profileEditForm" onsubmit="saveProfileEdit(event)">
+              <div class="form-group">
+                <label class="form-label" for="editName">Full Name</label>
+                <input type="text" id="editName" class="form-input" required placeholder="e.g. Fatima Rahman">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editHouse">House / Apartment / Flat No.</label>
+                <input type="text" id="editHouse" class="form-input" required placeholder="e.g. Apt 4B, House 23 or Holding 104">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editAddress">Street Address & Area</label>
+                <input type="text" id="editAddress" class="form-input" required placeholder="e.g. Road 5, Dhanmondi, Dhaka">
+              </div>
+              
+              <div id="editProfileStatus" class="status-desc" style="display: none; text-align: center; color: var(--sage); margin-bottom: 1rem;">Saving changes...</div>
+
+              <div class="auth-actions" style="margin-top: 1.5rem; display: flex; gap: 0.8rem;">
+                <button type="button" class="checkout-cancel-btn" style="flex: 1; margin: 0;" onclick="disableProfileEdit()">Cancel</button>
+                <button type="submit" class="auth-submit-btn" style="flex: 1; margin: 0;">Save Changes</button>
+              </div>
+            </form>
           </div>
         </div>
 
@@ -595,6 +628,12 @@ function updateAuthUI() {
   const addressVal = document.getElementById('userAddressVal');
   const avatarVal = document.getElementById('userAvatarPlaceholder');
 
+  // Reset panels back to Profile View mode
+  const viewPanel = document.getElementById('authProfileViewPanel');
+  const editPanel = document.getElementById('authProfileEditPanel');
+  if (viewPanel) viewPanel.style.display = 'block';
+  if (editPanel) editPanel.style.display = 'none';
+
   if (currentUser) {
     // Authenticated State
     labels.forEach(label => label.textContent = currentUser.name.split(' ')[0]);
@@ -617,6 +656,76 @@ function updateAuthUI() {
 
     if (authUnauthenticated) authUnauthenticated.style.display = 'block';
     if (authAuthenticated) authAuthenticated.style.display = 'none';
+  }
+}
+
+// Enable Profile Edit Panel and load existing details
+function enableProfileEdit() {
+  const viewPanel = document.getElementById('authProfileViewPanel');
+  const editPanel = document.getElementById('authProfileEditPanel');
+  
+  if (currentUser) {
+    document.getElementById('editName').value = currentUser.name || '';
+    
+    let houseVal = '';
+    let addressVal = currentUser.address || '';
+    if (currentUser.address && currentUser.address.includes(',')) {
+      const idx = currentUser.address.indexOf(',');
+      houseVal = currentUser.address.substring(0, idx).trim();
+      addressVal = currentUser.address.substring(idx + 1).trim();
+    }
+    document.getElementById('editHouse').value = houseVal;
+    document.getElementById('editAddress').value = addressVal;
+  }
+
+  if (viewPanel) viewPanel.style.display = 'none';
+  if (editPanel) editPanel.style.display = 'block';
+}
+
+// Disable Profile Edit Panel
+function disableProfileEdit() {
+  const viewPanel = document.getElementById('authProfileViewPanel');
+  const editPanel = document.getElementById('authProfileEditPanel');
+  if (viewPanel) viewPanel.style.display = 'block';
+  if (editPanel) editPanel.style.display = 'none';
+}
+
+// Save Profile Updates to Supabase
+async function saveProfileEdit(e) {
+  e.preventDefault();
+  
+  if (!currentUser) return;
+  
+  const statusEl = document.getElementById('editProfileStatus');
+  const name = document.getElementById('editName').value.trim();
+  const house = document.getElementById('editHouse').value.trim();
+  const street = document.getElementById('editAddress').value.trim();
+  const address = `${house}, ${street}`;
+
+  if (statusEl) {
+    statusEl.style.display = 'block';
+    statusEl.textContent = "Saving changes to the Shuchi User database...";
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from('profiles')
+      .update({ name, address })
+      .eq('phone', currentUser.phone);
+
+    if (error) throw error;
+
+    currentUser.name = name;
+    currentUser.address = address;
+    saveUserState(currentUser);
+    updateAuthUI();
+    disableProfileEdit();
+    showToast("Profile details updated successfully!");
+  } catch (err) {
+    console.error("Profile edit failed:", err);
+    alert(`Failed to update details: ${err.message || err.toString()}`);
+  } finally {
+    if (statusEl) statusEl.style.display = 'none';
   }
 }
 
