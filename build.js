@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
-// Supabase Configuration matching cart.js
+// Configuration
+const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTp7ww3V0vvjNe4qNd-UZTORWpqD6m3bimIXekdzREHjrbBwkV3u5dYxcnoXXz3RjML8BnCfvO8wrg6/pub?gid=0&single=true&output=csv";
 const SUPABASE_PROJECT_ID = "okprwbzfsyvrkpygjkum";
 const SUPABASE_KEY = "sb_publishable_LAgGxlaltxGIe6wWu1DBkQ_PJN0DLNG";
 const HOST = `${SUPABASE_PROJECT_ID}.supabase.co`;
@@ -10,42 +11,206 @@ const PATH = "/rest/v1/products?select=*";
 
 console.log("🚀 Starting Jamstack Pre-rendering Build...");
 
-// 1. Fetch products from Supabase REST API natively
-const options = {
-  hostname: HOST,
-  path: PATH,
-  method: 'GET',
-  headers: {
-    'apikey': SUPABASE_KEY,
-    'Authorization': `Bearer ${SUPABASE_KEY}`
-  }
-};
+// Helper to parse RFC 4180 CSV with quotes support
+function parseCSV(csvText) {
+  const lines = [];
+  let currentRow = [];
+  let currentField = '';
+  let inQuotes = false;
 
-const req = https.request(options, res => {
-  let body = '';
-  res.on('data', chunk => body += chunk);
-  res.on('end', () => {
-    try {
-      if (res.statusCode !== 200) {
-        throw new Error(`Failed to fetch: HTTP ${res.statusCode}. Body: ${body}`);
+  for (let i = 0; i < csvText.length; i++) {
+    const char = csvText[i];
+    const nextChar = csvText[i + 1];
+
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        currentField += '"';
+        i++; // skip next escaped quote
+      } else {
+        inQuotes = !inQuotes;
       }
-
-      const products = JSON.parse(body);
-      console.log(`✅ Loaded ${products.length} products from database.`);
-      
-      runGenerator(products);
-    } catch (e) {
-      console.error("❌ Build error:", e);
-      process.exit(1);
+    } else if (char === ',' && !inQuotes) {
+      currentRow.push(currentField.trim());
+      currentField = '';
+    } else if ((char === '\r' || char === '\n') && !inQuotes) {
+      if (char === '\r' && nextChar === '\n') {
+        i++; // skip LF
+      }
+      currentRow.push(currentField.trim());
+      if (currentRow.length > 1 || currentRow[0] !== '') {
+        lines.push(currentRow);
+      }
+      currentRow = [];
+      currentField = '';
+    } else {
+      currentField += char;
     }
-  });
-});
+  }
+  
+  if (currentField !== '' || currentRow.length > 0) {
+    currentRow.push(currentField.trim());
+    lines.push(currentRow);
+  }
 
-req.on('error', err => {
-  console.error("❌ Network error fetching database records:", err);
-  process.exit(1);
-});
-req.end();
+  return lines;
+}
+
+// Fetch Google Sheet CSV data
+function fetchGoogleSheetCSV() {
+  return new Promise((resolve, reject) => {
+    https.get(GOOGLE_SHEET_CSV_URL, res => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        if (res.statusCode !== 200) {
+          reject(new Error(`Failed to fetch Google Sheet CSV: HTTP ${res.statusCode}`));
+        } else {
+          resolve(data);
+        }
+      });
+    }).on('error', reject);
+  });
+}
+
+// Convert CSV lines to typed product objects
+function parseCSVToProducts(csvText) {
+  const rows = parseCSV(csvText);
+  if (rows.length < 2) return [];
+
+  const headers = rows[0].map(h => h.trim().toLowerCase());
+  const colIndex = {
+    id: headers.indexOf("id"),
+    brand: headers.indexOf("brand"),
+    title: headers.indexOf("title"),
+    price: headers.indexOf("price"),
+    desc: headers.indexOf("desc"),
+    skin_type: headers.indexOf("skin_type"),
+    volume: headers.indexOf("volume"),
+    volume_unit: headers.indexOf("volume_unit"),
+    img: headers.indexOf("img")
+  };
+
+  if (colIndex.id === -1) {
+    throw new Error("Google Sheet CSV is missing the required 'id' header column.");
+  }
+
+  const products = [];
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    const id = String(row[colIndex.id]).trim();
+    if (!id) continue; // Skip empty/blank rows
+
+    products.push({
+      id: id,
+      brand: colIndex.brand !== -1 ? String(row[colIndex.brand]).trim() : "",
+      title: colIndex.title !== -1 ? String(row[colIndex.title]).trim() : "",
+      price: colIndex.price !== -1 ? parseFloat(row[colIndex.price]) || 0 : 0,
+      desc: colIndex.desc !== -1 ? String(row[colIndex.desc]).trim() : "",
+      skin_type: colIndex.skin_type !== -1 ? String(row[colIndex.skin_type]).trim() : "",
+      volume: colIndex.volume !== -1 ? parseFloat(row[colIndex.volume]) || null : null,
+      volume_unit: colIndex.volume_unit !== -1 ? String(row[colIndex.volume_unit]).trim() : "",
+      img: colIndex.img !== -1 ? String(row[colIndex.img]).trim() : ""
+    });
+  }
+  return products;
+}
+
+// Push products to Supabase via Upsert
+function syncProductsToSupabase(products) {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify(products);
+    const writeKey = process.env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_KEY;
+
+    const options = {
+      hostname: HOST,
+      path: "/rest/v1/products",
+      method: 'POST',
+      headers: {
+        'apikey': writeKey,
+        'Authorization': `Bearer ${writeKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates', // Tell Supabase to perform an upsert on match
+        'Content-Length': Buffer.byteLength(payload)
+      }
+    };
+
+    const req = https.request(options, res => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          console.log(`✅ Database Sync: Successfully upserted ${products.length} products to Supabase.`);
+          resolve();
+        } else {
+          reject(new Error(`Failed to sync spreadsheet with Supabase database (HTTP ${res.statusCode}): ${body}`));
+        }
+      });
+    });
+
+    req.on('error', reject);
+    req.write(payload);
+    req.end();
+  });
+}
+
+// Query final dataset from Supabase
+function fetchAllProductsFromSupabase() {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: HOST,
+      path: PATH,
+      method: 'GET',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    };
+
+    const req = https.request(options, res => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        try {
+          if (res.statusCode !== 200) {
+            throw new Error(`Failed to fetch database products: HTTP ${res.statusCode}`);
+          }
+          resolve(JSON.parse(body));
+        } catch (e) {
+          reject(e);
+        }
+      });
+    });
+
+    req.on('error', reject);
+    req.end();
+  });
+}
+
+// Orchestrator entry point
+async function runSyncAndBuild() {
+  try {
+    console.log("📥 Step 1: Downloading products spreadsheet from Google Sheets...");
+    const csvData = await fetchGoogleSheetCSV();
+    
+    console.log("⚙️ Step 2: Parsing Google Sheet CSV records...");
+    const parsedProducts = parseCSVToProducts(csvData);
+    console.log(`Parsed ${parsedProducts.length} product rows.`);
+    
+    console.log("⚡ Step 3: Syncing records to Supabase tables...");
+    await syncProductsToSupabase(parsedProducts);
+    
+    console.log("🔍 Step 4: Loading final dataset from Supabase...");
+    const finalProducts = await fetchAllProductsFromSupabase();
+    console.log(`Loaded ${finalProducts.length} final products from database.`);
+    
+    runGenerator(finalProducts);
+  } catch (err) {
+    console.error("❌ Build Sync Pipeline failed:", err);
+    process.exit(1);
+  }
+}
+
+runSyncAndBuild();
 
 function getBaseProductId(id) {
   if (!id) return '';
