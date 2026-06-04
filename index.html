@@ -1231,7 +1231,7 @@ const SHEET_API_URL = "";
 
 // 2. Fetch all products and build the cards dynamically
 // Helper to render the product cards safely
-function renderHomepageCards(products) {
+function renderHomepageCards(products, allProducts) {
   const grid = document.getElementById('prodGrid');
   grid.innerHTML = '';
 
@@ -1261,12 +1261,17 @@ function renderHomepageCards(products) {
         <rect x="15" y="38" width="20" height="1" fill="white" opacity="0.35"/>
       </svg>`;
 
+    const baseId = getBaseProductId(p.id);
+    const hasVariants = allProducts && allProducts.filter(item => getBaseProductId(item.id || item.ID || item.Id) === baseId).length > 1;
+    const variantsBadge = hasVariants ? `<span class="product-badge options-badge">✦ Options Available</span>` : '';
+
     // Build the HTML for a single card with dynamic e-commerce actions
     const cardHTML = `
       <div class="product-card fi" data-brand="${pBrand.replace(/"/g, '&quot;')}">
         <a href="./${p.id}.html" style="text-decoration: none; color: inherit; display: block;">
           <div class="product-card-img">
             <span class="product-badge authentic">✓ Direct Import</span>
+            ${variantsBadge}
             ${imgHTML}
           </div>
           <div class="product-card-body">
@@ -1321,7 +1326,7 @@ async function loadHomepageProducts() {
           return bPriority - aPriority;
         });
         const topSix = uniqueProducts.slice(0, 6);
-        renderHomepageCards(topSix);
+        renderHomepageCards(topSix, parsed);
         hasCache = true;
       }
     } catch(e) {
@@ -1372,7 +1377,7 @@ async function loadHomepageProducts() {
 
     // Render fresh cards (top 6 only)
     const topSix = uniqueProducts.slice(0, 6);
-    renderHomepageCards(topSix);
+    renderHomepageCards(topSix, liveProducts);
 
   } catch (error) {
     console.error("Error loading homepage products:", error);

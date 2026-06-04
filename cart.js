@@ -1146,11 +1146,16 @@ async function injectStorefrontCatalogOnDetails() {
           <rect x="16" y="3" width="18" height="8" rx="2" fill="#6B8F6B" opacity="0.4"/>
         </svg>`;
 
+      const baseId = getBaseProductId(p.id);
+      const hasVariants = products && products.filter(item => getBaseProductId(item.id || item.ID || item.Id) === baseId).length > 1;
+      const variantsBadge = hasVariants ? `<span class="product-badge options-badge">✦ Options Available</span>` : '';
+      
       const cardHTML = `
         <div class="product-card">
           <a href="./${p.id}.html" style="text-decoration: none; color: inherit; display: block;">
             <div class="product-card-img">
               <span class="product-badge authentic">✓ Direct Import</span>
+              ${variantsBadge}
               ${imgHTML}
             </div>
             <div class="product-card-body" style="padding: 1.5rem;">

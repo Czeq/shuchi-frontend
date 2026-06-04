@@ -341,11 +341,15 @@ function runGenerator(products) {
           <rect x="15" y="38" width="20" height="1" fill="white" opacity="0.35"/>
         </svg>`;
 
+      const hasVariants = products.filter(item => getBaseProductId(item.id) === baseId).length > 1;
+      const variantsBadge = hasVariants ? `<span class="product-badge options-badge">✦ Options Available</span>` : '';
+
       return `
       <div class="product-card" data-brand="${pBrand.replace(/"/g, '&quot;')}">
         <a href="./${p.id}.html" style="text-decoration: none; color: inherit; display: block;">
           <div class="product-card-img">
             <span class="product-badge authentic">✓ Direct Import</span>
+            ${variantsBadge}
             ${imgHTML}
           </div>
           <div class="product-card-body">

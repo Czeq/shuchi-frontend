@@ -762,6 +762,13 @@
 .product-badge.authentic {
   background: var(--sage);
 }
+.product-badge.options-badge {
+  background: var(--dark);
+  border: 1px solid rgba(245, 239, 228, 0.2);
+  color: var(--cream);
+  left: auto;
+  right: 1rem;
+}
 
 .product-card-body {
   padding: 1.5rem;
