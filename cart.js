@@ -265,8 +265,12 @@ function injectCartUI() {
             <input type="tel" id="custPhone" class="form-input" required placeholder="e.g. 017XXXXXXXX" pattern="[0-9]{11}" title="Please enter a valid 11-digit Bangladeshi mobile number">
           </div>
           <div class="form-group">
-            <label class="form-label" for="custAddress">Delivery Address</label>
-            <input type="text" id="custAddress" class="form-input" required placeholder="e.g. House 12, Road 5, Dhanmondi, Dhaka">
+            <label class="form-label" for="custHouse">House / Apartment / Flat No.</label>
+            <input type="text" id="custHouse" class="form-input" required placeholder="e.g. Apt 4B, House 23 or Holding 104">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="custAddress">Street Address & Area</label>
+            <input type="text" id="custAddress" class="form-input" required placeholder="e.g. Road 5, Dhanmondi, Dhaka">
           </div>
           <div class="form-group">
             <label class="form-label" for="custArea">Delivery Area</label>
@@ -351,9 +355,13 @@ function injectAuthUI() {
               <label class="form-label" for="signUpPhone">Phone Number</label>
               <input type="tel" id="signUpPhone" class="form-input" required placeholder="017XXXXXXXX" pattern="[0-9]{11}">
             </div>
+             <div class="form-group">
+              <label class="form-label" for="signUpHouse">House / Apartment / Flat No.</label>
+              <input type="text" id="signUpHouse" class="form-input" required placeholder="e.g. Apt 4B, House 23 or Holding 104">
+            </div>
             <div class="form-group">
-              <label class="form-label" for="signUpAddress">Delivery Address</label>
-              <input type="text" id="signUpAddress" class="form-input" required placeholder="House 12, Road 5, Dhanmondi, Dhaka">
+              <label class="form-label" for="signUpAddress">Street Address & Area</label>
+              <input type="text" id="signUpAddress" class="form-input" required placeholder="e.g. Road 5, Dhanmondi, Dhaka">
             </div>
             <div class="auth-actions">
               <button type="button" class="checkout-cancel-btn" onclick="toggleAuthModal()">Cancel</button>
@@ -487,7 +495,9 @@ async function submitSignUp(e) {
 
   const name = document.getElementById('signUpName').value.trim();
   const phone = document.getElementById('signUpPhone').value.trim();
-  const address = document.getElementById('signUpAddress').value.trim();
+  const house = document.getElementById('signUpHouse').value.trim();
+  const street = document.getElementById('signUpAddress').value.trim();
+  const address = `${house}, ${street}`;
 
   toggleAuthLoader(true, "Registering Account...", "We are connecting to the Shuchi User data base.");
 
@@ -663,15 +673,26 @@ async function fetchPurchaseHistory(phone) {
 function prefillCheckoutForm() {
   const nameInput = document.getElementById('custName');
   const phoneInput = document.getElementById('custPhone');
+  const houseInput = document.getElementById('custHouse');
   const addressInput = document.getElementById('custAddress');
 
   if (currentUser) {
     if (nameInput) nameInput.value = currentUser.name;
     if (phoneInput) phoneInput.value = currentUser.phone;
-    if (addressInput) addressInput.value = currentUser.address;
+    
+    let houseVal = '';
+    let addressVal = currentUser.address || '';
+    if (currentUser.address && currentUser.address.includes(',')) {
+      const idx = currentUser.address.indexOf(',');
+      houseVal = currentUser.address.substring(0, idx).trim();
+      addressVal = currentUser.address.substring(idx + 1).trim();
+    }
+    if (houseInput) houseInput.value = houseVal;
+    if (addressInput) addressInput.value = addressVal;
   } else {
     if (nameInput) nameInput.value = "";
     if (phoneInput) phoneInput.value = "";
+    if (houseInput) houseInput.value = "";
     if (addressInput) addressInput.value = "";
   }
 }
@@ -863,7 +884,9 @@ async function submitCheckout(e) {
 
   const name = document.getElementById('custName').value.trim();
   const phone = document.getElementById('custPhone').value.trim();
-  const address = document.getElementById('custAddress').value.trim();
+  const house = document.getElementById('custHouse').value.trim();
+  const street = document.getElementById('custAddress').value.trim();
+  const address = `${house}, ${street}`;
   const areaSelect = document.getElementById('custArea');
   const areaLabel = areaSelect.options[areaSelect.selectedIndex].text;
   
