@@ -262,7 +262,7 @@ function injectCartUI() {
         <form id="checkoutForm" onsubmit="submitCheckout(event)">
           <div class="form-group">
             <label class="form-label" for="custName">Full Name</label>
-            <input type="text" id="custName" class="form-input" required placeholder="e.g. Fatima Rahman">
+            <input type="text" id="custName" class="form-input" required placeholder="e.g. Name">
           </div>
           <div class="form-group">
             <label class="form-label" for="custPhone">Phone Number</label>
@@ -435,7 +435,7 @@ function injectAuthUI() {
           <form id="signUpForm" class="auth-panel" onsubmit="submitSignUp(event)">
             <div class="form-group">
               <label class="form-label" for="signUpName">Full Name</label>
-              <input type="text" id="signUpName" class="form-input" required placeholder="Fatima Rahman">
+              <input type="text" id="signUpName" class="form-input" required placeholder="Name">
             </div>
             <div class="form-group">
               <label class="form-label" for="signUpPhone">Phone Number</label>
@@ -492,7 +492,7 @@ function injectAuthUI() {
             <form id="profileEditForm" onsubmit="saveProfileEdit(event)">
               <div class="form-group">
                 <label class="form-label" for="editName">Full Name</label>
-                <input type="text" id="editName" class="form-input" required placeholder="e.g. Fatima Rahman">
+                <input type="text" id="editName" class="form-input" required placeholder="e.g. Name">
               </div>
               <div class="form-group">
                 <label class="form-label" for="editHouse">House / Apartment / Flat No.</label>

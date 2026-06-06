@@ -551,10 +551,18 @@
   .text-soft { color: var(--text-soft); }
   .bold { font-weight: 600; }
   
+  .insights-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    align-items: start;
+  }
+  
   /* RESPONSIVE */
   @media (max-width: 1024px) {
     .metrics-grid { grid-template-columns: 1fr 1fr; }
-    .charts-grid, .analytics-row {
+    .charts-grid, .analytics-row, .insights-grid {
       grid-template-columns: 1fr !important;
     }
   }
@@ -931,6 +939,63 @@
       </div>
     </div>
 
+    <!-- Financial Insights: Products and Customers Grid -->
+    <div class="insights-grid">
+      <!-- Product Analytics Column -->
+      <div style="background: var(--white); border: 1px solid var(--sage-pale); padding: 1.5rem; border-radius: 4px; min-height: 400px; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <h3 class="checkout-title" style="margin: 0; font-size: 1.15rem; font-weight: 500;">Product Profitability & Margins</h3>
+          <!-- Sub-tabs for switching between Most Profitable and Profit Margin % -->
+          <div style="display: flex; gap: 0.3rem;">
+            <button class="filter-tab active" id="btnMostProfitable" onclick="switchProductAnalyticTab('profitable')" style="font-size: 0.72rem; padding: 0.35rem 0.7rem; border-radius: 4px;">Most Profitable</button>
+            <button class="filter-tab" id="btnMarginPct" onclick="switchProductAnalyticTab('margins')" style="font-size: 0.72rem; padding: 0.35rem 0.7rem; border-radius: 4px;">Margin %</button>
+          </div>
+        </div>
+        
+        <p id="productAnalyticDesc" style="font-size: 0.74rem; color: var(--text-soft); margin-bottom: 1.2rem; line-height: 1.4;">Products ordered by total profit contribution (Units Sold × Unit Profit).</p>
+        
+        <div style="flex-grow: 1; overflow-y: auto; max-height: 350px;">
+          <table style="font-size: 0.8rem; width: 100%;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--cream-deep);">
+                <th style="padding: 0.6rem 0.5rem; font-size: 0.68rem; background: transparent; border-bottom: 1.5px solid var(--cream-deep); text-align: left;">Product</th>
+                <th id="colMetricLabel1" style="padding: 0.6rem 0.5rem; font-size: 0.68rem; background: transparent; border-bottom: 1.5px solid var(--cream-deep);" class="text-right">Units</th>
+                <th id="colMetricLabel2" style="padding: 0.6rem 0.5rem; font-size: 0.68rem; background: transparent; border-bottom: 1.5px solid var(--cream-deep);" class="text-right">Total Profit</th>
+              </tr>
+            </thead>
+            <tbody id="productAnalyticsBody">
+              <tr>
+                <td colspan="3" class="text-soft text-center" style="padding: 2rem;">Loading product insights...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Best Customers Column -->
+      <div style="background: var(--white); border: 1px solid var(--sage-pale); padding: 1.5rem; border-radius: 4px; min-height: 400px; display: flex; flex-direction: column;">
+        <h3 class="checkout-title" style="margin-top: 0; margin-bottom: 0.5rem; text-align: left; font-size: 1.15rem; font-weight: 500;">Best Customers</h3>
+        <p style="font-size: 0.74rem; color: var(--text-soft); margin-bottom: 1.2rem; line-height: 1.4;">Customers ranked by total lifetime spend (excluding cancelled orders).</p>
+        
+        <div style="flex-grow: 1; overflow-y: auto; max-height: 350px;">
+          <table style="font-size: 0.8rem; width: 100%;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--cream-deep);">
+                <th style="padding: 0.6rem 0.5rem; font-size: 0.68rem; background: transparent; border-bottom: 1.5px solid var(--cream-deep); text-align: left;">Customer Name</th>
+                <th style="padding: 0.6rem 0.5rem; font-size: 0.68rem; background: transparent; border-bottom: 1.5px solid var(--cream-deep);" class="text-center">Orders</th>
+                <th style="padding: 0.6rem 0.5rem; font-size: 0.68rem; background: transparent; border-bottom: 1.5px solid var(--cream-deep);" class="text-right">Total Spent</th>
+              </tr>
+            </thead>
+            <tbody id="bestCustomersBody">
+              <tr>
+                <td colspan="3" class="text-soft text-center" style="padding: 2rem;">Loading customer insights...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- Product Margin Table -->
     <div class="table-container" style="background: var(--white); border: 1px solid var(--sage-pale); border-radius: 4px; padding: 1.5rem;">
       <h3 class="checkout-title" style="margin-top: 0; margin-bottom: 0.5rem; text-align: left; font-size: 1.15rem; font-weight: 500;">Product Profitability & Margin Performance</h3>
@@ -1026,6 +1091,7 @@ let expensesList = [];
 let activeTab = 'dashboard';
 let orderStatusFilter = 'all';
 let currentFulfillmentOrder = null;
+let activeProductAnalyticTab = 'profitable';
 
 // Chart JS Instances
 let revenueChartInstance = null;
@@ -1910,6 +1976,34 @@ async function updateProductCost(prodId, cost) {
   }
 }
 
+// Switch Product Analytics sub-tab
+function switchProductAnalyticTab(tabName) {
+  activeProductAnalyticTab = tabName;
+  
+  const btnProfitable = document.getElementById('btnMostProfitable');
+  const btnMargins = document.getElementById('btnMarginPct');
+  const descEl = document.getElementById('productAnalyticDesc');
+  const col1 = document.getElementById('colMetricLabel1');
+  const col2 = document.getElementById('colMetricLabel2');
+  
+  if (tabName === 'profitable') {
+    btnProfitable.classList.add('active');
+    btnMargins.classList.remove('active');
+    if (descEl) descEl.textContent = 'Products ordered by total profit contribution (Units Sold × Unit Profit).';
+    if (col1) col1.textContent = 'Units';
+    if (col2) col2.textContent = 'Total Profit';
+  } else {
+    btnProfitable.classList.remove('active');
+    btnMargins.classList.add('active');
+    if (descEl) descEl.textContent = 'Products ordered by profit margin percentage ((Retail Price - Wholesale Cost) / Retail Price).';
+    if (col1) col1.textContent = 'Retail / Cost';
+    if (col2) col2.textContent = 'Margin %';
+  }
+  
+  // Re-render financials tab to update table content
+  renderFinancials();
+}
+
 // Render Financial Analytics Tab
 function renderFinancials() {
   const activeOrders = ordersList.filter(o => (o.status || '').toLowerCase() !== 'cancelled');
@@ -2018,7 +2112,101 @@ function renderFinancials() {
     });
   }
 
-  // Render Product profitability table
+  // 1. Render switchable Product Analytics Table (Most Profitable vs. Margin %)
+  const analyticsTbody = document.getElementById('productAnalyticsBody');
+  analyticsTbody.innerHTML = '';
+  
+  if (productsRowData.length === 0) {
+    analyticsTbody.innerHTML = '<tr><td colspan="3" class="text-soft text-center" style="padding: 2rem;">No sales logs found for product insights.</td></tr>';
+  } else {
+    if (activeProductAnalyticTab === 'profitable') {
+      // Sort by total profit contribution descending
+      productsRowData.sort((a, b) => {
+        const aContribution = a.qty * (a.price - a.cost);
+        const bContribution = b.qty * (b.price - b.cost);
+        return bContribution - aContribution;
+      });
+
+      productsRowData.forEach(item => {
+        const contribution = item.qty * (item.price - item.cost);
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid var(--cream-deep)';
+        tr.innerHTML = `
+          <td style="padding: 0.65rem 0.5rem; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.title}">${item.title}</td>
+          <td style="padding: 0.65rem 0.5rem;" class="text-right bold">${item.qty}</td>
+          <td style="padding: 0.65rem 0.5rem; color: ${contribution >= 0 ? 'var(--sage)' : '#B22222'}" class="text-right bold">৳ ${contribution.toLocaleString()}</td>
+        `;
+        analyticsTbody.appendChild(tr);
+      });
+    } else {
+      // Sort by margin % descending
+      productsRowData.sort((a, b) => {
+        const aMargin = a.price > 0 ? ((a.price - a.cost) / a.price) * 100 : 0;
+        const bMargin = b.price > 0 ? ((b.price - b.cost) / b.price) * 100 : 0;
+        return bMargin - aMargin;
+      });
+
+      productsRowData.forEach(item => {
+        const margin = item.price > 0 ? ((item.price - item.cost) / item.price) * 100 : 0;
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid var(--cream-deep)';
+        tr.innerHTML = `
+          <td style="padding: 0.65rem 0.5rem; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.title}">${item.title}</td>
+          <td style="padding: 0.65rem 0.5rem; font-size: 0.76rem;" class="text-right text-soft">৳ ${item.price.toLocaleString()} / ৳ ${item.cost.toLocaleString()}</td>
+          <td style="padding: 0.65rem 0.5rem;" class="text-right bold">${margin.toFixed(1)}%</td>
+        `;
+        analyticsTbody.appendChild(tr);
+      });
+    }
+  }
+
+  // 2. Render Best Customers Table
+  const customerTbody = document.getElementById('bestCustomersBody');
+  customerTbody.innerHTML = '';
+  
+  const customerAgg = {};
+  ordersList.forEach(order => {
+    const status = (order.status || '').toLowerCase();
+    if (status === 'cancelled') return;
+    
+    const phone = order.phone || 'N/A';
+    const name = order.customer_name || 'Guest';
+    const key = phone !== 'N/A' ? phone : name;
+    
+    if (!customerAgg[key]) {
+      customerAgg[key] = {
+        name: name,
+        phone: phone,
+        orders: 0,
+        totalSpent: 0
+      };
+    }
+    customerAgg[key].orders++;
+    customerAgg[key].totalSpent += parseFloat(order.total_price || 0);
+  });
+
+  const sortedCustomers = Object.values(customerAgg)
+    .sort((a, b) => b.totalSpent - a.totalSpent);
+
+  if (sortedCustomers.length === 0) {
+    customerTbody.innerHTML = '<tr><td colspan="3" class="text-soft text-center" style="padding: 2rem;">No customer profile spends recorded yet.</td></tr>';
+  } else {
+    sortedCustomers.forEach(customer => {
+      const tr = document.createElement('tr');
+      tr.style.borderBottom = '1px solid var(--cream-deep)';
+      tr.innerHTML = `
+        <td style="padding: 0.65rem 0.5rem;">
+          <div class="bold" style="font-size: 0.82rem;">${customer.name}</div>
+          <div class="text-soft" style="font-size: 0.74rem; margin-top: 0.1rem;">${customer.phone}</div>
+        </td>
+        <td style="padding: 0.65rem 0.5rem;" class="text-center bold">${customer.orders}</td>
+        <td style="padding: 0.65rem 0.5rem;" class="text-right bold">৳ ${parseInt(customer.totalSpent || 0).toLocaleString()}</td>
+      `;
+      customerTbody.appendChild(tr);
+    });
+  }
+
+  // 3. Render Product profitability table
   const profitTbody = document.getElementById('productProfitabilityBody');
   profitTbody.innerHTML = '';
   if (productsRowData.length === 0) {
