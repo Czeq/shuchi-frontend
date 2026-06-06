@@ -8,6 +8,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // Global States
 let cartItems = [];
 let currentUser = null; // { name, phone, address }
+let discountsList = [];
 
 // Cookie Helper Functions
 function setCookie(name, value, days) {
@@ -109,12 +110,20 @@ async function fetchProductsWithRetry(url, retries = 3, delay = 1000) {
 }
 
 // Initialize System
-function initCartSystem() {
+async function initCartSystem() {
   loadCartState();
   loadUserState();
   injectCartUI();
   injectAuthUI();
   injectNavControls();
+  
+  // Fetch active discounts first
+  try {
+    await fetchDiscounts();
+  } catch(e) {
+    console.warn("Failed to load discounts:", e);
+  }
+  
   updateCartUI();
   updateAuthUI();
   
@@ -125,6 +134,217 @@ function initCartSystem() {
 
   // Initialize user registration reminder floating prompt
   initRegistrationPrompt();
+  
+  // Initialize dynamic discount DOM observer
+  initDiscountObserver();
+}
+
+// ── DISCOUNT SYSTEM HELPERS & DYNAMIC DOM RENDERER ──
+
+// Fetch active discounts from Supabase database or localStorage fallback
+async function fetchDiscounts() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('discounts')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    discountsList = data || [];
+  } catch (e) {
+    console.warn("Discounts table fetch error from database. Falling back to localStorage:", e);
+    const local = localStorage.getItem('shuchi_discounts');
+    if (local) {
+      try {
+        discountsList = JSON.parse(local);
+      } catch(err) {
+        console.error("Failed to parse local discounts:", err);
+        discountsList = [];
+      }
+    } else {
+      discountsList = [];
+    }
+  }
+}
+
+// Global category classifier helper
+function classifyProductCategory(title, desc) {
+  const t = (title || '').toLowerCase();
+  const d = (desc || '').toLowerCase();
+  if (t.includes('shampoo') || t.includes('conditioner') || t.includes('hair')) return 'Shampoo';
+  if (t.includes('body wash') || t.includes('shower gel') || t.includes('body cleanser')) return 'Body Wash';
+  if (t.includes('body cream') || t.includes('body lotion')) return 'Body Cream';
+  if (t.includes('sunscreen') || t.includes('sun cream') || t.includes('sunblock') || t.includes('sun stick')) return 'Sunscreen';
+  if (t.includes('cleansing oil') || t.includes('oil cleanser') || t.includes('cleansing balm') || t.includes('micellar') || t.includes('makeup remover')) return 'Cleanser';
+  if (t.includes('facewash') || t.includes('face wash') || t.includes('foam cleanser') || t.includes('foaming')) return 'Facewash';
+  if (t.includes('toner') || t.includes('skin refiner') || t.includes('toning')) return 'Toner';
+  if (t.includes('essence') || t.includes('mucin') || t.includes('serum') || t.includes('ampoule')) return 'Essence & Serum';
+  if (t.includes('lotion') || t.includes('emulsion')) return 'Lotion';
+  if (t.includes('cream') || t.includes('gel cream') || t.includes('moisturizer') || t.includes('sleeping mask')) return 'Cream';
+  
+  if (d.includes('shampoo') || d.includes('hair')) return 'Shampoo';
+  if (d.includes('body wash') || d.includes('shower gel')) return 'Body Wash';
+  if (d.includes('body cream') || d.includes('body lotion')) return 'Body Cream';
+  if (d.includes('sunscreen') || d.includes('sun cream')) return 'Sunscreen';
+  if (d.includes('cleansing oil') || d.includes('cleansing balm')) return 'Cleanser';
+  if (d.includes('facewash') || d.includes('face wash') || d.includes('cleansing foam')) return 'Facewash';
+  if (d.includes('toner')) return 'Toner';
+  if (d.includes('essence') || d.includes('serum') || d.includes('ampoule')) return 'Essence & Serum';
+  if (d.includes('lotion') || d.includes('emulsion')) return 'Lotion';
+  if (d.includes('cream') || d.includes('moisturizer')) return 'Cream';
+  return 'Other';
+}
+
+// Calculate discounted price for a product based on active rules
+function getDiscountedPrice(product) {
+  const price = parseFloat(product.price || product.Price || 0);
+  const activeDiscounts = discountsList.filter(d => d.active);
+  if (activeDiscounts.length === 0) return { price: price, discount: null };
+  
+  let bestPrice = price;
+  let appliedDiscount = null;
+  
+  activeDiscounts.forEach(disc => {
+    let matches = false;
+    if (disc.scope === 'all') {
+      matches = true;
+    } else if (disc.scope === 'brand') {
+      matches = (product.brand || product.Brand || '').toLowerCase().trim() === (disc.scope_value || '').toLowerCase().trim();
+    } else if (disc.scope === 'category') {
+      const pTitle = product.title || product.Title || '';
+      const pDesc = product.desc || product.Desc || '';
+      const pType = classifyProductCategory(pTitle, pDesc);
+      matches = pType.toLowerCase().trim() === (disc.scope_value || '').toLowerCase().trim();
+    }
+    
+    if (matches) {
+      let currentDiscountedPrice = price;
+      if (disc.type === 'percentage') {
+        currentDiscountedPrice = price * (1 - disc.value / 100);
+      } else {
+        currentDiscountedPrice = Math.max(0, price - disc.value);
+      }
+      
+      if (currentDiscountedPrice < bestPrice) {
+        bestPrice = currentDiscountedPrice;
+        appliedDiscount = disc;
+      }
+    }
+  });
+  
+  return {
+    price: bestPrice,
+    discount: appliedDiscount
+  };
+}
+
+// Dynamic Discount DOM Applicator
+function applyLiveDiscountsToDOM() {
+  const cards = document.querySelectorAll('.product-card');
+  const cachedProds = sessionStorage.getItem('shuchi_products');
+  let products = [];
+  if (cachedProds) {
+    try {
+      products = JSON.parse(cachedProds);
+    } catch(e) {}
+  }
+  
+  cards.forEach(card => {
+    if (card.dataset.discountApplied === 'true') return;
+    
+    const link = card.querySelector('a');
+    if (!link) return;
+    const href = link.getAttribute('href') || '';
+    const idMatch = href.match(/\/([^/]+)\.html$/) || href.match(/^([^/]+)\.html$/);
+    if (!idMatch) return;
+    const prodId = idMatch[1];
+    
+    const product = products.find(p => p.id === prodId);
+    if (!product) return;
+    
+    const discInfo = getDiscountedPrice(product);
+    if (discInfo.discount) {
+      const discountedPrice = Math.round(discInfo.price);
+      
+      // Update Price display
+      const priceSpan = card.querySelector('.product-price');
+      if (priceSpan) {
+        priceSpan.outerHTML = `
+          <div class="product-price-container" style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; line-height: 1.2;">
+            <span style="text-decoration: line-through; color: var(--text-soft); font-size: 0.78rem; font-weight: normal;">৳ ${product.price.toLocaleString()}</span>
+            <span class="product-price" style="color: var(--sage); font-weight: 600;">৳ ${discountedPrice.toLocaleString()}</span>
+          </div>
+        `;
+      }
+      
+      // Add Badge
+      const imgContainer = card.querySelector('.product-card-img');
+      if (imgContainer) {
+        const discountLabel = discInfo.discount.type === 'percentage' 
+          ? `${discInfo.discount.value}% Off` 
+          : `৳${discInfo.discount.value} Off`;
+        
+        imgContainer.insertAdjacentHTML('beforeend', `
+          <span class="product-badge" style="background: var(--sage); color: var(--white); top: 2.3rem; right: auto; left: 1rem; font-size: 0.65rem; font-weight: 600; padding: 0.15rem 0.45rem; border-radius: 2px; z-index: 5;">
+            ${discountLabel}
+          </span>
+        `);
+      }
+    }
+    card.dataset.discountApplied = 'true';
+  });
+  
+  // 2. Process Product Detail Page Price & Button
+  const detailPriceEl = document.getElementById('pricePlaceholder');
+  if (detailPriceEl && !detailPriceEl.dataset.discountApplied) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const currId = urlParams.get('id') || '';
+    if (currId) {
+      const product = products.find(p => p.id === currId);
+      if (product) {
+        const discInfo = getDiscountedPrice(product);
+        if (discInfo.discount) {
+          const discountedPrice = Math.round(discInfo.price);
+          const discountLabel = discInfo.discount.type === 'percentage' 
+            ? `${discInfo.discount.value}% Off` 
+            : `৳${discInfo.discount.value} Off`;
+          
+          detailPriceEl.innerHTML = `
+            <span style="text-decoration: line-through; font-size: 1.1rem; color: var(--text-soft); font-weight: normal; margin-right: 0.8rem;">৳ ${product.price}</span>
+            ৳ ${discountedPrice}
+            <span class="product-badge" style="background: var(--sage); color: var(--white); margin-left: 0.8rem; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; vertical-align: middle;">
+              ${discountLabel}
+            </span>
+          `;
+          
+          // Update Add to Bag button text
+          const buyBtn = document.querySelector('.btn-primary');
+          if (buyBtn && buyBtn.textContent.includes('Add to Bag')) {
+            buyBtn.textContent = `Add to Bag — ৳ ${discountedPrice}`;
+          }
+        }
+      }
+    }
+    detailPriceEl.dataset.discountApplied = 'true';
+  }
+}
+
+// Watch for DOM changes to apply discounts on dynamically rendered cards
+function initDiscountObserver() {
+  applyLiveDiscountsToDOM();
+  
+  const observer = new MutationObserver((mutations) => {
+    let shouldApply = false;
+    mutations.forEach(m => {
+      if (m.addedNodes.length > 0) {
+        shouldApply = true;
+      }
+    });
+    if (shouldApply) {
+      applyLiveDiscountsToDOM();
+    }
+  });
+  
+  observer.observe(document.body, { childList: true, subtree: true });
 }
 
 // Load cart from localStorage
@@ -1083,7 +1303,10 @@ function updateCartUI() {
     badge.style.display = totalQuantity > 0 ? 'flex' : 'none';
   });
 
-  const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const subtotal = cartItems.reduce((acc, item) => {
+    const discountInfo = getDiscountedPrice(item);
+    return acc + (Math.round(discountInfo.price) * item.quantity);
+  }, 0);
   
   const areaSelect = document.getElementById('custArea');
   const areaValue = areaSelect ? areaSelect.value : 'inside';
@@ -1123,13 +1346,23 @@ function updateCartUI() {
         <rect x="16" y="3" width="18" height="8" rx="2" fill="#6B8F6B" opacity="0.4"/>
       </svg>`;
 
+    const discountInfo = getDiscountedPrice(item);
+    const discountedPrice = Math.round(discountInfo.price);
+    const hasDiscount = discountedPrice < item.price;
+    const priceHTML = hasDiscount 
+      ? `<div style="display:flex; align-items:center; gap:0.5rem;">
+           <span style="text-decoration:line-through; color:var(--text-soft); font-weight:normal; font-size:0.85rem;">৳ ${item.price.toLocaleString()}</span>
+           <span style="color:var(--sage); font-weight:600;">৳ ${discountedPrice.toLocaleString()}</span>
+         </div>`
+      : `৳ ${item.price.toLocaleString()}`;
+
     return `
       <div class="cart-item">
         <div class="cart-item-img">${imgHTML}</div>
         <div class="cart-item-details">
           <span class="cart-item-brand">${item.brand}</span>
           <h4 class="cart-item-title">${item.title}</h4>
-          <div class="cart-item-price">৳ ${item.price.toLocaleString()}</div>
+          <div class="cart-item-price">${priceHTML}</div>
           <div class="cart-item-actions">
             <div class="qty-control">
               <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
@@ -1235,7 +1468,10 @@ async function submitCheckout(e) {
   
   const paymentMethod = document.querySelector('input[name="payOpt"]:checked').value;
 
-  const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const subtotal = cartItems.reduce((acc, item) => {
+    const discountInfo = getDiscountedPrice(item);
+    return acc + (Math.round(discountInfo.price) * item.quantity);
+  }, 0);
   const deliveryCharge = areaSelect.value === 'inside' ? 60 : 120;
   const totalPrice = subtotal + deliveryCharge;
 
