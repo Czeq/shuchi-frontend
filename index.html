@@ -203,95 +203,36 @@
   .hero-right {
     background: radial-gradient(circle at 50% 50%, var(--cream-deep) 0%, var(--cream) 100%);
     display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero-right::before {
-    content: '';
-    position: absolute;
-    width: 320px;
-    height: 320px;
-    background: radial-gradient(circle, rgba(168, 196, 162, 0.45) 0%, rgba(214, 232, 212, 0) 70%);
-    filter: blur(40px);
-    z-index: 1;
-    animation: pulseGlow 8s ease-in-out infinite alternate;
-  }
-  @keyframes pulseGlow {
-    from { transform: scale(1); opacity: 0.6; }
-    to { transform: scale(1.25); opacity: 0.95; }
-  }
-
-  .hero-botanical {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0.12;
-    z-index: 0;
-  }
-
-  .hero-product-stack {
-    position: relative;
-    z-index: 2;
-    display: flex;
     flex-direction: column;
+    justify-content: flex-start;
     align-items: center;
-    gap: 1.2rem;
-    animation: floatUp 6s ease-in-out infinite alternate;
+    position: relative;
+    padding: 5vw 4vw;
   }
-  @keyframes floatUp { from { transform: translateY(0); } to { transform: translateY(-14px); } }
 
-  .product-card-hero {
-    background: rgba(250, 250, 247, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    padding: 1.5rem;
-    width: 235px;
-    text-align: center;
-    box-shadow: 0 30px 70px rgba(26,43,27,0.1);
-    border-radius: 12px;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .product-card-hero:hover {
-    transform: scale(1.06) translate(var(--hover-tx), var(--hover-ty)) rotate(var(--hover-rot));
-    box-shadow: 0 40px 90px rgba(26,43,27,0.16);
-  }
-  .product-card-hero.off1 { transform: translateX(38px) rotate(2.5deg); --hover-tx: 38px; --hover-ty: -5px; --hover-rot: 1deg; }
-  .product-card-hero.off2 { transform: translateX(-28px) rotate(-2deg); --hover-tx: -28px; --hover-ty: -5px; --hover-rot: -1deg; }
-
-  .pimg {
+  .hero-right .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
     width: 100%;
-    aspect-ratio: 1 / 1;
-    background: linear-gradient(135deg, var(--sage-pale), var(--cream-deep));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
+    margin-top: 1rem;
   }
-  .pname { font-family: Georgia, 'Times New Roman', serif; font-size: 1rem; color: var(--dark); }
-  .pprice { font-size: 0.78rem; color: var(--sage); margin-top: 0.2rem; }
 
-  .hero-card-cta {
-    display: inline-block;
-    margin-top: 0.8rem;
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--white);
-    background: var(--sage);
-    padding: 0.35rem 0.8rem;
-    border-radius: 4px;
-    opacity: 0;
-    transform: translateY(5px);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+  .hero-right .product-card .product-desc-card {
+    display: none;
   }
-  .product-card-hero:hover .hero-card-cta {
-    opacity: 1;
-    transform: translateY(0);
+  .hero-right .product-card-img {
+    aspect-ratio: 1.25 / 1;
+  }
+  .hero-right .product-card-body {
+    padding: 1rem;
+  }
+  .hero-right .product-card-actions {
+    padding: 0 1rem 1rem !important;
+  }
+  .hero-right .card-btn-add, .hero-right .card-btn-buy {
+    font-size: 0.72rem;
+    padding: 0.5rem;
+    min-height: 38px;
   }
 
   /* HERO PILLS */
@@ -522,7 +463,7 @@
   .step-desc { font-size: 0.74rem; color: var(--text-soft); }
 
   /* ROUTINE */
-  #routine { background: var(--dark); color: var(--cream); position: relative; overflow: hidden; }
+  #routine { background: var(--dark); color: var(--cream); position: relative; overflow: hidden; padding: 4rem 8vw; }
   #routine::after {
     content: ''; position: absolute; top: -40%; right: -20%;
     width: 70%; height: 180%;
@@ -536,17 +477,17 @@
   .routine-left .section-label::before { background: var(--sage-light); }
   .routine-left .section-title { color: var(--cream); max-width: 20ch; }
 
-  .routine-desc { font-size: 0.9rem; color: rgba(245,239,228,0.6); margin: 1.5rem 0 2.5rem; line-height: 1.8; max-width: 38ch; }
+  .routine-desc { font-size: 0.9rem; color: rgba(245,239,228,0.6); margin: 1rem 0 1.5rem; line-height: 1.8; max-width: 38ch; }
 
-  .quiz-widget { background: rgba(255,255,255,0.04); border: 1px solid rgba(107,143,107,0.25); padding: 2.5rem; }
+  .quiz-widget { background: rgba(255,255,255,0.04); border: 1px solid rgba(107,143,107,0.25); padding: 1.75rem; }
   .quiz-step { display: none; }
   .quiz-step.active { display: block; }
-  .quiz-q { font-family: Georgia, 'Times New Roman', serif; font-size: 1.25rem; color: var(--cream); margin-bottom: 1.4rem; line-height: 1.4; }
+  .quiz-q { font-family: Georgia, 'Times New Roman', serif; font-size: 1.25rem; color: var(--cream); margin-bottom: 1.2rem; line-height: 1.4; }
   .quiz-progress { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(168,196,162,0.6); margin-bottom: 0.8rem; }
   .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
   .qopt {
     border: 1.5px solid rgba(107,143,107,0.3); background: transparent;
-    color: rgba(245,239,228,0.7); padding: 0.8rem 1rem;
+    color: rgba(245,239,228,0.7); padding: 0.6rem 1rem;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 0.8rem;
     cursor: pointer; transition: all 0.3s; text-align: left;
   }
@@ -554,13 +495,13 @@
 
   .routine-result { display: none; }
   .routine-result.active { display: block; }
-  .result-title { font-family: Georgia, 'Times New Roman', serif; font-size: 1.2rem; color: var(--cream); margin: 0.8rem 0 1.2rem; line-height: 1.4; }
+  .result-title { font-family: Georgia, 'Times New Roman', serif; font-size: 1.2rem; color: var(--cream); margin: 0.5rem 0 0.8rem; line-height: 1.4; }
 
-  .routine-steps { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.5rem; }
+  .routine-steps { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1rem; }
   .rsi {
     display: flex; align-items: center; gap: 1rem;
     background: rgba(107,143,107,0.1); border: 1px solid rgba(107,143,107,0.2);
-    padding: 0.85rem 1.1rem;
+    padding: 0.5rem 1rem;
   }
   .rnum {
     width: 26px; height: 26px; border-radius: 50%; background: var(--sage);
@@ -732,7 +673,7 @@
 
     /* Hero */
     #hero { grid-template-columns: 1fr; min-height: auto; padding-top: 64px; }
-    .hero-right { display: none; }
+    .hero-right { display: flex; padding: 4vw 6vw 5rem; }
     .hero-left { padding: 3rem 6vw 4rem; }
     .hero-title { font-size: clamp(2.8rem, 8vw, 4rem); }
 
@@ -747,8 +688,9 @@
     #why::before { font-size: 38vw; }
 
     /* Routine */
-    .routine-inner { grid-template-columns: 1fr; gap: 3rem; }
-    .quiz-widget { padding: 1.8rem; }
+    #routine { padding: 2.5rem 6vw; }
+    .routine-inner { grid-template-columns: 1fr; gap: 2rem; }
+    .quiz-widget { padding: 1.5rem; }
 
     /* Reviews */
     .reviews-grid { grid-template-columns: 1fr 1fr; gap: 1.2rem; }
@@ -814,12 +756,15 @@
     .why-right { padding: 1.5rem; }
     .tracker-step { gap: 0.8rem; }
 
+    .hero-right .products-grid { grid-template-columns: 1fr; }
+
     /* Routine */
-    .routine-inner { gap: 2.5rem; }
-    .quiz-widget { padding: 1.4rem; }
+    #routine { padding: 2rem 5vw; }
+    .routine-inner { gap: 1.5rem; }
+    .quiz-widget { padding: 1.25rem; }
     .quiz-q { font-size: 1.1rem; }
     .quiz-options { grid-template-columns: 1fr; gap: 0.6rem; }
-    .qopt { min-height: 48px; padding: 0.9rem 1rem; }
+    .qopt { min-height: 44px; padding: 0.7rem 0.9rem; }
     .routine-left .section-title { font-size: clamp(1.8rem, 7vw, 2.5rem); }
 
     /* Reviews */
@@ -896,19 +841,8 @@
     <h1 class="hero-title" style="margin-top: 0; margin-bottom: 1.5rem;">Skin that speaks<br><em>the truth.</em></h1>
     <p class="hero-desc">No myths. No shortcuts. Only verified Korean ingredients and the science behind every drop — curated for Bangladesh's skin, climate, and conscience.</p>
     
-    <!-- Skin Type Quick Select Ribbon -->
-    <div class="hero-quick-select" style="margin-bottom: 2rem;">
-      <p style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-soft); margin-bottom: 0.60rem; font-weight: 500; opacity: 0.9;">Select skin concern for a tailored routine:</p>
-      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-        <button class="hero-pill" onclick="quickStartQuiz('oily')">Oily / Acne</button>
-        <button class="hero-pill" onclick="quickStartQuiz('dry')">Dry / Dehydrated</button>
-        <button class="hero-pill" onclick="quickStartQuiz('combo')">Combination</button>
-        <button class="hero-pill" onclick="quickStartQuiz('normal')">Normal Skin</button>
-      </div>
-    </div>
-
     <div class="hero-actions">
-      <a href="storefront.html" class="btn-primary">Shop Now</a>
+      <a href="storefront.html" class="btn-primary">Shop All Products</a>
       <a href="#routine" class="btn-outline">Build My Routine</a>
     </div>
     <div class="hero-badges">
@@ -919,87 +853,19 @@
   </div>
 
   <div class="hero-right">
-    <svg class="hero-botanical" viewBox="0 0 600 700" xmlns="http://www.w3.org/2000/svg">
-      <g fill="none" stroke="#6B8F6B" stroke-width="1.5">
-        <ellipse cx="300" cy="520" rx="40" ry="20"/>
-        <path d="M300 520 Q280 490 300 470 Q320 490 300 520"/>
-        <path d="M300 520 Q260 485 250 460 Q280 470 300 520"/>
-        <path d="M300 520 Q340 485 350 460 Q320 470 300 520"/>
-        <path d="M300 520 Q245 500 240 475 Q265 480 300 520"/>
-        <path d="M300 520 Q355 500 360 475 Q335 480 300 520"/>
-        <path d="M300 520 Q295 580 290 640" stroke-width="2"/>
-        <path d="M100 200 Q140 160 180 200 Q140 220 100 200"/>
-        <path d="M110 220 Q155 185 190 230 Q150 245 110 220"/>
-        <path d="M90 250 Q135 215 165 260 Q125 270 90 250"/>
-        <line x1="130" y1="190" x2="200" y2="330" stroke-width="2"/>
-        <circle cx="480" cy="160" r="30"/>
-        <circle cx="480" cy="160" r="18"/>
-        <path d="M480 130 L480 100"/>
-        <path d="M510 160 L540 160"/>
-        <path d="M503 137 L524 116"/>
-        <path d="M503 183 L524 204"/>
-        <path d="M457 137 L436 116"/>
-        <path d="M457 183 L436 204"/>
-        <path d="M400 350 Q420 330 440 350 Q420 365 400 350"/>
-        <path d="M405 365 Q428 345 445 370 Q425 380 405 365"/>
-        <line x1="425" y1="340" x2="430" y2="420" stroke-width="1.5"/>
-      </g>
-    </svg>
-    <div class="hero-product-stack">
-      <a href="./snail96.html" style="text-decoration: none; display: block;" class="product-card-hero off1">
-        <div class="pimg">
-          <svg width="60" height="85" viewBox="0 0 60 85" fill="none">
-            <defs>
-              <linearGradient id="snailGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
-                <stop offset="100%" stop-color="#E8DFD0" stop-opacity="0.6"/>
-              </linearGradient>
-              <linearGradient id="pumpGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#3D503E"/>
-                <stop offset="100%" stop-color="#6B8F6B"/>
-              </linearGradient>
-            </defs>
-            <rect x="22" y="4" width="16" height="12" rx="2" fill="url(#pumpGrad)" />
-            <rect x="25" y="16" width="10" height="4" fill="#222" opacity="0.6"/>
-            <rect x="12" y="20" width="36" height="60" rx="8" fill="url(#snailGrad)" stroke="rgba(107, 143, 107, 0.3)" stroke-width="1" />
-            <path d="M12 45 Q30 48 48 45 L48 72 Q30 75 12 72 Z" fill="#F4EFE0" opacity="0.8"/>
-            <rect x="17" y="30" width="26" height="28" rx="2" fill="white" fill-opacity="0.95" />
-            <line x1="21" y1="36" x2="39" y2="36" stroke="#6B8F6B" stroke-width="1.5" />
-            <line x1="21" y1="42" x2="35" y2="42" stroke="#B8975A" stroke-width="1" />
-            <line x1="21" y1="48" x2="31" y2="48" stroke="#ccc" stroke-width="1" />
-            <circle cx="30" cy="65" r="3" fill="#B8975A" opacity="0.7"/>
-          </svg>
+    <div style="width: 100%; max-width: 650px;">
+      <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end; width: 100%;">
+        <div>
+          <p class="section-label" style="margin-bottom: 0.3rem;">Curated Selection</p>
+          <h2 class="section-title" style="font-size: clamp(1.4rem, 2.5vw, 1.8rem); line-height: 1.25;">Pure formulas,<br><em>proven results.</em></h2>
         </div>
-        <div class="pname">COSRX Snail 96</div>
-        <div class="pprice">৳ 1,450</div>
-        <span class="hero-card-cta">Shop Product</span>
-      </a>
-      <a href="./greentea.html" style="text-decoration: none; display: block;" class="product-card-hero off2">
-        <div class="pimg">
-          <svg width="60" height="85" viewBox="0 0 60 85" fill="none">
-            <defs>
-              <linearGradient id="teaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#A8C4A2" stop-opacity="0.95"/>
-                <stop offset="100%" stop-color="#5A7F5A" stop-opacity="0.85"/>
-              </linearGradient>
-              <linearGradient id="teaCap" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#2F4030"/>
-                <stop offset="100%" stop-color="#1E2B1F"/>
-              </linearGradient>
-            </defs>
-            <path d="M22 6 h16 a2 2 0 0 1 2 2 v10 a0 0 0 0 1 0 0 h-20 a0 0 0 0 1 0 0 v-10 a2 2 0 0 1 2 -2 z" fill="url(#teaCap)"/>
-            <rect x="26" y="18" width="8" height="4" fill="#B8975A"/>
-            <path d="M12 36 C12 25, 48 25, 48 36 L48 70 C48 76, 12 76, 12 70 Z" fill="url(#teaGrad)" stroke="rgba(47, 64, 48, 0.3)" stroke-width="1" />
-            <rect x="18" y="42" width="24" height="20" rx="1" fill="white" fill-opacity="0.95" />
-            <circle cx="30" cy="52" r="4" fill="#6B8F6B" opacity="0.3"/>
-            <path d="M30 49 L32 53 L28 53 Z" fill="#6B8F6B" opacity="0.8"/>
-            <path d="M42 66 Q45 60 48 64 Q46 68 42 66" stroke="white" stroke-width="0.7" fill="none"/>
-          </svg>
-        </div>
-        <div class="pname">Innisfree Green Tea</div>
-        <div class="pprice">৳ 1,890</div>
-        <span class="hero-card-cta">Shop Product</span>
-      </a>
+      </div>
+      <div class="products-grid" id="prodGrid">
+        <!-- Products dynamically injected via Google Sheets API/Supabase -->
+      </div>
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <a href="storefront.html" class="btn-outline" style="display: block; width: 100%; text-align: center; font-size: 0.75rem; padding: 0.75rem 1.5rem;">View All Products &rarr;</a>
+      </div>
     </div>
   </div>
 </section>
@@ -1011,23 +877,7 @@
   </div>
 </div>
 
-<!-- PRODUCTS -->
-<section id="products">
-  <div class="products-header fi">
-    <div>
-      <p class="section-label">Curated Selection</p>
-      <h2 class="section-title">Pure ingredients,<br><em>proven results.</em></h2>
-    </div>
-    <a href="storefront.html" class="btn-outline">View All Products</a>
-  </div>
-  
-  <div class="products-grid" id="prodGrid">
-    <!-- Products dynamically injected via Google Sheets API -->
-  </div>
-  <div class="products-footer-action fi" style="text-align: center; margin-top: 4rem; margin-bottom: 2.5rem;">
-    <a href="storefront.html" class="btn-primary" style="display: inline-block; padding: 1.1rem 3.5rem; font-size: 0.85rem; letter-spacing: 0.16em; font-weight: 600; box-shadow: 0 10px 25px rgba(26, 43, 27, 0.15); border-radius: 4px;">Explore Storefront — View All Products &rarr;</a>
-  </div>
-</section>
+
 
 <!-- WHY SHUCHI -->
 <section id="why">
@@ -1137,12 +987,11 @@
           <div class="rsi"><div class="rnum">4</div><div><div class="rtype">Moisturize</div><div class="rname">Etude House Soon Jung Emulsion</div></div></div>
           <div class="rsi"><div class="rnum">5</div><div><div class="rtype">Protect</div><div class="rname">ISNTREE Hyaluronic Acid Watery Sun Gel SPF50</div></div></div>
         </div>
-        <button class="btn-primary" onclick="shopRoutine()" style="background:var(--sage);width:100%;text-align:center;border:none">Shop This Routine →</button>
+        <button class="btn-primary" onclick="shopRoutine()" style="background:var(--sage);width:100%;text-align:center;border:none">Shop This Routine &rarr;</button>
       </div>
     </div>
   </div>
 </section>
-
 
 <!-- WATCH & LEARN -->
 <section id="watch">
@@ -1196,7 +1045,7 @@
       <p class="fcol-title">Shop</p>
       <ul class="flinks">
         <li><a href="storefront.html">All Products</a></li>
-        <li><a href="index.html#products">Featured Items</a></li>
+        <li><a href="index.html#prodGrid">Curated Selection</a></li>
         <li><a href="index.html#routine">Routine Builder</a></li>
       </ul>
     </div>
@@ -1256,11 +1105,128 @@ function quickStartQuiz(skinType) {
   });
 }
 
-// Quiz
+// Quiz State & Lookups
 let cq = 1;
+let quizAnswers = {
+  skinType: 'oily',
+  concern: 'acne',
+  steps: 5
+};
+
+const FALLBACK_DATABASE = [
+  { id: 'cosrx-lowpH', title: 'Low pH Good Morning Gel Cleanser', brand: 'COSRX', price: 1200, skin_type: 'oily,combo,normal', desc: 'Gentle gel cleanser targeting acne.' },
+  { id: 'somebymi-aha', title: 'AHA BHA PHA 30 Days Toner', brand: 'Some By Mi', price: 1550, skin_type: 'oily,combo', desc: 'Exfoliating toner for acne and dark spots.' },
+  { id: 'snail96', title: 'Advanced Snail 96 Mucin Essence', brand: 'COSRX', price: 1450, skin_type: 'all', desc: 'Hydrating essence for sensitive skin.' },
+  { id: 'soonjung-emulsion', title: 'Soon Jung Emulsion', brand: 'Etude House', price: 1750, skin_type: 'oily,combo', desc: 'Light moisturizer for sensitive skin.' },
+  { id: 'isntree-sungel', title: 'Hyaluronic Acid Watery Sun Gel SPF50', brand: 'ISNTREE', price: 1890, skin_type: 'all', desc: 'Sun protection for all skin concerns.' }
+];
+
+function getCachedProducts() {
+  const cached = sessionStorage.getItem('shuchi_products');
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached);
+      if (parsed && parsed.length > 0) return parsed;
+    } catch(e) {
+      console.error("Error reading cached products:", e);
+    }
+  }
+  return FALLBACK_DATABASE;
+}
+
+function getProductForStep(stepName, skinType, concern, allProducts) {
+  const targetType = (skinType || '').toLowerCase().trim();
+  const targetConcern = (concern || '').toLowerCase().trim();
+
+  let keywordCheck = () => false;
+  if (stepName === 'cleanse') {
+    keywordCheck = (title, id) => {
+      const t = `${title} ${id}`.toLowerCase();
+      return t.includes('cleanser') || t.includes('foam') || t.includes('gel') || t.includes('wash');
+    };
+  } else if (stepName === 'tone') {
+    keywordCheck = (title, id) => {
+      const t = `${title} ${id}`.toLowerCase();
+      return t.includes('toner') || t.includes('tone') || t.includes('peeling');
+    };
+  } else if (stepName === 'treat') {
+    keywordCheck = (title, id) => {
+      const t = `${title} ${id}`.toLowerCase();
+      return t.includes('serum') || t.includes('essence') || t.includes('ampoule') || t.includes('treatment') || t.includes('mucin');
+    };
+  } else if (stepName === 'moisturize') {
+    keywordCheck = (title, id) => {
+      const t = `${title} ${id}`.toLowerCase();
+      return t.includes('cream') || t.includes('emulsion') || t.includes('lotion') || t.includes('moisturizer');
+    };
+  } else if (stepName === 'protect') {
+    keywordCheck = (title, id) => {
+      const t = `${title} ${id}`.toLowerCase();
+      return t.includes('sun gel') || t.includes('sunscreen') || t.includes('sun cream') || t.includes('spf');
+    };
+  }
+
+  const categoryProducts = allProducts.filter(p => {
+    const title = p.title || p.Title || '';
+    const id = p.id || p.ID || '';
+    return keywordCheck(title, id);
+  });
+
+  const getFallback = () => {
+    return FALLBACK_DATABASE.find(p => p.id.includes(stepName)) || 
+           FALLBACK_DATABASE.find(p => {
+             const t = p.id.toLowerCase();
+             if (stepName === 'cleanse') return t.includes('lowph') || t.includes('cleanse');
+             if (stepName === 'tone') return t.includes('aha') || t.includes('tone');
+             if (stepName === 'treat') return t.includes('snail') || t.includes('treat');
+             if (stepName === 'moisturize') return t.includes('emulsion') || t.includes('cream');
+             if (stepName === 'protect') return t.includes('sungel') || t.includes('protect');
+             return false;
+           }) || FALLBACK_DATABASE[0];
+  };
+
+  if (categoryProducts.length === 0) {
+    return getFallback();
+  }
+
+  let matched = categoryProducts.filter(p => {
+    const text = `${p.title || ''} ${p.desc || p.Desc || ''}`.toLowerCase();
+    const keywordsMap = {
+      acne: ['acne', 'breakout', 'trouble', 'clear', 'bha', 'salicylic'],
+      pigmentation: ['dark spot', 'pigmentation', 'glow', 'whitening', 'brightening', 'niacinamide', 'vitamin c'],
+      sensitivity: ['sensitive', 'calming', 'soothing', 'centella', 'cica', 'panthenol', 'barrier', 'soon jung', 'soonjung'],
+      aging: ['aging', 'wrinkle', 'firming', 'snail', 'collagen', 'peptide', 'retinol']
+    };
+    const keywords = keywordsMap[targetConcern] || [];
+    return keywords.some(k => text.includes(k));
+  });
+
+  if (matched.length > 0) {
+    const typeMatched = matched.find(p => {
+      const pSkinType = (p.skin_type || p.skintype || p.Skin_type || '').toLowerCase();
+      return (targetType && pSkinType.includes(targetType)) || pSkinType.includes('all');
+    });
+    if (typeMatched) return typeMatched;
+    return matched[0];
+  }
+
+  const typeMatched = categoryProducts.find(p => {
+    const pSkinType = (p.skin_type || p.skintype || p.Skin_type || '').toLowerCase();
+    return (targetType && pSkinType.includes(targetType)) || pSkinType.includes('all');
+  });
+  if (typeMatched) return typeMatched;
+
+  return categoryProducts[0];
+}
+
 function pick(btn, val) {
   btn.parentElement.querySelectorAll('.qopt').forEach(b => b.classList.remove('sel'));
   btn.classList.add('sel');
+  
+  if (cq === 1) quizAnswers.skinType = val;
+  else if (cq === 2) quizAnswers.concern = val;
+  else if (cq === 3) quizAnswers.steps = parseInt(val) || 5;
+
   if (cq < 3) {
     setTimeout(() => {
       document.getElementById('q' + cq).classList.remove('active');
@@ -1269,9 +1235,122 @@ function pick(btn, val) {
     }, 320);
   }
 }
+
 function showResult() {
   document.getElementById('quizWidget').style.display = 'none';
-  document.getElementById('routineResult').classList.add('active');
+  const resultArea = document.getElementById('routineResult');
+  
+  // 1. Generate recommendation list
+  const allProducts = getCachedProducts();
+  const recommendedRoutine = [];
+  
+  // Helper to compile step
+  const addStep = (stepNum, stepLabel, categoryKey) => {
+    const prod = getProductForStep(categoryKey, quizAnswers.skinType, quizAnswers.concern, allProducts);
+    recommendedRoutine.push({
+      step: stepNum,
+      label: stepLabel,
+      product: prod
+    });
+  };
+
+  if (quizAnswers.steps === 3) {
+    addStep(1, 'Cleanse', 'cleanse');
+    addStep(2, 'Moisturize', 'moisturize');
+    addStep(3, 'Protect', 'protect');
+  } else {
+    addStep(1, 'Cleanse', 'cleanse');
+    addStep(2, 'Tone', 'tone');
+    addStep(3, 'Treat', 'treat');
+    addStep(4, 'Moisturize', 'moisturize');
+    addStep(5, 'Protect', 'protect');
+  }
+
+  // 2. Render recommendation markup
+  const stepsContainer = resultArea.querySelector('.routine-steps');
+  stepsContainer.innerHTML = '';
+
+  const concernTextMap = {
+    acne: 'acne-prone skin',
+    pigmentation: 'hyperpigmentation & dark spots',
+    sensitivity: 'sensitive skin',
+    aging: 'aging & textured skin'
+  };
+
+  const typeTextMap = {
+    oily: 'oily',
+    dry: 'dry / dehydrated',
+    combo: 'combination',
+    normal: 'normal'
+  };
+
+  const routineTitle = resultArea.querySelector('.result-title');
+  routineTitle.innerHTML = `For ${typeTextMap[quizAnswers.skinType] || 'balanced'} & ${concernTextMap[quizAnswers.concern] || 'sensitive skin'}<br>in humid conditions`;
+
+  const recommendedIds = recommendedRoutine.map(r => r.product.id || r.product.ID || '');
+
+  recommendedRoutine.forEach(r => {
+    const p = r.product;
+    const pBrand = p.brand || p.Brand || '';
+    const pTitle = p.title || p.Title || '';
+    const pPrice = p.price || p.Price || 0;
+    const pImage = p.img || p.image || p.imageurl || '';
+    const pId = p.id || p.ID || '';
+    const imgHTML = pImage ? 
+      `<img src="${pImage}" alt="${pTitle}" style="max-width: 100%; max-height: 100%; object-fit: contain;">` :
+      `<svg width="20" height="30" viewBox="0 0 50 76" fill="none" style="opacity: 0.5;">
+        <rect x="11" y="8" width="28" height="62" rx="4" fill="#A8C4A2"/>
+        <rect x="16" y="3" width="18" height="8" rx="2" fill="#6B8F6B"/>
+      </svg>`;
+
+    const stepHTML = `
+      <div class="rsi" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 1rem; text-align: left; min-width: 0; flex: 1;">
+          <div class="rnum">${r.step}</div>
+          <div class="rsi-img" style="width: 44px; height: 44px; background: rgba(255,255,255,0.08); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; border: 1px solid rgba(255, 255, 255, 0.15);">
+            ${imgHTML}
+          </div>
+          <div style="min-width: 0; flex: 1;">
+            <div class="rtype" style="margin-bottom: 0.1rem;">${r.label}</div>
+            <a href="./${pId}.html" class="rname" style="text-decoration: none; font-weight: 500; transition: color 0.3s; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--cream);" onmouseover="this.style.color='var(--sage-light)'" onmouseout="this.style.color='var(--cream)'">${pBrand} · ${pTitle}</a>
+          </div>
+        </div>
+        <div style="text-align: right; font-weight: 600; font-size: 0.88rem; color: var(--sage-light); flex-shrink: 0; margin-left: 0.5rem;">
+          ৳ ${pPrice}
+        </div>
+      </div>
+    `;
+    stepsContainer.insertAdjacentHTML('beforeend', stepHTML);
+  });
+
+  // 3. Update the checkout button CTA
+  const actionButton = resultArea.querySelector('.btn-primary');
+  actionButton.setAttribute('onclick', `addEntireRoutineToCart('${recommendedIds.join(',')}')`);
+  actionButton.innerHTML = `Shop This ${quizAnswers.steps}-Step Routine &rarr;`;
+
+  resultArea.classList.add('active');
+}
+
+async function addEntireRoutineToCart(idsString) {
+  const ids = idsString.split(',');
+  const allProducts = getCachedProducts();
+  
+  for (const id of ids) {
+    const p = allProducts.find(item => (item.id || item.ID) === id) || FALLBACK_DATABASE.find(item => (item.id || item.ID) === id);
+    if (p) {
+      const pTitle = p.title || p.Title || '';
+      const pBrand = p.brand || p.Brand || '';
+      const pPrice = p.price || p.Price || 0;
+      const pImage = p.img || p.image || p.imageurl || '';
+      const pId = p.id || p.ID || id;
+      
+      addToCart(pId, pTitle, pBrand, pPrice, pImage);
+    }
+  }
+  
+  if (typeof toggleCartDrawer === 'function') {
+    toggleCartDrawer();
+  }
 }
 
 // Filter by Brand
@@ -1406,8 +1485,8 @@ async function loadHomepageProducts() {
           const bPriority = (bBrand.includes('3w clinic') || bBrand.includes('3wclinic') || bBrand.includes('cosrx')) ? 1 : 0;
           return bPriority - aPriority;
         });
-        const topSix = uniqueProducts.slice(0, 6);
-        renderHomepageCards(topSix, parsed);
+        const topFour = uniqueProducts.slice(0, 4);
+        renderHomepageCards(topFour, parsed);
         hasCache = true;
       }
     } catch(e) {
@@ -1456,9 +1535,9 @@ async function loadHomepageProducts() {
       return bPriority - aPriority;
     });
 
-    // Render fresh cards (top 6 only)
-    const topSix = uniqueProducts.slice(0, 6);
-    renderHomepageCards(topSix, liveProducts);
+    // Render fresh cards (top 4 only)
+    const topFour = uniqueProducts.slice(0, 4);
+    renderHomepageCards(topFour, liveProducts);
 
   } catch (error) {
     console.error("Error loading homepage products:", error);
