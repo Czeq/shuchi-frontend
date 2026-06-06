@@ -949,14 +949,17 @@ async function fetchPurchaseHistory(phone) {
 
       return `
         <div class="order-history-card">
-          <div class="order-hist-header">
-            <span class="order-hist-id">${order.order_id}</span>
+          <div class="order-hist-header" style="align-items: flex-start;">
+            <span class="order-hist-items-prominent">${order.items}</span>
             <span class="order-hist-status ${statusClass}">${formattedStatus}</span>
           </div>
-          <div class="order-hist-items">${order.items}</div>
+          <div class="order-hist-meta-row">
+            <span class="order-hist-id-secondary">Order ${order.order_id}</span>
+            <span class="order-hist-date-secondary">${dateStr}</span>
+          </div>
           ${trackingHTML}
-          <div class="order-hist-footer">
-            <span>${dateStr}</span>
+          <div class="order-hist-footer-price">
+            <span>Total Price</span>
             <span class="order-hist-price">৳ ${parseInt(order.total_price || 0).toLocaleString()}</span>
           </div>
         </div>
