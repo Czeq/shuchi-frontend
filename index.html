@@ -95,7 +95,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     padding-top: 80px;
-    overflow: hidden;
   }
 
   .hero-left {
@@ -103,6 +102,15 @@
     flex-direction: column;
     justify-content: flex-start;
     padding: 3.5rem 4vw 3rem 8vw;
+  }
+
+  .hero-left-sticky {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 110px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
   }
 
   .hero-eyebrow {
@@ -675,6 +683,7 @@
     #hero { grid-template-columns: 1fr; min-height: auto; padding-top: 64px; }
     .hero-right { display: flex; padding: 4vw 6vw 5rem; }
     .hero-left { padding: 3rem 6vw 4rem; }
+    .hero-left-sticky { position: static; }
     .hero-title { font-size: clamp(2.8rem, 8vw, 4rem); }
 
     /* Sections */
@@ -836,19 +845,21 @@
 <!-- HERO -->
 <section id="hero">
   <div class="hero-left">
-    <p class="hero-eyebrow">Pure Korean Skincare · Bangladesh</p>
-    <p class="hero-bangla" style="margin-bottom: 0.8rem; font-size: clamp(1.2rem, 2vw, 1.6rem); color: var(--sage); font-weight: 500; font-family: Georgia, serif; font-style: italic;">শুচি — পবিত্র, স্বচ্ছ</p>
-    <h1 class="hero-title" style="margin-top: 0; margin-bottom: 1rem;">Skin that speaks<br><em>the truth.</em></h1>
-    <p class="hero-desc">No myths. No shortcuts. Only verified Korean ingredients and the science behind every drop — curated for Bangladesh's skin, climate, and conscience.</p>
-    
-    <div class="hero-actions">
-      <a href="storefront.html" class="btn-primary">Shop All Products</a>
-      <a href="#routine" class="btn-outline">Build My Routine</a>
-    </div>
-    <div class="hero-badges">
-      <div><div class="badge-number">100%</div><div class="badge-label">Verified Imports</div></div>
-      <div><div class="badge-number">72h</div><div class="badge-label">Fast Delivery</div></div>
-      <div><div class="badge-number">0</div><div class="badge-label">Hidden Ingredients</div></div>
+    <div class="hero-left-sticky">
+      <p class="hero-eyebrow">Pure Korean Skincare · Bangladesh</p>
+      <p class="hero-bangla" style="margin-bottom: 0.8rem; font-size: clamp(1.2rem, 2vw, 1.6rem); color: var(--sage); font-weight: 500; font-family: Georgia, serif; font-style: italic;">শুচি — পবিত্র, স্বচ্ছ</p>
+      <h1 class="hero-title" style="margin-top: 0; margin-bottom: 1rem;">Skin that speaks<br><em>the truth.</em></h1>
+      <p class="hero-desc">No myths. No shortcuts. Only verified Korean ingredients and the science behind every drop — curated for Bangladesh's skin, climate, and conscience.</p>
+      
+      <div class="hero-actions">
+        <a href="storefront.html" class="btn-primary">Shop All Products</a>
+        <a href="#routine" class="btn-outline">Build My Routine</a>
+      </div>
+      <div class="hero-badges">
+        <div><div class="badge-number">100%</div><div class="badge-label">Verified Imports</div></div>
+        <div><div class="badge-number">72h</div><div class="badge-label">Fast Delivery</div></div>
+        <div><div class="badge-number">0</div><div class="badge-label">Hidden Ingredients</div></div>
+      </div>
     </div>
   </div>
 
