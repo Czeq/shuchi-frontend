@@ -95,7 +95,8 @@ async function fetchProductsWithRetry(url, retries = 3, delay = 1000) {
           desc: item.desc || '',
           skintype: item.skin_type || '',
           volume: item.volume ? `${item.volume} ${item.volume_unit || ''}`.trim() : '',
-          image: item.img || ''
+          image: item.img || '',
+          stock: item.stock === null || item.stock === undefined ? true : item.stock
         }));
       }
       throw new Error("Empty or invalid product list returned from Supabase.");
@@ -302,18 +303,100 @@ function injectCartUI() {
         </form>
 
         <div class="checkout-status-screen" id="checkoutStatusScreen">
-          <svg class="logo-loader" id="statusSpinner" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 64px; height: 64px; margin: 0 auto 1.5rem;">
-            <path d="M428.393 458.741C397.367 442.352 389.639 455.699 350.257 463.372C297.897 480.729 273.085 493.192 219.832 520.489L270.021 623.63C288.39 656.569 303.786 659.091 332.525 683.826C379.073 693.884 408.435 692.732 468.538 674.586L591.894 632.338L521.57 537.477L428.393 458.741Z" fill="currentColor"/>
-            <path d="M573.217 875.61C558.753 907.579 544.465 901.772 508.648 919.854C456.64 938.242 429.398 943.607 370.592 954.689L347.01 842.436C341.328 805.152 351.945 793.721 359.486 756.56C390.094 720.077 413.996 702.986 472.604 680.474L595.96 638.226L598.559 756.283L573.217 875.61Z" fill="currentColor"/>
-            <path d="M838.875 684.401C873.212 680.144 872.05 664.541 899.764 635.376C932.621 590.63 945.829 565.89 973.871 512.335L875.613 455.277C842.332 438.408 828.42 445.201 791.288 441.173C747.87 459.682 724.662 477.614 685.954 527.493L609.301 634.042L719.3 672.554L838.875 684.401Z" fill="currentColor"/>
-            <path d="M633.551 876.431C648.671 908.629 662.802 902.957 698.928 921.458C751.214 940.435 778.511 946.098 837.423 957.823L858.536 845.541C863.402 808.225 852.564 796.654 844.24 759.324C812.915 722.431 788.698 705.048 729.738 681.868L605.75 638.226L605.698 756.545L633.551 876.431Z" fill="currentColor"/>
-            <path d="M478.04 427.924C470.246 393.217 484.887 389.034 502.085 352.27C531.758 305.223 549.852 284.014 589.206 238.634L674.723 314.396C701.444 340.894 699.975 356.68 716.285 391.275C714.156 439.626 705.68 468.205 673.311 522.665L602.112 633.156L529.533 539.712L478.04 427.924Z" fill="currentColor"/>
-          </svg>
-          <div class="success-icon" id="successIcon" style="display:none;">✓</div>
+          <div class="status-flower-container">
+            <svg class="logo-loader" id="statusSpinner" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 64px; height: 64px; margin: 0 auto;">
+              <path d="M428.393 458.741C397.367 442.352 389.639 455.699 350.257 463.372C297.897 480.729 273.085 493.192 219.832 520.489L270.021 623.63C288.39 656.569 303.786 659.091 332.525 683.826C379.073 693.884 408.435 692.732 468.538 674.586L591.894 632.338L521.57 537.477L428.393 458.741Z" fill="currentColor"/>
+              <path d="M573.217 875.61C558.753 907.579 544.465 901.772 508.648 919.854C456.64 938.242 429.398 943.607 370.592 954.689L347.01 842.436C341.328 805.152 351.945 793.721 359.486 756.56C390.094 720.077 413.996 702.986 472.604 680.474L595.96 638.226L598.559 756.283L573.217 875.61Z" fill="currentColor"/>
+              <path d="M838.875 684.401C873.212 680.144 872.05 664.541 899.764 635.376C932.621 590.63 945.829 565.89 973.871 512.335L875.613 455.277C842.332 438.408 828.42 445.201 791.288 441.173C747.87 459.682 724.662 477.614 685.954 527.493L609.301 634.042L719.3 672.554L838.875 684.401Z" fill="currentColor"/>
+              <path d="M633.551 876.431C648.671 908.629 662.802 902.957 698.928 921.458C751.214 940.435 778.511 946.098 837.423 957.823L858.536 845.541C863.402 808.225 852.564 796.654 844.24 759.324C812.915 722.431 788.698 705.048 729.738 681.868L605.75 638.226L605.698 756.545L633.551 876.431Z" fill="currentColor"/>
+              <path d="M478.04 427.924C470.246 393.217 484.887 389.034 502.085 352.27C531.758 305.223 549.852 284.014 589.206 238.634L674.723 314.396C701.444 340.894 699.975 356.68 716.285 391.275C714.156 439.626 705.68 468.205 673.311 522.665L602.112 633.156L529.533 539.712L478.04 427.924Z" fill="currentColor"/>
+            </svg>
+            <div class="success-icon" id="successIcon" style="display:none; margin-bottom: 0;">✓</div>
+          </div>
           <h4 class="status-title" id="statusTitle">Processing Order...</h4>
+
+          <div class="processing-bar-layers" id="processingBarLayers">
+            <div class="layer-step" id="layerStep1">
+              <div class="layer-meta">
+                <span class="layer-name-container">
+                  <svg class="step-flower-icon" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M428.393 458.741C397.367 442.352 389.639 455.699 350.257 463.372C297.897 480.729 273.085 493.192 219.832 520.489L270.021 623.63C288.39 656.569 303.786 659.091 332.525 683.826C379.073 693.884 408.435 692.732 468.538 674.586L591.894 632.338L521.57 537.477L428.393 458.741Z" fill="currentColor"/>
+                    <path d="M573.217 875.61C558.753 907.579 544.465 901.772 508.648 919.854C456.64 938.242 429.398 943.607 370.592 954.689L347.01 842.436C341.328 805.152 351.945 793.721 359.486 756.56C390.094 720.077 413.996 702.986 472.604 680.474L595.96 638.226L598.559 756.283L573.217 875.61Z" fill="currentColor"/>
+                    <path d="M838.875 684.401C873.212 680.144 872.05 664.541 899.764 635.376C932.621 590.63 945.829 565.89 973.871 512.335L875.613 455.277C842.332 438.408 828.42 445.201 791.288 441.173C747.87 459.682 724.662 477.614 685.954 527.493L609.301 634.042L719.3 672.554L838.875 684.401Z" fill="currentColor"/>
+                    <path d="M633.551 876.431C648.671 908.629 662.802 902.957 698.928 921.458C751.214 940.435 778.511 946.098 837.423 957.823L858.536 845.541C863.402 808.225 852.564 796.654 844.24 759.324C812.915 722.431 788.698 705.048 729.738 681.868L605.75 638.226L605.698 756.545L633.551 876.431Z" fill="currentColor"/>
+                    <path d="M478.04 427.924C470.246 393.217 484.887 389.034 502.085 352.27C531.758 305.223 549.852 284.014 589.206 238.634L674.723 314.396C701.444 340.894 699.975 356.68 716.285 391.275C714.156 439.626 705.68 468.205 673.311 522.665L602.112 633.156L529.533 539.712L478.04 427.924Z" fill="currentColor"/>
+                  </svg>
+                  <span class="layer-name">Bag Validation</span>
+                </span>
+                <span class="layer-pct" id="layerPct1">0%</span>
+              </div>
+              <div class="layer-bar-bg">
+                <div class="layer-bar-fill" id="layerFill1"></div>
+              </div>
+            </div>
+
+            <div class="layer-step" id="layerStep2">
+              <div class="layer-meta">
+                <span class="layer-name-container">
+                  <svg class="step-flower-icon" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M428.393 458.741C397.367 442.352 389.639 455.699 350.257 463.372C297.897 480.729 273.085 493.192 219.832 520.489L270.021 623.63C288.39 656.569 303.786 659.091 332.525 683.826C379.073 693.884 408.435 692.732 468.538 674.586L591.894 632.338L521.57 537.477L428.393 458.741Z" fill="currentColor"/>
+                    <path d="M573.217 875.61C558.753 907.579 544.465 901.772 508.648 919.854C456.64 938.242 429.398 943.607 370.592 954.689L347.01 842.436C341.328 805.152 351.945 793.721 359.486 756.56C390.094 720.077 413.996 702.986 472.604 680.474L595.96 638.226L598.559 756.283L573.217 875.61Z" fill="currentColor"/>
+                    <path d="M838.875 684.401C873.212 680.144 872.05 664.541 899.764 635.376C932.621 590.63 945.829 565.89 973.871 512.335L875.613 455.277C842.332 438.408 828.42 445.201 791.288 441.173C747.87 459.682 724.662 477.614 685.954 527.493L609.301 634.042L719.3 672.554L838.875 684.401Z" fill="currentColor"/>
+                    <path d="M633.551 876.431C648.671 908.629 662.802 902.957 698.928 921.458C751.214 940.435 778.511 946.098 837.423 957.823L858.536 845.541C863.402 808.225 852.564 796.654 844.24 759.324C812.915 722.431 788.698 705.048 729.738 681.868L605.75 638.226L605.698 756.545L633.551 876.431Z" fill="currentColor"/>
+                    <path d="M478.04 427.924C470.246 393.217 484.887 389.034 502.085 352.27C531.758 305.223 549.852 284.014 589.206 238.634L674.723 314.396C701.444 340.894 699.975 356.68 716.285 391.275C714.156 439.626 705.68 468.205 673.311 522.665L602.112 633.156L529.533 539.712L478.04 427.924Z" fill="currentColor"/>
+                  </svg>
+                  <span class="layer-name">Security Verification</span>
+                </span>
+                <span class="layer-pct" id="layerPct2">0%</span>
+              </div>
+              <div class="layer-bar-bg">
+                <div class="layer-bar-fill" id="layerFill2"></div>
+              </div>
+            </div>
+
+            <div class="layer-step" id="layerStep3">
+              <div class="layer-meta">
+                <span class="layer-name-container">
+                  <svg class="step-flower-icon" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M428.393 458.741C397.367 442.352 389.639 455.699 350.257 463.372C297.897 480.729 273.085 493.192 219.832 520.489L270.021 623.63C288.39 656.569 303.786 659.091 332.525 683.826C379.073 693.884 408.435 692.732 468.538 674.586L591.894 632.338L521.57 537.477L428.393 458.741Z" fill="currentColor"/>
+                    <path d="M573.217 875.61C558.753 907.579 544.465 901.772 508.648 919.854C456.64 938.242 429.398 943.607 370.592 954.689L347.01 842.436C341.328 805.152 351.945 793.721 359.486 756.56C390.094 720.077 413.996 702.986 472.604 680.474L595.96 638.226L598.559 756.283L573.217 875.61Z" fill="currentColor"/>
+                    <path d="M838.875 684.401C873.212 680.144 872.05 664.541 899.764 635.376C932.621 590.63 945.829 565.89 973.871 512.335L875.613 455.277C842.332 438.408 828.42 445.201 791.288 441.173C747.87 459.682 724.662 477.614 685.954 527.493L609.301 634.042L719.3 672.554L838.875 684.401Z" fill="currentColor"/>
+                    <path d="M633.551 876.431C648.671 908.629 662.802 902.957 698.928 921.458C751.214 940.435 778.511 946.098 837.423 957.823L858.536 845.541C863.402 808.225 852.564 796.654 844.24 759.324C812.915 722.431 788.698 705.048 729.738 681.868L605.75 638.226L605.698 756.545L633.551 876.431Z" fill="currentColor"/>
+                    <path d="M478.04 427.924C470.246 393.217 484.887 389.034 502.085 352.27C531.758 305.223 549.852 284.014 589.206 238.634L674.723 314.396C701.444 340.894 699.975 356.68 716.285 391.275C714.156 439.626 705.68 468.205 673.311 522.665L602.112 633.156L529.533 539.712L478.04 427.924Z" fill="currentColor"/>
+                  </svg>
+                  <span class="layer-name">Database Registry</span>
+                </span>
+                <span class="layer-pct" id="layerPct3">0%</span>
+              </div>
+              <div class="layer-bar-bg">
+                <div class="layer-bar-fill" id="layerFill3"></div>
+              </div>
+            </div>
+
+            <div class="layer-step" id="layerStep4">
+              <div class="layer-meta">
+                <span class="layer-name-container">
+                  <svg class="step-flower-icon" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M428.393 458.741C397.367 442.352 389.639 455.699 350.257 463.372C297.897 480.729 273.085 493.192 219.832 520.489L270.021 623.63C288.39 656.569 303.786 659.091 332.525 683.826C379.073 693.884 408.435 692.732 468.538 674.586L591.894 632.338L521.57 537.477L428.393 458.741Z" fill="currentColor"/>
+                    <path d="M573.217 875.61C558.753 907.579 544.465 901.772 508.648 919.854C456.64 938.242 429.398 943.607 370.592 954.689L347.01 842.436C341.328 805.152 351.945 793.721 359.486 756.56C390.094 720.077 413.996 702.986 472.604 680.474L595.96 638.226L598.559 756.283L573.217 875.61Z" fill="currentColor"/>
+                    <path d="M838.875 684.401C873.212 680.144 872.05 664.541 899.764 635.376C932.621 590.63 945.829 565.89 973.871 512.335L875.613 455.277C842.332 438.408 828.42 445.201 791.288 441.173C747.87 459.682 724.662 477.614 685.954 527.493L609.301 634.042L719.3 672.554L838.875 684.401Z" fill="currentColor"/>
+                    <path d="M633.551 876.431C648.671 908.629 662.802 902.957 698.928 921.458C751.214 940.435 778.511 946.098 837.423 957.823L858.536 845.541C863.402 808.225 852.564 796.654 844.24 759.324C812.915 722.431 788.698 705.048 729.738 681.868L605.75 638.226L605.698 756.545L633.551 876.431Z" fill="currentColor"/>
+                    <path d="M478.04 427.924C470.246 393.217 484.887 389.034 502.085 352.27C531.758 305.223 549.852 284.014 589.206 238.634L674.723 314.396C701.444 340.894 699.975 356.68 716.285 391.275C714.156 439.626 705.68 468.205 673.311 522.665L602.112 633.156L529.533 539.712L478.04 427.924Z" fill="currentColor"/>
+                  </svg>
+                  <span class="layer-name">Finalizing Order</span>
+                </span>
+                <span class="layer-pct" id="layerPct4">0%</span>
+              </div>
+              <div class="layer-bar-bg">
+                <div class="layer-bar-fill" id="layerFill4"></div>
+              </div>
+            </div>
+          </div>
+
           <p class="status-desc" id="statusDesc">Writing order records securely to the Shuchi User database.</p>
           <button class="cart-checkout-btn" id="statusActionBtn" style="display:none; margin-top:1.5rem;" onclick="closeCheckoutAfterSuccess()">Continue Shopping</button>
         </div>
+
       </div>
     </div>
   `;
@@ -490,6 +573,43 @@ function toggleAuthModal(e) {
     closeCheckout();
   }
 }
+
+// Trigger order tracking via the auth overlay
+function triggerOrderTracking() {
+  injectAuthUI(); // Ensure auth UI elements are in the DOM
+  
+  const overlay = document.getElementById('authOverlay');
+  if (!overlay) return;
+
+  // Open the modal
+  overlay.classList.add('active');
+
+  // Close other overlays
+  const mainNav = document.getElementById('mainNav');
+  if (mainNav) mainNav.classList.remove('mopen');
+  const cartOverlay = document.getElementById('cartOverlay');
+  if (cartOverlay) cartOverlay.classList.remove('active');
+  closeCheckout();
+
+  if (currentUser) {
+    // Already logged in: show authenticated dashboard & purchase history
+    updateAuthUI();
+    
+    // Smooth scroll to the purchase history
+    setTimeout(() => {
+      const historyList = document.getElementById('purchaseHistoryList');
+      if (historyList) {
+        historyList.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 100);
+  } else {
+    // Guest: prompt to login
+    switchAuthTab('signin');
+    showToast("Please sign in to track your order history.");
+  }
+}
+window.triggerOrderTracking = triggerOrderTracking;
+
 
 // Switch registration/login tabs in Modal
 function switchAuthTab(tab) {
@@ -991,6 +1111,47 @@ function closeCheckout() {
   }
 }
 
+// Helper to animate progress layer bars
+function animateLayer(layerIndex, durationMs, startPct = 0, endPct = 100) {
+  return new Promise((resolve) => {
+    const stepEl = document.getElementById(`layerStep${layerIndex}`);
+    const fillEl = document.getElementById(`layerFill${layerIndex}`);
+    const pctEl = document.getElementById(`layerPct${layerIndex}`);
+    
+    if (!stepEl || !fillEl || !pctEl) {
+      resolve();
+      return;
+    }
+    
+    stepEl.classList.remove('completed', 'failed');
+    stepEl.classList.add('active');
+    stepEl.style.opacity = '1';
+    
+    const startTime = performance.now();
+    
+    function update() {
+      const now = performance.now();
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / durationMs, 1);
+      
+      const currentPct = Math.round(startPct + (endPct - startPct) * progress);
+      fillEl.style.width = `${currentPct}%`;
+      pctEl.textContent = `${currentPct}%`;
+      
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        if (endPct === 100) {
+          stepEl.classList.remove('active');
+          stepEl.classList.add('completed');
+        }
+        resolve();
+      }
+    }
+    requestAnimationFrame(update);
+  });
+}
+
 async function submitCheckout(e) {
   e.preventDefault();
 
@@ -1021,27 +1182,63 @@ async function submitCheckout(e) {
   spinner.style.display = 'block';
   successIcon.style.display = 'none';
   statusTitle.textContent = "Processing Order...";
-  statusDesc.textContent = "Writing order records securely to the Shuchi User database.";
   statusBtn.style.display = 'none';
+
+  // Reset all steps
+  for (let i = 1; i <= 4; i++) {
+    const stepEl = document.getElementById(`layerStep${i}`);
+    const fillEl = document.getElementById(`layerFill${i}`);
+    const pctEl = document.getElementById(`layerPct${i}`);
+    if (stepEl) {
+      stepEl.classList.remove('active', 'completed', 'failed');
+    }
+    if (fillEl) {
+      fillEl.style.width = '0%';
+      fillEl.style.backgroundColor = ''; 
+    }
+    if (pctEl) {
+      pctEl.textContent = '0%';
+    }
+  }
 
   const orderId = "SHC-" + Math.floor(100000 + Math.random() * 900000);
 
   try {
-    const { error } = await supabaseClient
-      .from('orders')
-      .insert([{
-        order_id: orderId,
-        customer_name: name,
-        phone: phone,
-        address: address,
-        area: areaLabel,
-        payment_method: paymentMethod,
-        items: itemsSummary,
-        total_price: totalPrice,
-        created_at: new Date().toISOString()
-      }]);
+    // 1. Bag Validation (600ms)
+    statusDesc.textContent = "Verifying items, stock levels, and delivery options...";
+    await animateLayer(1, 600, 0, 100);
 
-    if (error) throw error;
+    // 2. Security Check (600ms)
+    statusDesc.textContent = "Encrypting transaction payload and verifying session keys...";
+    await animateLayer(2, 600, 0, 100);
+
+    // 3. Database Registry
+    statusDesc.textContent = "Writing order records securely to the Shuchi database...";
+    const step3Animation = animateLayer(3, 800, 0, 80);
+    
+    const insertPromise = (async () => {
+      const { error } = await supabaseClient
+        .from('orders')
+        .insert([{
+          order_id: orderId,
+          customer_name: name,
+          phone: phone,
+          address: address,
+          area: areaLabel,
+          payment_method: paymentMethod,
+          items: itemsSummary,
+          total_price: totalPrice,
+          created_at: new Date().toISOString()
+        }]);
+      if (error) throw error;
+    })();
+
+    await Promise.all([step3Animation, insertPromise]);
+    await animateLayer(3, 300, 80, 100);
+
+    // 4. Finalizing Order & Dispatch (600ms)
+    statusDesc.textContent = "Clearing bag cache and generating Shuchi Dispatch manifest...";
+    await animateLayer(4, 600, 0, 100);
 
     cartItems = [];
     saveCartState();
@@ -1056,9 +1253,27 @@ async function submitCheckout(e) {
     statusBtn.style.display = 'block';
   } catch (err) {
     console.error("Order submit failed:", err);
+    
+    let failedIndex = 3;
+    for (let i = 1; i <= 4; i++) {
+      const step = document.getElementById(`layerStep${i}`);
+      if (step && !step.classList.contains('completed')) {
+        failedIndex = i;
+        break;
+      }
+    }
+    
+    const failedStep = document.getElementById(`layerStep${failedIndex}`);
+    if (failedStep) {
+      failedStep.classList.remove('active');
+      failedStep.classList.add('failed');
+      const fillEl = document.getElementById(`layerFill${failedIndex}`);
+      if (fillEl) fillEl.style.width = '100%';
+    }
+
     spinner.style.display = 'none';
     statusTitle.textContent = "Order Submission Failed";
-    statusDesc.textContent = `There was a Shuchi User database connection issue: ${err.message || err.toString()}. Please verify your network and click retry or contact support.`;
+    statusDesc.textContent = `There was a Shuchi database connection issue: ${err.message || err.toString()}. Please verify your network and click retry or contact support.`;
     
     statusBtn.textContent = "Close & Retry";
     statusBtn.onclick = function() {
