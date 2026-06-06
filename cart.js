@@ -81,7 +81,7 @@ async function fetchProductsWithRetry(url, retries = 3, delay = 1000) {
     try {
       const { data, error } = await supabaseClient
         .from('products')
-        .select('*');
+        .select('id, brand, title, price, desc, skin_type, volume, volume_unit, img, stock');
 
       if (error) throw error;
 
