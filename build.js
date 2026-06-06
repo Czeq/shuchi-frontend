@@ -100,7 +100,9 @@ function parseCSVToProducts(csvText) {
     skin_type: headers.indexOf("skin_type"),
     volume: headers.indexOf("volume"),
     volume_unit: headers.indexOf("volume_unit"),
-    img: headers.indexOf("img")
+    img: headers.indexOf("img"),
+    cost_price: headers.indexOf("cost_price"),
+    stock: headers.indexOf("stock")
   };
 
   if (colIndex.id === -1) {
@@ -113,7 +115,7 @@ function parseCSVToProducts(csvText) {
     const id = String(row[colIndex.id]).trim();
     if (!id) continue; // Skip empty/blank rows
 
-    products.push({
+    const product = {
       id: id,
       brand: colIndex.brand !== -1 ? String(row[colIndex.brand]).trim() : "",
       title: colIndex.title !== -1 ? String(row[colIndex.title]).trim() : "",
@@ -123,7 +125,17 @@ function parseCSVToProducts(csvText) {
       volume: colIndex.volume !== -1 ? parseFloat(row[colIndex.volume]) || null : null,
       volume_unit: colIndex.volume_unit !== -1 ? String(row[colIndex.volume_unit]).trim() : "",
       img: colIndex.img !== -1 ? String(row[colIndex.img]).trim() : ""
-    });
+    };
+
+    if (colIndex.cost_price !== -1 && row[colIndex.cost_price] !== undefined && String(row[colIndex.cost_price]).trim() !== "") {
+      product.cost_price = parseFloat(row[colIndex.cost_price]) || 0;
+    }
+    if (colIndex.stock !== -1 && row[colIndex.stock] !== undefined && String(row[colIndex.stock]).trim() !== "") {
+      const stockVal = String(row[colIndex.stock]).trim().toLowerCase();
+      product.stock = stockVal !== 'false' && stockVal !== '0';
+    }
+
+    products.push(product);
   }
   return products;
 }
