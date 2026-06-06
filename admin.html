@@ -866,6 +866,10 @@
               <!-- Will be dynamically populated with brands or categories -->
             </select>
           </div>
+          <div style="margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; user-select: none;">
+            <input type="checkbox" id="discIsReverse" style="width: 14px; height: 14px; cursor: pointer;">
+            <label for="discIsReverse" style="cursor: pointer; font-size: 0.74rem; color: var(--text-soft); font-weight: 500; line-height: 1.2;">Reverse Discount (Treat base price as final price and show inflated original price)</label>
+          </div>
           <button type="submit" class="btn-action" style="width: 100%; justify-content: center; padding: 0.65rem;">Create Discount</button>
         </form>
       </div>
@@ -1345,9 +1349,10 @@ function classifyProductType(title, desc) {
 function getDiscountedPrice(product) {
   const price = parseFloat(product.price || 0);
   const activeDiscounts = discountsList.filter(d => d.active);
-  if (activeDiscounts.length === 0) return { price: price, discount: null };
+  if (activeDiscounts.length === 0) return { price: price, originalPrice: price, discount: null };
   
   let bestPrice = price;
+  let bestOriginalPrice = price;
   let appliedDiscount = null;
   
   activeDiscounts.forEach(disc => {
@@ -1362,15 +1367,30 @@ function getDiscountedPrice(product) {
     }
     
     if (matches) {
-      let currentDiscountedPrice = price;
-      if (disc.type === 'percentage') {
-        currentDiscountedPrice = price * (1 - disc.value / 100);
+      let currentPrice = price;
+      let currentOriginalPrice = price;
+      const isReverse = disc.is_reverse || disc.isReverse;
+      
+      if (isReverse) {
+        currentPrice = price;
+        if (disc.type === 'percentage') {
+          const val = parseFloat(disc.value);
+          currentOriginalPrice = val < 100 ? price / (1 - val / 100) : price;
+        } else {
+          currentOriginalPrice = price + parseFloat(disc.value);
+        }
       } else {
-        currentDiscountedPrice = Math.max(0, price - disc.value);
+        if (disc.type === 'percentage') {
+          currentPrice = price * (1 - disc.value / 100);
+        } else {
+          currentPrice = Math.max(0, price - disc.value);
+        }
+        currentOriginalPrice = price;
       }
       
-      if (currentDiscountedPrice < bestPrice) {
-        bestPrice = currentDiscountedPrice;
+      if (currentPrice < bestPrice || (currentPrice === bestPrice && currentOriginalPrice > bestOriginalPrice)) {
+        bestPrice = currentPrice;
+        bestOriginalPrice = currentOriginalPrice;
         appliedDiscount = disc;
       }
     }
@@ -1378,6 +1398,7 @@ function getDiscountedPrice(product) {
   
   return {
     price: bestPrice,
+    originalPrice: bestOriginalPrice,
     discount: appliedDiscount
   };
 }
@@ -1532,6 +1553,7 @@ async function submitDiscount(e) {
   const value = parseFloat(document.getElementById('discValue').value) || 0;
   const scope = document.getElementById('discScope').value;
   const scopeValue = scope !== 'all' ? document.getElementById('discScopeValue').value : '';
+  const isReverse = document.getElementById('discIsReverse').checked;
   
   if (value <= 0) {
     showAdminToast("Discount value must be positive", "error");
@@ -1549,6 +1571,7 @@ async function submitDiscount(e) {
     value: value,
     scope: scope,
     scope_value: scopeValue,
+    is_reverse: isReverse,
     active: true,
     created_at: new Date().toISOString()
   };
@@ -1573,9 +1596,11 @@ function renderDiscountsTable() {
   }
   
   discountsList.forEach(disc => {
-    const scopeText = disc.scope === 'all' ? 'All Products' : 
+    const isReverse = disc.is_reverse || disc.isReverse;
+    const reverseBadge = isReverse ? ` <span class="badge" style="font-size:0.6rem; background:#ebf8ff; color:#2b6cb0; border:1px solid #bee3f8; padding:0.1rem 0.25rem; border-radius:3px; font-weight:600; vertical-align:middle; margin-left:0.2rem; display:inline-block;">Reverse</span>` : '';
+    const scopeText = (disc.scope === 'all' ? 'All Products' : 
                       disc.scope === 'brand' ? `Brand: ${disc.scope_value}` : 
-                      `Type: ${disc.scope_value}`;
+                      `Type: ${disc.scope_value}`) + reverseBadge;
     const valText = disc.type === 'percentage' ? `${disc.value}%` : `৳${disc.value}`;
     
     const tr = document.createElement('tr');
@@ -2036,7 +2061,7 @@ function renderProductsTable() {
         : `৳${discountInfo.discount.value} off`;
       priceHTML = `
         <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;">
-          <span class="text-soft" style="text-decoration: line-through; font-size: 0.76rem; font-weight: normal;">৳ ${prod.price}</span>
+          <span class="text-soft" style="text-decoration: line-through; font-size: 0.76rem; font-weight: normal;">৳ ${Math.round(discountInfo.originalPrice).toLocaleString()}</span>
           <span class="bold" style="color: var(--sage);">৳ ${Math.round(discountInfo.price).toLocaleString()}</span>
           <span class="badge" style="font-size: 0.65rem; background: var(--sage-pale); color: var(--dark); padding: 0.1rem 0.35rem; border-radius: 3px; font-weight: 600; margin-top: 0.1rem; line-height: 1;">${discountLabel}</span>
         </div>
@@ -2135,7 +2160,7 @@ async function updateOrderStatus(orderId, newStatus) {
     renderDashboard();
   } catch (err) {
     console.error("Fulfillment update failed:", err);
-    alert(`Unable to update order status: ${err.message}`);
+    showAdminToast(`Unable to update order status: ${err.message}`, "error");
   }
 }
 
@@ -2164,7 +2189,7 @@ async function toggleProductStock(prodId, currentStockState) {
     renderProductsTable();
   } catch (err) {
     console.error("Stock toggle failed:", err);
-    alert(`Unable to update stock status: ${err.message}`);
+    showAdminToast(`Unable to update stock status: ${err.message}`, "error");
   }
 }
 
@@ -2190,24 +2215,24 @@ function openSupplierModal(orderId) {
   });
   
   const textBody = `DEAR SUPPLIER,
-
+ 
 PLEASE DISPATCH THE FOLLOWING ORDER ITEMS FOR SHUCHI (শুচি).
-
+ 
 ORDER REFERENCE: ${order.order_id}
 ORDER DATE: ${dateStr}
-
+ 
 =======================================
 DISPATCH ITEMS:
 ${order.items.replace(/,/g, '\n')}
 =======================================
-
+ 
 DELIVERY INFORMATION:
 CUSTOMER: ${order.customer_name}
 PHONE: ${order.phone}
 ADDRESS: ${order.address}
 AREA / REGION: ${order.area || 'N/A'}
 DELIVERY WINDOW: 72 hours max
-
+ 
 THANK YOU,
 SHUCHI INVENTORY SYSTEM`;
 
@@ -2219,7 +2244,7 @@ SHUCHI INVENTORY SYSTEM`;
 function copyEmailPreview() {
   const text = document.getElementById('emailPreview').textContent;
   navigator.clipboard.writeText(text).then(() => {
-    alert("Order details copied to clipboard!");
+    showAdminToast("Order details copied to clipboard!");
   }).catch(err => {
     console.error("Clipboard write failed:", err);
   });

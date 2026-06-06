@@ -198,9 +198,10 @@ function classifyProductCategory(title, desc) {
 function getDiscountedPrice(product) {
   const price = parseFloat(product.price || product.Price || 0);
   const activeDiscounts = discountsList.filter(d => d.active);
-  if (activeDiscounts.length === 0) return { price: price, discount: null };
+  if (activeDiscounts.length === 0) return { price: price, originalPrice: price, discount: null };
   
   let bestPrice = price;
+  let bestOriginalPrice = price;
   let appliedDiscount = null;
   
   activeDiscounts.forEach(disc => {
@@ -217,15 +218,30 @@ function getDiscountedPrice(product) {
     }
     
     if (matches) {
-      let currentDiscountedPrice = price;
-      if (disc.type === 'percentage') {
-        currentDiscountedPrice = price * (1 - disc.value / 100);
+      let currentPrice = price;
+      let currentOriginalPrice = price;
+      const isReverse = disc.is_reverse || disc.isReverse;
+      
+      if (isReverse) {
+        currentPrice = price;
+        if (disc.type === 'percentage') {
+          const val = parseFloat(disc.value);
+          currentOriginalPrice = val < 100 ? price / (1 - val / 100) : price;
+        } else {
+          currentOriginalPrice = price + parseFloat(disc.value);
+        }
       } else {
-        currentDiscountedPrice = Math.max(0, price - disc.value);
+        if (disc.type === 'percentage') {
+          currentPrice = price * (1 - disc.value / 100);
+        } else {
+          currentPrice = Math.max(0, price - disc.value);
+        }
+        currentOriginalPrice = price;
       }
       
-      if (currentDiscountedPrice < bestPrice) {
-        bestPrice = currentDiscountedPrice;
+      if (currentPrice < bestPrice || (currentPrice === bestPrice && currentOriginalPrice > bestOriginalPrice)) {
+        bestPrice = currentPrice;
+        bestOriginalPrice = currentOriginalPrice;
         appliedDiscount = disc;
       }
     }
@@ -233,6 +249,7 @@ function getDiscountedPrice(product) {
   
   return {
     price: bestPrice,
+    originalPrice: bestOriginalPrice,
     discount: appliedDiscount
   };
 }
@@ -279,7 +296,7 @@ function applyLiveDiscountsToDOM() {
       if (priceSpan) {
         priceSpan.outerHTML = `
           <div class="product-price-container" style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem; line-height: 1.2;">
-            <span style="text-decoration: line-through; color: var(--text-soft); font-size: 0.78rem; font-weight: normal;">৳ ${product.price.toLocaleString()}</span>
+            <span style="text-decoration: line-through; color: var(--text-soft); font-size: 0.78rem; font-weight: normal;">৳ ${Math.round(discInfo.originalPrice).toLocaleString()}</span>
             <span class="product-price" style="color: var(--sage); font-weight: 600;">৳ ${discountedPrice.toLocaleString()}</span>
           </div>
         `;
@@ -320,7 +337,7 @@ function applyLiveDiscountsToDOM() {
               : `৳${discInfo.discount.value} Off`;
             
             detailPriceEl.innerHTML = `
-              <span style="text-decoration: line-through; font-size: 1.1rem; color: var(--text-soft); font-weight: normal; margin-right: 0.8rem;">৳ ${product.price}</span>
+              <span style="text-decoration: line-through; font-size: 1.1rem; color: var(--text-soft); font-weight: normal; margin-right: 0.8rem;">৳ ${Math.round(discInfo.originalPrice)}</span>
               ৳ ${discountedPrice}
               <span class="product-badge" style="background: var(--sage); color: var(--white); margin-left: 0.8rem; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; vertical-align: middle;">
                 ${discountLabel}
@@ -649,6 +666,8 @@ function injectAuthUI() {
             <button class="auth-tab active" id="tabSignIn" onclick="switchAuthTab('signin')">Sign In</button>
             <button class="auth-tab" id="tabSignUp" onclick="switchAuthTab('signup')">Sign Up</button>
           </div>
+          
+          <div id="authErrorMessage" style="color: #e53e3e; background: #fff5f5; border: 1px solid #fed7d7; padding: 0.8rem; margin: 1rem 0 0.2rem 0; font-size: 0.82rem; border-radius: 4px; display: none; text-align: left; font-weight: 500; line-height: 1.4;"></div>
 
           <!-- Sign In Form -->
           <form id="signInForm" class="auth-panel active" onsubmit="submitSignIn(event)">
@@ -849,6 +868,12 @@ function switchAuthTab(tab) {
   const formIn = document.getElementById('signInForm');
   const formUp = document.getElementById('signUpForm');
 
+  const errMsg = document.getElementById('authErrorMessage');
+  if (errMsg) {
+    errMsg.style.display = 'none';
+    errMsg.textContent = '';
+  }
+
   if (tab === 'signin') {
     tabIn.classList.add('active');
     tabUp.classList.remove('active');
@@ -886,6 +911,12 @@ async function submitSignUp(e) {
   const street = document.getElementById('signUpAddress').value.trim();
   const address = `${house}, ${street}`;
 
+  const errMsg = document.getElementById('authErrorMessage');
+  if (errMsg) {
+    errMsg.style.display = 'none';
+    errMsg.textContent = '';
+  }
+
   toggleAuthLoader(true, "Registering Account...", "We are connecting to the Shuchi User data base.");
 
   try {
@@ -921,7 +952,10 @@ async function submitSignUp(e) {
   } catch (err) {
     console.error("Supabase registration failed:", err);
     toggleAuthLoader(false);
-    alert(`Registration failed: ${err.message || err.toString()}`);
+    if (errMsg) {
+      errMsg.textContent = `Registration failed: ${err.message || err.toString()}`;
+      errMsg.style.display = 'block';
+    }
   }
 }
 
@@ -930,6 +964,12 @@ async function submitSignIn(e) {
   e.preventDefault();
 
   const phone = document.getElementById('signInPhone').value.trim();
+
+  const errMsg = document.getElementById('authErrorMessage');
+  if (errMsg) {
+    errMsg.style.display = 'none';
+    errMsg.textContent = '';
+  }
 
   toggleAuthLoader(true, "Signing In...", "We are connecting to the Shuchi User data base.");
 
@@ -957,7 +997,10 @@ async function submitSignIn(e) {
   } catch (err) {
     console.error("Sign in failed:", err);
     toggleAuthLoader(false);
-    alert(`Could not sign in: ${err.message || err.toString()}`);
+    if (errMsg) {
+      errMsg.textContent = `Could not sign in: ${err.message || err.toString()}`;
+      errMsg.style.display = 'block';
+    }
   }
 }
 
@@ -1058,9 +1101,11 @@ async function saveProfileEdit(e) {
 
   if (statusEl) {
     statusEl.style.display = 'block';
+    statusEl.style.color = 'var(--sage)';
     statusEl.textContent = "Saving changes to the Shuchi User database...";
   }
 
+  let success = false;
   try {
     const { data, error } = await supabaseClient
       .from('profiles')
@@ -1080,11 +1125,18 @@ async function saveProfileEdit(e) {
     updateAuthUI();
     disableProfileEdit();
     showToast("Profile details updated successfully!");
+    success = true;
   } catch (err) {
     console.error("Profile edit failed:", err);
-    alert(`Failed to update details: ${err.message || err.toString()}`);
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.style.color = '#e53e3e';
+      statusEl.textContent = `Failed to update details: ${err.message || err.toString()}`;
+    }
   } finally {
-    if (statusEl) statusEl.style.display = 'none';
+    if (success && statusEl) {
+      statusEl.style.display = 'none';
+    }
   }
 }
 
@@ -1359,11 +1411,12 @@ function updateCartUI() {
 
     const discountInfo = getDiscountedPrice(item);
     const discountedPrice = Math.round(discountInfo.price);
-    const hasDiscount = discountedPrice < item.price;
+    const originalPrice = Math.round(discountInfo.originalPrice);
+    const hasDiscount = originalPrice > discountedPrice;
     const priceHTML = hasDiscount 
       ? `<div style="display:flex; flex-direction:column; gap:0.1rem; align-items:flex-start;">
            <div style="display:flex; align-items:center; gap:0.5rem; line-height:1.2;">
-             <span style="text-decoration:line-through; color:var(--text-soft); font-weight:normal; font-size:0.8rem;">৳ ${item.price.toLocaleString()}</span>
+             <span style="text-decoration:line-through; color:var(--text-soft); font-weight:normal; font-size:0.8rem;">৳ ${originalPrice.toLocaleString()}</span>
              <span style="color:var(--sage); font-weight:600; font-size:0.95rem;">৳ ${discountedPrice.toLocaleString()}</span>
            </div>
            <span style="background:var(--sage-pale); color:var(--dark-mid); font-size:0.65rem; font-weight:600; padding:0.1rem 0.35rem; border-radius:2px; display:inline-block; margin-top:0.15rem; line-height:1;">
