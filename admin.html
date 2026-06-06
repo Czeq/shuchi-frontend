@@ -1494,12 +1494,17 @@ function filterCustomersTable() {
 // Data Mutation: Update Order Fulfillment Status
 async function updateOrderStatus(orderId, newStatus) {
   try {
-    const { error } = await supabaseClient
+    const { data, error } = await supabaseClient
       .from('orders')
       .update({ status: newStatus })
-      .eq('order_id', orderId);
+      .eq('order_id', orderId)
+      .select();
 
     if (error) throw error;
+
+    if (!data || data.length === 0) {
+      throw new Error("No database records were modified. You may not have permission to update this order. Please verify your Supabase Row Level Security (RLS) policies.");
+    }
 
     // Update local state
     const index = ordersList.findIndex(o => o.order_id === orderId);
@@ -1519,12 +1524,17 @@ async function updateOrderStatus(orderId, newStatus) {
 async function toggleProductStock(prodId, currentStockState) {
   const newStockState = !currentStockState;
   try {
-    const { error } = await supabaseClient
+    const { data, error } = await supabaseClient
       .from('products')
       .update({ stock: newStockState })
-      .eq('id', prodId);
+      .eq('id', prodId)
+      .select();
 
     if (error) throw error;
+
+    if (!data || data.length === 0) {
+      throw new Error("No database records were modified. You may not have permission to edit product details. Please ensure your Supabase RLS policy allows UPDATE transactions on the products table.");
+    }
 
     // Update local state
     const index = productsList.findIndex(p => p.id === prodId);

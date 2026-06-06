@@ -831,12 +831,17 @@ async function saveProfileEdit(e) {
   }
 
   try {
-    const { error } = await supabaseClient
+    const { data, error } = await supabaseClient
       .from('profiles')
       .update({ name, address })
-      .eq('phone', currentUser.phone);
+      .eq('phone', currentUser.phone)
+      .select();
 
     if (error) throw error;
+
+    if (!data || data.length === 0) {
+      throw new Error("No database records were modified. You may not have permission to update this profile.");
+    }
 
     currentUser.name = name;
     currentUser.address = address;
@@ -881,6 +886,67 @@ async function fetchPurchaseHistory(phone) {
       const statusClass = (order.status || 'processing').toLowerCase();
       const formattedStatus = order.status || 'Processing';
 
+      let trackingHTML = '';
+      if (statusClass === 'cancelled') {
+        trackingHTML = `
+          <div class="order-tracking-bar">
+            <div class="track-line failed" style="width: 100%;"></div>
+            <div class="track-steps">
+              <div class="track-step failed" style="width: 100%;">
+                <span class="track-dot"></span>
+                <span class="track-label">Order Cancelled</span>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        let fillWidth = 0;
+        let step1 = 'completed'; // Placed
+        let step2 = ''; // Processing
+        let step3 = ''; // Sent to Supplier
+        let step4 = ''; // Delivered
+
+        if (statusClass === 'processing' || statusClass === 'placed') {
+          fillWidth = 33;
+          step2 = 'active';
+        } else if (statusClass === 'sent to supplier' || statusClass === 'sent-to-supplier') {
+          fillWidth = 66;
+          step2 = 'completed';
+          step3 = 'active';
+        } else if (statusClass === 'delivered') {
+          fillWidth = 100;
+          step2 = 'completed';
+          step3 = 'completed';
+          step4 = 'completed';
+        }
+
+        trackingHTML = `
+          <div class="order-tracking-bar">
+            <div class="track-line">
+              <div class="track-line-fill" style="width: ${fillWidth}%;"></div>
+            </div>
+            <div class="track-steps">
+              <div class="track-step ${step1}">
+                <span class="track-dot"></span>
+                <span class="track-label">Placed</span>
+              </div>
+              <div class="track-step ${step2}">
+                <span class="track-dot"></span>
+                <span class="track-label">Processing</span>
+              </div>
+              <div class="track-step ${step3}">
+                <span class="track-dot"></span>
+                <span class="track-label">Sent to Supplier</span>
+              </div>
+              <div class="track-step ${step4}">
+                <span class="track-dot"></span>
+                <span class="track-label">Delivered</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
       return `
         <div class="order-history-card">
           <div class="order-hist-header">
@@ -888,6 +954,7 @@ async function fetchPurchaseHistory(phone) {
             <span class="order-hist-status ${statusClass}">${formattedStatus}</span>
           </div>
           <div class="order-hist-items">${order.items}</div>
+          ${trackingHTML}
           <div class="order-hist-footer">
             <span>${dateStr}</span>
             <span class="order-hist-price">৳ ${parseInt(order.total_price || 0).toLocaleString()}</span>
