@@ -274,6 +274,47 @@
   .pname { font-family: Georgia, 'Times New Roman', serif; font-size: 1rem; color: var(--dark); }
   .pprice { font-size: 0.78rem; color: var(--sage); margin-top: 0.2rem; }
 
+  .hero-card-cta {
+    display: inline-block;
+    margin-top: 0.8rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--white);
+    background: var(--sage);
+    padding: 0.35rem 0.8rem;
+    border-radius: 4px;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .product-card-hero:hover .hero-card-cta {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* HERO PILLS */
+  .hero-pill {
+    background: transparent;
+    border: 1px solid rgba(107, 143, 107, 0.35);
+    color: var(--text-soft);
+    padding: 0.45rem 1rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    font-family: inherit;
+  }
+  .hero-pill:hover {
+    background: var(--sage);
+    border-color: var(--sage);
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 143, 107, 0.15);
+  }
+
   /* MARQUEE */
   .marquee-strip {
     background: var(--dark);
@@ -854,6 +895,18 @@
     <p class="hero-bangla" style="margin-bottom: 0.8rem; font-size: clamp(1.2rem, 2vw, 1.6rem); color: var(--sage); font-weight: 500; font-family: Georgia, serif; font-style: italic;">শুচি — পবিত্র, স্বচ্ছ</p>
     <h1 class="hero-title" style="margin-top: 0; margin-bottom: 1.5rem;">Skin that speaks<br><em>the truth.</em></h1>
     <p class="hero-desc">No myths. No shortcuts. Only verified Korean ingredients and the science behind every drop — curated for Bangladesh's skin, climate, and conscience.</p>
+    
+    <!-- Skin Type Quick Select Ribbon -->
+    <div class="hero-quick-select" style="margin-bottom: 2rem;">
+      <p style="font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-soft); margin-bottom: 0.60rem; font-weight: 500; opacity: 0.9;">Select skin concern for a tailored routine:</p>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        <button class="hero-pill" onclick="quickStartQuiz('oily')">Oily / Acne</button>
+        <button class="hero-pill" onclick="quickStartQuiz('dry')">Dry / Dehydrated</button>
+        <button class="hero-pill" onclick="quickStartQuiz('combo')">Combination</button>
+        <button class="hero-pill" onclick="quickStartQuiz('normal')">Normal Skin</button>
+      </div>
+    </div>
+
     <div class="hero-actions">
       <a href="storefront.html" class="btn-primary">Shop Now</a>
       <a href="#routine" class="btn-outline">Build My Routine</a>
@@ -893,7 +946,7 @@
       </g>
     </svg>
     <div class="hero-product-stack">
-      <div class="product-card-hero off1">
+      <a href="./snail96.html" style="text-decoration: none; display: block;" class="product-card-hero off1">
         <div class="pimg">
           <svg width="60" height="85" viewBox="0 0 60 85" fill="none">
             <defs>
@@ -919,8 +972,9 @@
         </div>
         <div class="pname">COSRX Snail 96</div>
         <div class="pprice">৳ 1,450</div>
-      </div>
-      <div class="product-card-hero off2">
+        <span class="hero-card-cta">Shop Product</span>
+      </a>
+      <a href="./greentea.html" style="text-decoration: none; display: block;" class="product-card-hero off2">
         <div class="pimg">
           <svg width="60" height="85" viewBox="0 0 60 85" fill="none">
             <defs>
@@ -944,7 +998,8 @@
         </div>
         <div class="pname">Innisfree Green Tea</div>
         <div class="pprice">৳ 1,890</div>
-      </div>
+        <span class="hero-card-cta">Shop Product</span>
+      </a>
     </div>
   </div>
 </section>
@@ -1174,6 +1229,32 @@
 </footer>
 
 <script>
+
+// Quick start quiz from landing pills
+function quickStartQuiz(skinType) {
+  // Reset quiz states first
+  cq = 1;
+  document.getElementById('q1').classList.add('active');
+  document.getElementById('q2').classList.remove('active');
+  document.getElementById('q3').classList.remove('active');
+  document.getElementById('quizWidget').style.display = 'block';
+  document.getElementById('routineResult').classList.remove('active');
+  document.querySelectorAll('.quiz-step .qopt').forEach(b => b.classList.remove('sel'));
+
+  // Scroll smoothly to routine builder section
+  document.getElementById('routine').scrollIntoView({ behavior: 'smooth' });
+
+  // Pre-select skin type after a small scroll delay
+  const options = document.querySelectorAll('#q1 .qopt');
+  options.forEach(opt => {
+    const clickHandler = opt.getAttribute('onclick');
+    if (clickHandler && clickHandler.includes(skinType)) {
+      setTimeout(() => {
+        opt.click();
+      }, 500);
+    }
+  });
+}
 
 // Quiz
 let cq = 1;
