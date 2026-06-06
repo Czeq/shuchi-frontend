@@ -254,9 +254,18 @@ function applyLiveDiscountsToDOM() {
     const link = card.querySelector('a');
     if (!link) return;
     const href = link.getAttribute('href') || '';
+    
+    let prodId = null;
     const idMatch = href.match(/\/([^/]+)\.html$/) || href.match(/^([^/]+)\.html$/);
-    if (!idMatch) return;
-    const prodId = idMatch[1];
+    if (idMatch) {
+      prodId = idMatch[1];
+    } else {
+      const queryMatch = href.match(/[?&]id=([^&]+)/);
+      if (queryMatch) {
+        prodId = queryMatch[1];
+      }
+    }
+    if (!prodId) return;
     
     const product = products.find(p => p.id === prodId);
     if (!product) return;
@@ -295,36 +304,38 @@ function applyLiveDiscountsToDOM() {
   
   // 2. Process Product Detail Page Price & Button
   const detailPriceEl = document.getElementById('pricePlaceholder');
-  if (detailPriceEl && !detailPriceEl.dataset.discountApplied) {
-    const urlParams = new URLSearchParams(window.location.search);
-    const currId = urlParams.get('id') || '';
-    if (currId) {
-      const product = products.find(p => p.id === currId);
-      if (product) {
-        const discInfo = getDiscountedPrice(product);
-        if (discInfo.discount) {
-          const discountedPrice = Math.round(discInfo.price);
-          const discountLabel = discInfo.discount.type === 'percentage' 
-            ? `${discInfo.discount.value}% Off` 
-            : `৳${discInfo.discount.value} Off`;
-          
-          detailPriceEl.innerHTML = `
-            <span style="text-decoration: line-through; font-size: 1.1rem; color: var(--text-soft); font-weight: normal; margin-right: 0.8rem;">৳ ${product.price}</span>
-            ৳ ${discountedPrice}
-            <span class="product-badge" style="background: var(--sage); color: var(--white); margin-left: 0.8rem; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; vertical-align: middle;">
-              ${discountLabel}
-            </span>
-          `;
-          
-          // Update Add to Bag button text
-          const buyBtn = document.querySelector('.btn-primary');
-          if (buyBtn && buyBtn.textContent.includes('Add to Bag')) {
-            buyBtn.textContent = `Add to Bag — ৳ ${discountedPrice}`;
+  if (detailPriceEl) {
+    const hasDiscountBadge = detailPriceEl.querySelector('.product-badge');
+    if (!hasDiscountBadge) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const currId = urlParams.get('id') || '';
+      if (currId) {
+        const product = products.find(p => p.id === currId);
+        if (product) {
+          const discInfo = getDiscountedPrice(product);
+          if (discInfo.discount) {
+            const discountedPrice = Math.round(discInfo.price);
+            const discountLabel = discInfo.discount.type === 'percentage' 
+              ? `${discInfo.discount.value}% Off` 
+              : `৳${discInfo.discount.value} Off`;
+            
+            detailPriceEl.innerHTML = `
+              <span style="text-decoration: line-through; font-size: 1.1rem; color: var(--text-soft); font-weight: normal; margin-right: 0.8rem;">৳ ${product.price}</span>
+              ৳ ${discountedPrice}
+              <span class="product-badge" style="background: var(--sage); color: var(--white); margin-left: 0.8rem; font-size: 0.72rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: 600; vertical-align: middle;">
+                ${discountLabel}
+              </span>
+            `;
+            
+            // Update Add to Bag button text
+            const buyBtn = document.querySelector('.btn-primary');
+            if (buyBtn && buyBtn.textContent.includes('Add to Bag')) {
+              buyBtn.textContent = `Add to Bag — ৳ ${discountedPrice}`;
+            }
           }
         }
       }
     }
-    detailPriceEl.dataset.discountApplied = 'true';
   }
 }
 
@@ -1350,9 +1361,14 @@ function updateCartUI() {
     const discountedPrice = Math.round(discountInfo.price);
     const hasDiscount = discountedPrice < item.price;
     const priceHTML = hasDiscount 
-      ? `<div style="display:flex; align-items:center; gap:0.5rem;">
-           <span style="text-decoration:line-through; color:var(--text-soft); font-weight:normal; font-size:0.85rem;">৳ ${item.price.toLocaleString()}</span>
-           <span style="color:var(--sage); font-weight:600;">৳ ${discountedPrice.toLocaleString()}</span>
+      ? `<div style="display:flex; flex-direction:column; gap:0.1rem; align-items:flex-start;">
+           <div style="display:flex; align-items:center; gap:0.5rem; line-height:1.2;">
+             <span style="text-decoration:line-through; color:var(--text-soft); font-weight:normal; font-size:0.8rem;">৳ ${item.price.toLocaleString()}</span>
+             <span style="color:var(--sage); font-weight:600; font-size:0.95rem;">৳ ${discountedPrice.toLocaleString()}</span>
+           </div>
+           <span style="background:var(--sage-pale); color:var(--dark-mid); font-size:0.65rem; font-weight:600; padding:0.1rem 0.35rem; border-radius:2px; display:inline-block; margin-top:0.15rem; line-height:1;">
+             ${discountInfo.discount.type === 'percentage' ? `${discountInfo.discount.value}% Off` : `৳${discountInfo.discount.value} Off`}
+           </span>
          </div>`
       : `৳ ${item.price.toLocaleString()}`;
 

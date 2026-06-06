@@ -625,6 +625,14 @@
         Products
       </a>
     </li>
+    <li class="nav-item" id="navCampaigns" onclick="switchTab('campaigns')">
+      <a>
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/>
+        </svg>
+        Campaigns
+      </a>
+    </li>
     <li class="nav-item" id="navCustomers" onclick="switchTab('customers')">
       <a>
         <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -823,6 +831,10 @@
       </table>
     </div>
 
+  </div>
+
+  <!-- TAB: CAMPAIGNS -->
+  <div id="tabCampaigns" class="tab-content">
     <!-- Discount Management Section -->
     <div class="insights-grid" style="margin-top: 2rem;">
       <!-- Record / Create Discount Form -->
@@ -1638,6 +1650,9 @@ function switchTab(tabName) {
   } else if (tabName === 'products') {
     document.getElementById('navProducts').classList.add('active');
     document.getElementById('tabProducts').classList.add('active');
+  } else if (tabName === 'campaigns') {
+    document.getElementById('navCampaigns').classList.add('active');
+    document.getElementById('tabCampaigns').classList.add('active');
   } else if (tabName === 'customers') {
     document.getElementById('navCustomers').classList.add('active');
     document.getElementById('tabCustomers').classList.add('active');
@@ -1658,6 +1673,7 @@ function renderDashboard() {
     renderOrdersTable();
   } else if (activeTab === 'products') {
     renderProductsTable();
+  } else if (activeTab === 'campaigns') {
     renderDiscountsTable();
   } else if (activeTab === 'customers') {
     renderCustomersTable();
