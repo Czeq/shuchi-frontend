@@ -286,6 +286,7 @@
     </div>
     
     <p class="p-price" id="pricePlaceholder">[Price]</p>
+    <div id="stockNoticePlaceholder"></div>
     <p class="p-desc" id="descPlaceholder">[Product Description Paragraph. Highlight what it does, texture, and why it matters.]</p>
     
     <div id="variantsContainer"></div>
@@ -512,12 +513,41 @@ function hydrateHTML(rawProduct) {
 
   // Update action button text with dynamic price and bind cart action
   const buyBtn = document.querySelector('#product-hero .btn-primary');
+  const stockNotice = document.getElementById('stockNoticePlaceholder');
+  const inStock = product.stock !== false && product.stock !== 'false';
+  
   if (buyBtn) {
-    buyBtn.textContent = `Add to Bag — ${pPrice}`;
-    buyBtn.onclick = function() {
-      const pImage = product.image || product.img || product.imageurl || product.imgurl || product.photo || '';
-      addToCart(product.id, pTitle, product.brand || '', product.price || 0, pImage);
-    };
+    if (inStock) {
+      buyBtn.removeAttribute('disabled');
+      buyBtn.style.background = 'var(--dark)';
+      buyBtn.style.color = 'var(--cream)';
+      buyBtn.style.cursor = 'pointer';
+      buyBtn.textContent = `Add to Bag — ${pPrice}`;
+      buyBtn.onclick = function() {
+        const pImage = product.image || product.img || product.imageurl || product.imgurl || product.photo || '';
+        addToCart(product.id, pTitle, product.brand || '', product.price || 0, pImage);
+      };
+    } else {
+      buyBtn.setAttribute('disabled', 'true');
+      buyBtn.style.background = 'var(--cream-deep)';
+      buyBtn.style.color = 'var(--text-soft)';
+      buyBtn.style.cursor = 'not-allowed';
+      buyBtn.textContent = `Restocking Soon`;
+      buyBtn.onclick = null;
+    }
+  }
+
+  if (stockNotice) {
+    if (!inStock) {
+      stockNotice.innerHTML = `
+        <div style="background: rgba(184, 151, 90, 0.1); border: 1px solid var(--gold); color: var(--dark-mid); padding: 0.8rem 1.2rem; font-size: 0.82rem; border-radius: 4px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.6rem; font-weight: 500;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          We are working to get this item back in stock soon!
+        </div>
+      `;
+    } else {
+      stockNotice.innerHTML = '';
+    }
   }
 
   document.getElementById('descPlaceholder').textContent = product.desc || '[Product Description]';

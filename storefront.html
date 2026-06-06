@@ -955,12 +955,21 @@ function renderStorefrontGrid() {
     const hasVariants = rawProductsList && rawProductsList.filter(item => getBaseProductId(item.id || item.ID || item.Id) === baseId).length > 1;
     const variantsBadge = hasVariants ? `<span class="product-badge options-badge">✦ Options Available</span>` : '';
 
+    const inStock = p.stock !== false && p.stock !== 'false';
+    const actionButtons = inStock ? 
+      `<button class="card-btn-add" onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Add To Bag</button>
+       <button class="card-btn-buy" onclick="event.preventDefault(); event.stopPropagation(); buyNow('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Buy Now</button>` :
+      `<button class="card-btn-outofstock" disabled style="width: 100%; padding: 0.6rem 1rem; background: var(--cream-deep); color: var(--text-soft); border: 1.5px solid var(--cream-deep); border-radius: 4px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; cursor: not-allowed; min-height: 38px;">Restocking Soon</button>`;
+
+    const stockBadge = inStock ? '' : `<span class="product-badge out-of-stock" style="background: var(--dark-mid); opacity: 0.85; right: 1rem; left: auto; font-size: 0.62rem;">Restocking Soon</span>`;
+
     const cardHTML = `
       <div class="product-card" data-brand="${pBrand.replace(/"/g, '&quot;')}">
         <a href="./${p.id}.html" style="text-decoration: none; color: inherit; display: block;">
           <div class="product-card-img">
             <span class="product-badge authentic">✓ Direct Import</span>
             ${variantsBadge}
+            ${stockBadge}
             ${imgHTML}
           </div>
           <div class="product-card-body">
@@ -973,8 +982,7 @@ function renderStorefrontGrid() {
           </div>
         </a>
         <div class="product-card-actions" style="padding: 0 1.5rem 1.5rem;">
-          <button class="card-btn-add" onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Add To Bag</button>
-          <button class="card-btn-buy" onclick="event.preventDefault(); event.stopPropagation(); buyNow('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Buy Now</button>
+          ${actionButtons}
         </div>
       </div>
     `;

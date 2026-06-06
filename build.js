@@ -209,6 +209,25 @@ async function runSyncAndBuild() {
     const parsedProducts = parseCSVToProducts(csvData);
     console.log(`Parsed ${parsedProducts.length} product rows.`);
     
+    console.log("📥 Step 2.5: Loading existing products from Supabase to preserve stock states...");
+    let existingProducts = [];
+    try {
+      existingProducts = await fetchAllProductsFromSupabase();
+    } catch (e) {
+      console.warn("Could not load existing Supabase products (table may be empty). Preserving default stock states.");
+    }
+    
+    const stockMap = {};
+    existingProducts.forEach(p => {
+      stockMap[p.id] = p.stock;
+    });
+
+    // Merge existing stock state into parsed products
+    parsedProducts.forEach(p => {
+      // If product exists in database, preserve its stock state, otherwise default to true
+      p.stock = (stockMap[p.id] !== undefined && stockMap[p.id] !== null) ? stockMap[p.id] : true;
+    });
+
     console.log("⚡ Step 3: Syncing records to Supabase tables...");
     await syncProductsToSupabase(parsedProducts);
     
@@ -279,9 +298,29 @@ function runGenerator(products) {
       /<p class="p-price" id="pricePlaceholder">\[Price\]<\/p>/g,
       `<p class="p-price" id="pricePlaceholder">৳ ${price}</p>`
     );
+    const inStock = product.stock !== false && product.stock !== 'false' && product.stock !== null;
+    let buyBtnHTML = '';
+    let stockNoticeHTML = '';
+
+    if (inStock) {
+      buyBtnHTML = `<button class="btn-primary" onclick="addToCart('${id}', '${title.replace(/'/g, "\\'")}', '${brand.replace(/'/g, "\\'")}', ${price}, '${image}')">Add to Bag — ৳ ${price}</button>`;
+    } else {
+      buyBtnHTML = `<button class="btn-primary" disabled style="background: var(--cream-deep) !important; color: var(--text-soft) !important; cursor: not-allowed !important;">Restocking Soon</button>`;
+      stockNoticeHTML = `
+        <div style="background: rgba(184, 151, 90, 0.1); border: 1px solid var(--gold); color: var(--dark-mid); padding: 0.8rem 1.2rem; font-size: 0.82rem; border-radius: 4px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.6rem; font-weight: 500;">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          We are working to get this item back in stock soon!
+        </div>
+      `;
+    }
+
     html = html.replace(
       /<button class="btn-primary">Add to Bag — \[Price\]<\/button>/g,
-      `<button class="btn-primary" onclick="addToCart('${id}', '${title.replace(/'/g, "\\'")}', '${brand.replace(/'/g, "\\'")}', ${price}, '${image}')">Add to Bag — ৳ ${price}</button>`
+      buyBtnHTML
+    );
+    html = html.replace(
+      /<div id="stockNoticePlaceholder"><\/div>/g,
+      stockNoticeHTML
     );
     html = html.replace(
       /<p class="p-desc" id="descPlaceholder">\[Product Description Paragraph. Highlight what it does, texture, and why it matters.\]<\/p>/g,
@@ -345,12 +384,21 @@ function runGenerator(products) {
       const hasVariants = products.filter(item => getBaseProductId(item.id) === baseId).length > 1;
       const variantsBadge = hasVariants ? `<span class="product-badge options-badge">✦ Options Available</span>` : '';
 
+      const inStock = p.stock !== false && p.stock !== 'false' && p.stock !== null;
+      const actionButtons = inStock ? 
+        `<button class="card-btn-add" onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Add To Bag</button>
+         <button class="card-btn-buy" onclick="event.preventDefault(); event.stopPropagation(); buyNow('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Buy Now</button>` :
+        `<button class="card-btn-outofstock" disabled style="width: 100%; padding: 0.6rem 1rem; background: var(--cream-deep); color: var(--text-soft); border: 1.5px solid var(--cream-deep); border-radius: 4px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; cursor: not-allowed; min-height: 38px;">Restocking Soon</button>`;
+
+      const stockBadge = inStock ? '' : `<span class="product-badge out-of-stock" style="background: var(--dark-mid); opacity: 0.85; right: 1rem; left: auto; font-size: 0.62rem;">Restocking Soon</span>`;
+
       return `
       <div class="product-card" data-brand="${pBrand.replace(/"/g, '&quot;')}">
         <a href="./${p.id}.html" style="text-decoration: none; color: inherit; display: block;">
           <div class="product-card-img">
             <span class="product-badge authentic">✓ Direct Import</span>
             ${variantsBadge}
+            ${stockBadge}
             ${imgHTML}
           </div>
           <div class="product-card-body">
@@ -363,8 +411,7 @@ function runGenerator(products) {
           </div>
         </a>
         <div class="product-card-actions" style="padding: 0 1.5rem 1.5rem;">
-          <button class="card-btn-add" onclick="event.preventDefault(); event.stopPropagation(); addToCart('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Add To Bag</button>
-          <button class="card-btn-buy" onclick="event.preventDefault(); event.stopPropagation(); buyNow('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Buy Now</button>
+          ${actionButtons}
         </div>
       </div>`;
     }).join('\n');

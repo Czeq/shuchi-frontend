@@ -121,6 +121,9 @@ function initCartSystem() {
   if (window.location.pathname.includes('product.html')) {
     injectStorefrontCatalogOnDetails();
   }
+
+  // Initialize user registration reminder floating prompt
+  initRegistrationPrompt();
 }
 
 // Load cart from localStorage
@@ -1104,16 +1107,69 @@ async function injectStorefrontCatalogOnDetails() {
   // Helper render
   const renderList = (prods) => {
     grid.innerHTML = '';
-    // Exclude current product and other variants, showing only unique base products
+    
+    // Helper to classify category for recommendations
+    const classifyProductTypeForRecs = (title, desc) => {
+      const t = (title || '').toLowerCase();
+      const d = (desc || '').toLowerCase();
+      if (t.includes('shampoo') || t.includes('conditioner') || t.includes('hair')) return 'Shampoo';
+      if (t.includes('body wash') || t.includes('shower gel') || t.includes('body cleanser')) return 'Body Wash';
+      if (t.includes('body cream') || t.includes('body lotion')) return 'Body Cream';
+      if (t.includes('sunscreen') || t.includes('sun cream') || t.includes('sunblock') || t.includes('sun stick')) return 'Sunscreen';
+      if (t.includes('cleansing oil') || t.includes('oil cleanser') || t.includes('cleansing balm') || t.includes('micellar') || t.includes('makeup remover')) return 'Cleanser';
+      if (t.includes('facewash') || t.includes('face wash') || t.includes('foam cleanser') || t.includes('foaming')) return 'Facewash';
+      if (t.includes('toner') || t.includes('skin refiner') || t.includes('toning')) return 'Toner';
+      if (t.includes('essence') || t.includes('mucin') || t.includes('serum') || t.includes('ampoule')) return 'Essence & Serum';
+      if (t.includes('lotion') || t.includes('emulsion')) return 'Lotion';
+      if (t.includes('cream') || t.includes('gel cream') || t.includes('moisturizer') || t.includes('sleeping mask')) return 'Cream';
+      
+      if (d.includes('shampoo') || d.includes('hair')) return 'Shampoo';
+      if (d.includes('body wash') || d.includes('shower gel')) return 'Body Wash';
+      if (d.includes('body cream') || d.includes('body lotion')) return 'Body Cream';
+      if (d.includes('sunscreen') || d.includes('sun cream')) return 'Sunscreen';
+      if (d.includes('cleansing oil') || d.includes('cleansing balm')) return 'Cleanser';
+      if (d.includes('facewash') || d.includes('face wash') || d.includes('cleansing foam')) return 'Facewash';
+      if (d.includes('toner')) return 'Toner';
+      if (d.includes('essence') || d.includes('serum') || d.includes('ampoule')) return 'Essence & Serum';
+      if (d.includes('lotion') || d.includes('emulsion')) return 'Lotion';
+      if (d.includes('cream') || d.includes('moisturizer')) return 'Cream';
+      return 'Other';
+    };
+
     const urlParams = new URLSearchParams(window.location.search);
     const currId = urlParams.get('id') || '';
     const currBaseId = getBaseProductId(currId);
     
+    // Find current product attributes
+    const currentProduct = prods.find(p => p.id === currId);
+    let currBrand = '';
+    let currType = '';
+    if (currentProduct) {
+      const normCurr = {};
+      Object.keys(currentProduct).forEach(k => { normCurr[k.trim().toLowerCase()] = currentProduct[k]; });
+      currBrand = (normCurr.brand || '').trim().toLowerCase();
+      currType = classifyProductTypeForRecs(normCurr.title, normCurr.desc);
+    }
+
     const seen = new Set();
     if (currBaseId) seen.add(currBaseId);
 
+    // Score products relative to the current product
+    const scored = prods.map(p => {
+      const pNorm = {};
+      Object.keys(p).forEach(k => { pNorm[k.trim().toLowerCase()] = p[k]; });
+      const pBrand = (pNorm.brand || '').trim().toLowerCase();
+      const pType = classifyProductTypeForRecs(pNorm.title, pNorm.desc);
+      
+      let score = 0;
+      if (currBrand && pBrand === currBrand) score += 10;
+      if (currType && pType === currType && pType !== 'Other') score += 5;
+      
+      return { ...p, score };
+    }).sort((a, b) => b.score - a.score);
+
     const filtered = [];
-    prods.forEach(p => {
+    scored.forEach(p => {
       const baseId = getBaseProductId(p.id);
       if (!seen.has(baseId)) {
         seen.add(baseId);
@@ -1121,7 +1177,7 @@ async function injectStorefrontCatalogOnDetails() {
       }
     });
 
-    const sliced = filtered.slice(0, 6); // show max 6 related items
+    const sliced = filtered.slice(0, 4); // show top 4 best matches
 
     if (sliced.length === 0) {
       grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-soft);">No other products available right now.</p>';
@@ -1150,12 +1206,21 @@ async function injectStorefrontCatalogOnDetails() {
       const hasVariants = products && products.filter(item => getBaseProductId(item.id || item.ID || item.Id) === baseId).length > 1;
       const variantsBadge = hasVariants ? `<span class="product-badge options-badge">✦ Options Available</span>` : '';
       
+      const inStock = p.stock !== false && p.stock !== 'false';
+      const actionButtons = inStock ? 
+        `<button class="card-btn-add" onclick="addToCart('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Add To Bag</button>
+         <button class="card-btn-buy" onclick="buyNow('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Buy Now</button>` :
+        `<button class="card-btn-outofstock" disabled style="width: 100%; padding: 0.6rem 1rem; background: var(--cream-deep); color: var(--text-soft); border: 1.5px solid var(--cream-deep); border-radius: 4px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; cursor: not-allowed; min-height: 38px;">Restocking Soon</button>`;
+
+      const stockBadge = inStock ? '' : `<span class="product-badge out-of-stock" style="background: var(--dark-mid); opacity: 0.85; right: 1rem; left: auto; font-size: 0.62rem;">Restocking Soon</span>`;
+
       const cardHTML = `
         <div class="product-card">
           <a href="./${p.id}.html" style="text-decoration: none; color: inherit; display: block;">
             <div class="product-card-img">
               <span class="product-badge authentic">✓ Direct Import</span>
               ${variantsBadge}
+              ${stockBadge}
               ${imgHTML}
             </div>
             <div class="product-card-body" style="padding: 1.5rem;">
@@ -1168,8 +1233,7 @@ async function injectStorefrontCatalogOnDetails() {
             </div>
           </a>
           <div class="product-card-actions" style="padding: 0 1.5rem 1.5rem;">
-            <button class="card-btn-add" onclick="addToCart('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Add To Bag</button>
-            <button class="card-btn-buy" onclick="buyNow('${p.id}', '${pTitle.replace(/'/g, "\\'")}', '${pBrand.replace(/'/g, "\\'")}', '${pPrice}', '${pImage}')">Buy Now</button>
+            ${actionButtons}
           </div>
         </div>
       `;
@@ -1209,6 +1273,155 @@ async function injectStorefrontCatalogOnDetails() {
         </div>
       `;
     }
+  }
+}
+
+// ── FLOATING REGISTRATION PROMPT (USER CONVERSION UX) ──
+function initRegistrationPrompt() {
+  const userState = localStorage.getItem('shuchi_user') || getCookie('shuchi_user');
+  if (userState) return;
+  if (sessionStorage.getItem('shuchi_reg_prompt_dismissed')) return;
+
+  setTimeout(() => {
+    if (localStorage.getItem('shuchi_user') || getCookie('shuchi_user')) return;
+
+    const style = document.createElement('style');
+    style.textContent = `
+      .shuchi-reg-prompt {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: var(--white, #FAFAF7);
+        border: 1.5px solid var(--sage-light, #A8C4A2);
+        box-shadow: 0 15px 35px rgba(26, 43, 27, 0.15);
+        padding: 1.5rem;
+        border-radius: 8px;
+        z-index: 1000;
+        max-width: 340px;
+        width: calc(100% - 4rem);
+        transform: translateY(40px);
+        opacity: 0;
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+      }
+      .shuchi-reg-prompt.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .shuchi-reg-prompt-title {
+        font-family: Georgia, serif;
+        font-size: 1.1rem;
+        color: var(--dark, #1A2B1B);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .shuchi-reg-prompt-close {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        color: var(--text-soft, #5A6E5B);
+        cursor: pointer;
+        transition: color 0.2s;
+        line-height: 1;
+      }
+      .shuchi-reg-prompt-close:hover {
+        color: var(--dark, #1A2B1B);
+      }
+      .shuchi-reg-prompt-desc {
+        font-size: 0.8rem;
+        color: var(--text-soft, #5A6E5B);
+        line-height: 1.5;
+      }
+      .shuchi-reg-prompt-actions {
+        display: flex;
+        gap: 0.8rem;
+        margin-top: 0.4rem;
+      }
+      .shuchi-reg-prompt-btn {
+        background: var(--dark, #1A2B1B);
+        color: var(--cream, #F5EFE4);
+        border: none;
+        padding: 0.5rem 1.2rem;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.3s;
+      }
+      .shuchi-reg-prompt-btn:hover {
+        background: var(--sage, #6B8F6B);
+        color: var(--white, #FAFAF7);
+      }
+      .shuchi-reg-prompt-btn-secondary {
+        background: transparent;
+        color: var(--text-soft, #5A6E5B);
+        border: 1px solid var(--cream-deep, #EDE4D4);
+        padding: 0.5rem 1.2rem;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 500;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.3s;
+      }
+      .shuchi-reg-prompt-btn-secondary:hover {
+        border-color: var(--text-soft, #5A6E5B);
+        color: var(--dark, #1A2B1B);
+      }
+      @media (max-width: 600px) {
+        .shuchi-reg-prompt {
+          bottom: 1.5rem;
+          right: 1.5rem;
+          left: 1.5rem;
+          width: auto;
+          max-width: none;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    const promptDiv = document.createElement('div');
+    promptDiv.className = 'shuchi-reg-prompt';
+    promptDiv.id = 'shuchiRegPrompt';
+    promptDiv.innerHTML = `
+      <div class="shuchi-reg-prompt-title">
+        <span>Create your Shuchi Account</span>
+        <button class="shuchi-reg-prompt-close" onclick="dismissRegPrompt()">×</button>
+      </div>
+      <div class="shuchi-reg-prompt-desc">
+        Register in 10 seconds to save checkout time, track order history, and personalize your skincare routines.
+      </div>
+      <div class="shuchi-reg-prompt-actions">
+        <button class="shuchi-reg-prompt-btn" onclick="triggerRegPromptSignUp()">Create Account</button>
+        <button class="shuchi-reg-prompt-btn-secondary" onclick="dismissRegPrompt()">Maybe Later</button>
+      </div>
+    `;
+    document.body.appendChild(promptDiv);
+
+    setTimeout(() => promptDiv.classList.add('show'), 50);
+  }, 4000);
+}
+
+function dismissRegPrompt() {
+  const promptDiv = document.getElementById('shuchiRegPrompt');
+  if (promptDiv) {
+    promptDiv.classList.remove('show');
+    setTimeout(() => promptDiv.remove(), 500);
+  }
+  sessionStorage.setItem('shuchi_reg_prompt_dismissed', 'true');
+}
+
+function triggerRegPromptSignUp() {
+  dismissRegPrompt();
+  if (typeof toggleAuthModal === 'function') {
+    toggleAuthModal();
   }
 }
 

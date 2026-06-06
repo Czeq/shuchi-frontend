@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Portal — SHUCHI শুচি</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --sage: #6B8F6B;
+    --sage-light: #A8C4A2;
+    --sage-pale: #D6E8D4;
+    --cream: #F5EFE4;
+    --cream-deep: #EDE4D4;
+    --white: #FAFAF7;
+    --dark: #1A2B1B;
+    --dark-mid: #2F4030;
+    --gold: #B8975A;
+    --gold-light: #D4B47A;
+    --text: #2C3A2D;
+    --text-soft: #5A6E5B;
+    --border: rgba(107, 143, 107, 0.15);
+    
+    /* Status Colors */
+    --status-processing: #B8975A;
+    --status-sent: #6B8F6B;
+    --status-delivered: #2F4030;
+    --status-cancelled: #a33b3b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #FAF9F6;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* LOGIN OVERLAY */
+  #loginOverlay {
+    position: fixed; inset: 0;
+    background: var(--dark);
+    z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.4s ease;
+  }
+  .login-card {
+    background: var(--white);
+    padding: 3rem;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(245, 239, 228, 0.1);
+  }
+  .login-title {
+    font-family: Georgia, serif;
+    font-size: 1.8rem;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  .login-subtitle {
+    font-size: 0.82rem;
+    color: var(--text-soft);
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  .form-group {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .form-group label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-soft);
+    font-weight: 600;
+  }
+  .form-group input {
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+    background: var(--white);
+    border: 1.5px solid var(--cream-deep);
+    border-radius: 6px;
+    outline: none;
+    transition: all 0.3s;
+  }
+  .form-group input:focus {
+    border-color: var(--sage);
+    background: #fff;
+  }
+  .login-btn {
+    width: 100%;
+    padding: 0.9rem;
+    background: var(--dark);
+    color: var(--cream);
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 1rem;
+  }
+  .login-btn:hover {
+    background: var(--sage);
+    color: var(--white);
+  }
+  .login-error {
+    color: var(--status-cancelled);
+    font-size: 0.8rem;
+    margin-top: 0.8rem;
+    text-align: center;
+    display: none;
+  }
+
+  /* SIDEBAR NAVIGATION */
+  aside {
+    width: 260px;
+    background: var(--dark);
+    color: var(--cream);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(245, 239, 228, 0.08);
+    position: fixed;
+    top: 0; bottom: 0; left: 0;
+    z-index: 100;
+  }
+  .brand-header {
+    padding: 2rem 1.8rem;
+    border-bottom: 1px solid rgba(245, 239, 228, 0.08);
+  }
+  .brand-logo {
+    font-family: Georgia, serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--cream);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+  }
+  .brand-logo span { color: var(--sage-light); font-style: italic; }
+  .brand-tag {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--sage-light);
+    margin-top: 0.3rem;
+  }
+  .nav-menu {
+    list-style: none;
+    padding: 1.5rem 0.8rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex-grow: 1;
+  }
+  .nav-item a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1rem;
+    color: rgba(245, 239, 228, 0.7);
+    text-decoration: none;
+    font-size: 0.88rem;
+    border-radius: 6px;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .nav-item a:hover, .nav-item.active a {
+    color: var(--white);
+    background: rgba(245, 239, 228, 0.06);
+  }
+  .nav-item.active a {
+    border-left: 3px solid var(--sage-light);
+    border-radius: 0 6px 6px 0;
+    background: rgba(107, 143, 107, 0.15);
+  }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.85; }
+  .logout-btn {
+    padding: 1.5rem;
+    border-top: 1px solid rgba(245, 239, 228, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    color: rgba(245, 239, 228, 0.5);
+    cursor: pointer;
+  }
+  .logout-btn:hover { color: var(--white); }
+
+  /* MAIN WORKSPACE */
+  main {
+    margin-left: 260px;
+    flex-grow: 1;
+    min-height: 100vh;
+    padding: 2rem 3rem;
+    background: #FAF9F6;
+  }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    border-bottom: 1.5px solid var(--cream-deep);
+    padding-bottom: 1.2rem;
+  }
+  .header-title h1 {
+    font-family: Georgia, serif;
+    font-size: 1.8rem;
+    color: var(--dark);
+    font-weight: 400;
+  }
+  .header-title p {
+    font-size: 0.82rem;
+    color: var(--text-soft);
+    margin-top: 0.2rem;
+  }
+  .header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  .btn-refresh {
+    background: var(--white);
+    border: 1.5px solid var(--cream-deep);
+    color: var(--text);
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+  }
+  .btn-refresh:hover {
+    border-color: var(--sage-light);
+    background: var(--cream);
+  }
+
+  /* KPI CARDS */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .metric-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(107, 143, 107, 0.03);
+    position: relative;
+    overflow: hidden;
+  }
+  .metric-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--sage-light);
+  }
+  .metric-card.alert::before { background: var(--gold); }
+  .metric-card.success::before { background: var(--sage); }
+  .metric-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-soft);
+    font-weight: 600;
+  }
+  .metric-value {
+    font-family: Georgia, serif;
+    font-size: 1.9rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin: 0.6rem 0 0.2rem;
+  }
+  .metric-sub {
+    font-size: 0.76rem;
+    color: var(--text-soft);
+  }
+
+  /* CHARTS LAYOUT */
+  .charts-grid, .analytics-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .analytics-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .chart-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(107, 143, 107, 0.03);
+    display: flex;
+    flex-direction: column;
+  }
+  .chart-card h4 {
+    font-family: Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--dark);
+    margin-bottom: 1.2rem;
+  }
+  .chart-container {
+    height: 250px;
+    position: relative;
+  }
+
+  /* TAB VIEW CONTROLLERS */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* SEARCH & FILTER CONTROLLER */
+  .table-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .search-wrapper {
+    position: relative;
+    max-width: 380px;
+    width: 100%;
+  }
+  .search-input {
+    width: 100%;
+    padding: 0.65rem 1rem 0.65rem 2.5rem;
+    font-size: 0.88rem;
+    background: var(--white);
+    border: 1.5px solid var(--cream-deep);
+    border-radius: 6px;
+    outline: none;
+    transition: all 0.3s;
+  }
+  .search-input:focus { border-color: var(--sage); }
+  .search-icon {
+    position: absolute; left: 0.9rem; top: 50%; transform: translateY(-50%);
+    color: var(--text-soft); pointer-events: none;
+  }
+  .filter-ribbon {
+    display: flex;
+    gap: 0.4rem;
+    background: var(--cream-deep);
+    padding: 0.3rem;
+    border-radius: 6px;
+  }
+  .filter-tab {
+    background: transparent;
+    border: none;
+    padding: 0.45rem 1.1rem;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--text-soft);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .filter-tab.active {
+    background: var(--white);
+    color: var(--dark);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+
+  /* DATA TABLES */
+  .table-container {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(107,143,107,0.03);
+    margin-bottom: 2rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.86rem;
+  }
+  th {
+    background: #F1EFEA;
+    color: var(--dark);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1.5px solid var(--cream-deep);
+  }
+  td {
+    padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid var(--cream-deep);
+    color: var(--text);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(245, 239, 228, 0.25); }
+
+  /* BADGES */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.65rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .badge.status-processing { background: rgba(184, 151, 90, 0.1); color: var(--status-processing); }
+  .badge.status-sent { background: rgba(107, 143, 107, 0.1); color: var(--status-sent); }
+  .badge.status-delivered { background: rgba(47, 64, 48, 0.1); color: var(--status-delivered); }
+  .badge.status-cancelled { background: rgba(163, 59, 59, 0.1); color: var(--status-cancelled); }
+
+  /* BUTTONS & DROPDOWNS */
+  .select-status {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.78rem;
+    background: var(--white);
+    border: 1.5px solid var(--cream-deep);
+    border-radius: 4px;
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .select-status:focus { border-color: var(--sage); }
+
+  .btn-action {
+    background: var(--sage-pale);
+    color: var(--dark-mid);
+    border: 1px solid var(--sage-light);
+    padding: 0.45rem 0.9rem;
+    font-size: 0.76rem;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .btn-action:hover {
+    background: var(--sage);
+    color: var(--white);
+    border-color: var(--sage);
+  }
+
+  .btn-stock-toggle {
+    background: var(--white);
+    color: var(--text);
+    border: 1.5px solid var(--cream-deep);
+    padding: 0.4rem 0.8rem;
+    font-size: 0.74rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+  .btn-stock-toggle.in-stock {
+    background: rgba(107, 143, 107, 0.08);
+    border-color: var(--sage-light);
+    color: var(--sage);
+  }
+  .btn-stock-toggle.out-of-stock {
+    background: rgba(163, 59, 59, 0.06);
+    border-color: rgba(163, 59, 59, 0.2);
+    color: var(--status-cancelled);
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(26, 43, 27, 0.55);
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.35s;
+    padding: 2rem;
+  }
+  .modal-overlay.active { opacity: 1; pointer-events: all; }
+  .modal-box {
+    background: var(--white);
+    max-width: 580px; width: 100%;
+    padding: 2.5rem;
+    border-radius: 8px;
+    position: relative;
+    transform: translateY(20px); transition: transform 0.35s;
+    box-shadow: 0 20px 45px rgba(0,0,0,0.18);
+  }
+  .modal-overlay.active .modal-box { transform: translateY(0); }
+  .modal-close {
+    position: absolute; top: 1.2rem; right: 1.5rem;
+    font-size: 1.4rem; color: var(--text-soft); cursor: pointer;
+    background: none; border: none;
+  }
+  .modal-title { font-family: Georgia, serif; font-size: 1.4rem; color: var(--dark); margin-bottom: 0.3rem; }
+  .modal-subtitle { font-size: 0.82rem; color: var(--text-soft); margin-bottom: 1.5rem; }
+
+  .email-preview-box {
+    background: #FAF9F6;
+    border: 1.5px solid var(--cream-deep);
+    padding: 1.2rem;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: var(--text);
+    white-space: pre-wrap;
+    max-height: 240px;
+    overflow-y: auto;
+    margin-bottom: 1.5rem;
+  }
+  .email-config-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* LOADER */
+  .spinner-wrapper {
+    display: flex; justify-content: center; align-items: center; padding: 4rem 2rem; flex-direction: column; gap: 1rem;
+  }
+  .logo-loader {
+    width: 50px; height: 50px;
+    animation: rotateBloom 3s infinite cubic-bezier(0.45, 0, 0.55, 1);
+    color: var(--sage);
+  }
+  @keyframes rotateBloom {
+    0% { transform: rotate(0deg) scale(0.9); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(0.9); }
+  }
+
+  /* UTILS */
+  .text-right { text-align: right; }
+  .text-soft { color: var(--text-soft); }
+  .bold { font-weight: 600; }
+  
+  /* RESPONSIVE */
+  @media (max-width: 1024px) {
+    .metrics-grid { grid-template-columns: 1fr 1fr; }
+    .charts-grid, .analytics-row {
+      grid-template-columns: 1fr !important;
+    }
+  }
+  @media (max-width: 768px) {
+    body { flex-direction: column; }
+    aside { width: 100%; position: relative; height: auto; border-bottom: 1px solid rgba(245, 239, 228, 0.08); }
+    .nav-menu { flex-direction: row; flex-wrap: wrap; padding: 0.8rem; }
+    main { margin-left: 0; padding: 1.5rem; }
+    .metrics-grid { grid-template-columns: 1fr; }
+    .table-actions { flex-direction: column; align-items: stretch; }
+    .search-wrapper { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay">
+  <div class="login-card">
+    <div class="login-title">SHUCHI Admin</div>
+    <div class="login-subtitle">Secure Offline-First Portal Access</div>
+    
+    <form id="loginForm" onsubmit="handleLocalLogin(event)">
+      <div class="form-group">
+        <label>Passcode / Password</label>
+        <input type="password" id="loginPassword" placeholder="Enter default 'shuchi2026' or 'admin'" required>
+      </div>
+      <button type="submit" class="login-btn">Log In</button>
+      <div id="loginError" class="login-error">Incorrect credentials. Try 'admin' or 'shuchi2026'.</div>
+    </form>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside>
+  <div class="brand-header">
+    <a href="#" class="brand-logo">SHUCHI <span>শুচি</span></a>
+    <div class="brand-tag">Admin Console</div>
+  </div>
+  <ul class="nav-menu">
+    <li class="nav-item active" id="navDash" onclick="switchTab('dashboard')">
+      <a>
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"/></svg>
+        Dashboard
+      </a>
+    </li>
+    <li class="nav-item" id="navOrders" onclick="switchTab('orders')">
+      <a>
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+        Orders
+      </a>
+    </li>
+    <li class="nav-item" id="navProducts" onclick="switchTab('products')">
+      <a>
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        Products
+      </a>
+    </li>
+    <li class="nav-item" id="navCustomers" onclick="switchTab('customers')">
+      <a>
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        Customers
+      </a>
+    </li>
+  </ul>
+  <div class="logout-btn" onclick="handleLogout()">
+    <span>Sign Out</span>
+    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main>
+  <header>
+    <div class="header-title">
+      <h1 id="pageTitle">Admin Dashboard</h1>
+      <p id="pageSubtitle">Real-time indicators and metrics from the Shuchi database.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-refresh" onclick="refreshData()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17"/></svg>
+        Sync Data
+      </button>
+    </div>
+  </header>
+
+  <!-- KPI SECTION -->
+  <div class="metrics-grid">
+    <div class="metric-card success">
+      <div class="metric-label">Total Revenue</div>
+      <div class="metric-value" id="kpiRevenue">৳ 0</div>
+      <div class="metric-sub" id="kpiRevenueSub">Excluding cancelled orders</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Total Orders</div>
+      <div class="metric-value" id="kpiOrders">0</div>
+      <div class="metric-sub">Lifetime orders submitted</div>
+    </div>
+    <div class="metric-card alert">
+      <div class="metric-label">Pending Fulfillments</div>
+      <div class="metric-value" id="kpiPending">0</div>
+      <div class="metric-sub" id="kpiPendingSub">Require supplier notification</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Registered Profiles</div>
+      <div class="metric-value" id="kpiCustomers">0</div>
+      <div class="metric-sub">Shuchi customer database</div>
+    </div>
+  </div>
+
+  <!-- TAB: DASHBOARD -->
+  <div id="tabDashboard" class="tab-content active">
+    
+    <!-- CHARTS PANEL -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h4>Daily Revenue Trend</h4>
+        <div class="chart-container">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h4>Payment Splits</h4>
+        <div class="chart-container" style="display:flex; align-items:center; justify-content:center;">
+          <canvas id="paymentChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="analytics-row">
+      <div class="chart-card">
+        <h4>Top 5 Products (Units Sold)</h4>
+        <div class="chart-container">
+          <canvas id="topProductsChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h4>Best Sellers Rankings</h4>
+        <div style="flex-grow: 1; overflow-y: auto;">
+          <table style="font-size: 0.8rem; width: 100%;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--cream-deep);">
+                <th style="padding: 0.5rem; font-size: 0.65rem; background: transparent; border-bottom: 1px solid var(--cream-deep);">Product</th>
+                <th style="padding: 0.5rem; font-size: 0.65rem; background: transparent; border-bottom: 1px solid var(--cream-deep);" class="text-right">Units</th>
+                <th style="padding: 0.5rem; font-size: 0.65rem; background: transparent; border-bottom: 1px solid var(--cream-deep);" class="text-right">Est. Revenue</th>
+              </tr>
+            </thead>
+            <tbody id="topProductsRankBody">
+              <tr><td colspan="3" class="text-soft text-center" style="padding: 2rem;">Awaiting database synchronization...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT ACTIVITY -->
+    <div class="table-actions">
+      <h3 style="font-family: Georgia, serif; font-size: 1.25rem; font-weight: 400; color: var(--dark);">Recent Activity (Latest Orders)</h3>
+      <button class="btn-action" onclick="switchTab('orders')">View All Orders</button>
+    </div>
+    <div class="table-container">
+      <table id="recentOrdersTable">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Area</th>
+            <th>Total Price</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="recentOrdersBody">
+          <tr>
+            <td colspan="6" class="text-soft text-center">Loading live orders...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: ORDERS -->
+  <div id="tabOrders" class="tab-content">
+    <div class="table-actions">
+      <div class="search-wrapper">
+        <input type="text" class="search-input" id="orderSearch" placeholder="Search orders by ID, name, phone, items..." oninput="filterOrdersTable()">
+        <svg class="search-icon" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+      
+      <div class="filter-ribbon">
+        <button class="filter-tab active" onclick="setOrderStatusFilter('all', this)">All</button>
+        <button class="filter-tab" onclick="setOrderStatusFilter('processing', this)">Processing</button>
+        <button class="filter-tab" onclick="setOrderStatusFilter('sent to supplier', this)">Sent to Supplier</button>
+        <button class="filter-tab" onclick="setOrderStatusFilter('delivered', this)">Delivered</button>
+        <button class="filter-tab" onclick="setOrderStatusFilter('cancelled', this)">Cancelled</button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table id="ordersTable">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Date</th>
+            <th>Customer / Contact</th>
+            <th>Items Ordered</th>
+            <th>Total Price</th>
+            <th>Fulfillment Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody">
+          <tr>
+            <td colspan="7" class="text-soft text-center">Loading orders database...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: PRODUCTS -->
+  <div id="tabProducts" class="tab-content">
+    <div class="table-actions">
+      <div class="search-wrapper">
+        <input type="text" class="search-input" id="productSearch" placeholder="Search products by title, brand, category..." oninput="filterProductsTable()">
+        <svg class="search-icon" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table id="productsTable">
+        <thead>
+          <tr>
+            <th>ID / SKU</th>
+            <th>Product Title</th>
+            <th>Brand</th>
+            <th>Volume</th>
+            <th>Price</th>
+            <th class="text-right">Stock Status</th>
+          </tr>
+        </thead>
+        <tbody id="productsBody">
+          <tr>
+            <td colspan="6" class="text-soft text-center">Loading inventory lists...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB: CUSTOMERS -->
+  <div id="tabCustomers" class="tab-content">
+    <div class="table-actions">
+      <div class="search-wrapper">
+        <input type="text" class="search-input" id="customerSearch" placeholder="Search profiles by name, phone, address..." oninput="filterCustomersTable()">
+        <svg class="search-icon" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table id="customersTable">
+        <thead>
+          <tr>
+            <th>Customer Name</th>
+            <th>Phone</th>
+            <th>Delivery Address</th>
+            <th class="text-right">Registered On</th>
+          </tr>
+        </thead>
+        <tbody id="customersBody">
+          <tr>
+            <td colspan="4" class="text-soft text-center">Loading profiles registry...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL: SEND TO SUPPLIER EMAIL -->
+<div class="modal-overlay" id="supplierModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="toggleSupplierModal(false)">×</button>
+    <div class="modal-title">Send Order to Supplier</div>
+    <div class="modal-subtitle">Format and dispatch order details directly to your supplier via email.</div>
+    
+    <div class="email-config-inputs">
+      <div class="form-group">
+        <label>Supplier Email</label>
+        <input type="email" id="supplierEmailInput" value="supplier@example.com" placeholder="supplier@example.com">
+      </div>
+      <div class="form-group">
+        <label>Order ID Reference</label>
+        <input type="text" id="supplierOrderRef" readonly>
+      </div>
+    </div>
+
+    <div class="email-preview-box" id="emailPreview">
+      <!-- Generated email body goes here -->
+    </div>
+
+    <div style="display: flex; gap: 0.8rem; justify-content: flex-end;">
+      <button class="btn-refresh" onclick="copyEmailPreview()" style="font-weight: 600;">Copy to Clipboard</button>
+      <button class="btn-action" onclick="sendSupplierEmail()" style="padding: 0.65rem 1.4rem;">Send Email</button>
+    </div>
+    
+    <!-- Code block template for programmatic automated sending via API (Resend) -->
+    <div style="margin-top: 2rem; border-top: 1px solid var(--cream-deep); padding-top: 1rem;">
+      <p style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-soft); font-weight: 600; margin-bottom: 0.5rem; letter-spacing: 0.05em;">Developer Note: API Automated Integration</p>
+      <p style="font-size: 0.78rem; color: var(--text-soft); line-height: 1.4; margin-bottom: 0.8rem;">
+        To send this email fully programmatically behind the scenes (without opening a mail client), configure a serverless endpoint to call the **Resend API** like so:
+      </p>
+      <pre style="background: #272822; color: #f8f8f2; padding: 0.8rem; border-radius: 4px; font-size: 0.68rem; overflow-x: auto; font-family: monospace;">
+fetch('https://api.resend.com/emails', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_RESEND_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    from: 'orders@shuchi.bd',
+    to: supplierEmail,
+    subject: `New Order Dispatch: ${orderRef}`,
+    html: emailHtmlBody
+  })
+});</pre>
+    </div>
+  </div>
+</div>
+
+<script>
+// Supabase connection client setup (reusing config from storefront/cart)
+const SUPABASE_URL = "https://okprwbzfsyvrkpygjkum.supabase.co";
+const SUPABASE_KEY = "sb_publishable_LAgGxlaltxGIe6wWu1DBkQ_PJN0DLNG";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// State cache
+let ordersList = [];
+let productsList = [];
+let customersList = [];
+let activeTab = 'dashboard';
+let orderStatusFilter = 'all';
+let currentFulfillmentOrder = null;
+
+// Chart JS Instances
+let revenueChartInstance = null;
+let paymentChartInstance = null;
+let topProductsChartInstance = null;
+
+// Page Initializer
+document.addEventListener('DOMContentLoaded', () => {
+  // Check localStorage session
+  const isLoggedIn = localStorage.getItem('shuchi_admin_session');
+  if (isLoggedIn === 'active') {
+    document.getElementById('loginOverlay').style.display = 'none';
+    refreshData();
+  }
+});
+
+// Auth handlers
+function handleLocalLogin(e) {
+  e.preventDefault();
+  const pass = document.getElementById('loginPassword').value;
+  if (pass === 'admin' || pass === 'shuchi2026') {
+    localStorage.setItem('shuchi_admin_session', 'active');
+    document.getElementById('loginOverlay').style.opacity = 0;
+    setTimeout(() => {
+      document.getElementById('loginOverlay').style.display = 'none';
+      refreshData();
+    }, 400);
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+// Sign out handler
+function handleLogout() {
+  localStorage.removeItem('shuchi_admin_session');
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loginOverlay').style.opacity = 1;
+  
+  // Destroy chart assets
+  if (revenueChartInstance) revenueChartInstance.destroy();
+  if (paymentChartInstance) paymentChartInstance.destroy();
+  if (topProductsChartInstance) topProductsChartInstance.destroy();
+}
+
+// Database Sync routines
+async function refreshData() {
+  setLoadingState(true);
+  try {
+    await Promise.all([
+      fetchOrders(),
+      fetchProducts(),
+      fetchCustomers()
+    ]);
+    calculateKPIs();
+    renderDashboard();
+  } catch (error) {
+    console.error("Failed to sync database records:", error);
+    alert("Database connection failed. Please ensure Supabase keys are active.");
+  } finally {
+    setLoadingState(false);
+  }
+}
+
+function setLoadingState(isLoading) {
+  const loadingHTML = `
+    <div class="spinner-wrapper">
+      <svg class="logo-loader" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M428.393 458.741C397.367 442.352 389.639 455.699 350.257 463.372C297.897 480.729 273.085 493.192 219.832 520.489L270.021 623.63C288.39 656.569 303.786 659.091 332.525 683.826C379.073 693.884 408.435 692.732 468.538 674.586L591.894 632.338L521.57 537.477L428.393 458.741Z" fill="currentColor"/>
+        <path d="M573.217 875.61C558.753 907.579 544.465 901.772 508.648 919.854C456.64 938.242 429.398 943.607 370.592 954.689L347.01 842.436C341.328 805.152 351.945 793.721 359.486 756.56C390.094 720.077 413.996 702.986 472.604 680.474L595.96 638.226L598.559 756.283L573.217 875.61Z" fill="currentColor"/>
+        <path d="M838.875 684.401C873.212 680.144 872.05 664.541 899.764 635.376C932.621 590.63 945.829 565.89 973.871 512.335L875.613 455.277C842.332 438.408 828.42 445.201 791.288 441.173C747.87 459.682 724.662 477.614 685.954 527.493L609.301 634.042L719.3 672.554L838.875 684.401Z" fill="currentColor"/>
+        <path d="M633.551 876.431C648.671 908.629 662.802 902.957 698.928 921.458C751.214 940.435 778.511 946.098 837.423 957.823L858.536 845.541C863.402 808.225 852.564 796.654 844.24 759.324C812.915 722.431 788.698 705.048 729.738 681.868L605.75 638.226L605.698 756.545L633.551 876.431Z" fill="currentColor"/>
+        <path d="M478.04 427.924C470.246 393.217 484.887 389.034 502.085 352.27C531.758 305.223 549.852 284.014 589.206 238.634L674.723 314.396C701.444 340.894 699.975 356.68 716.285 391.275C714.156 439.626 705.68 468.205 673.311 522.665L602.112 633.156L529.533 539.712L478.04 427.924Z" fill="currentColor"/>
+      </svg>
+      <p style="color: var(--sage); font-size: 0.85rem; letter-spacing: 0.08em; font-weight: 500;">Synchronizing with database...</p>
+    </div>
+  `;
+  if (isLoading) {
+    document.getElementById('recentOrdersBody').innerHTML = loadingHTML;
+    document.getElementById('ordersBody').innerHTML = loadingHTML;
+    document.getElementById('productsBody').innerHTML = loadingHTML;
+    document.getElementById('customersBody').innerHTML = loadingHTML;
+  }
+}
+
+async function fetchOrders() {
+  const { data, error } = await supabaseClient
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  ordersList = data || [];
+}
+
+async function fetchProducts() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('products')
+      .select('*')
+      .order('id', { ascending: true });
+    if (error) throw error;
+    productsList = data || [];
+  } catch (e) {
+    console.warn("Products table fetch error or empty:", e);
+    productsList = [];
+  }
+}
+
+async function fetchCustomers() {
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('*')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  customersList = data || [];
+}
+
+// KPI Calculation
+function calculateKPIs() {
+  const revenueTotal = ordersList
+    .filter(o => (o.status || '').toLowerCase() !== 'cancelled')
+    .reduce((acc, curr) => acc + parseFloat(curr.total_price || 0), 0);
+  
+  const pendingOrders = ordersList.filter(o => {
+    const s = (o.status || '').toLowerCase();
+    return s === 'processing' || s === '';
+  }).length;
+
+  document.getElementById('kpiRevenue').textContent = `৳ ${revenueTotal.toLocaleString()}`;
+  document.getElementById('kpiOrders').textContent = ordersList.length;
+  document.getElementById('kpiPending').textContent = pendingOrders;
+  document.getElementById('kpiPendingSub').textContent = `${pendingOrders} orders awaiting supplier dispatch`;
+  document.getElementById('kpiCustomers').textContent = customersList.length;
+}
+
+// Navigation Tab Switcher
+function switchTab(tabName) {
+  activeTab = tabName;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+
+  // Capitalize active name for title
+  const formattedTitle = tabName.charAt(0).toUpperCase() + tabName.slice(1) + " Portal";
+  document.getElementById('pageTitle').textContent = tabName === 'dashboard' ? 'Admin Dashboard' : formattedTitle;
+  document.getElementById('pageSubtitle').textContent = `Manage and monitor ${tabName} in real-time.`;
+
+  if (tabName === 'dashboard') {
+    document.getElementById('navDash').classList.add('active');
+    document.getElementById('tabDashboard').classList.add('active');
+  } else if (tabName === 'orders') {
+    document.getElementById('navOrders').classList.add('active');
+    document.getElementById('tabOrders').classList.add('active');
+  } else if (tabName === 'products') {
+    document.getElementById('navProducts').classList.add('active');
+    document.getElementById('tabProducts').classList.add('active');
+  } else if (tabName === 'customers') {
+    document.getElementById('navCustomers').classList.add('active');
+    document.getElementById('tabCustomers').classList.add('active');
+  }
+
+  renderDashboard();
+}
+
+// Render Controller
+function renderDashboard() {
+  if (activeTab === 'dashboard') {
+    renderRecentOrders();
+    renderCharts();
+  } else if (activeTab === 'orders') {
+    renderOrdersTable();
+  } else if (activeTab === 'products') {
+    renderProductsTable();
+  } else if (activeTab === 'customers') {
+    renderCustomersTable();
+  }
+}
+
+// 1. Dashboard Tab Renderer
+function renderRecentOrders() {
+  const tbody = document.getElementById('recentOrdersBody');
+  tbody.innerHTML = '';
+  const recent = ordersList.slice(0, 5);
+
+  if (recent.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-soft text-center">No orders registered yet.</td></tr>';
+    return;
+  }
+
+  recent.forEach(order => {
+    const status = order.status || 'Processing';
+    const cleanStatus = status.toLowerCase().replace(/\s+/g, '-');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="bold">${order.order_id}</td>
+      <td>${order.customer_name || 'Guest'}</td>
+      <td>${order.area || 'Unknown'}</td>
+      <td>৳ ${parseInt(order.total_price || 0).toLocaleString()}</td>
+      <td><span class="badge status-${cleanStatus}">${status}</span></td>
+      <td class="text-right">
+        <button class="btn-action" onclick="switchTab('orders')">Manage</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// 2. Analytical Charts Generator
+function renderCharts() {
+  if (ordersList.length === 0) return;
+
+  // Clean old instances
+  if (revenueChartInstance) revenueChartInstance.destroy();
+  if (paymentChartInstance) paymentChartInstance.destroy();
+  if (topProductsChartInstance) topProductsChartInstance.destroy();
+
+  const validOrders = ordersList.filter(o => (o.status || '').toLowerCase() !== 'cancelled');
+
+  // A. Daily Revenue Trend Data
+  const sortedOrders = [...validOrders].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  const revenueByDate = {};
+  sortedOrders.forEach(o => {
+    if (!o.created_at) return;
+    const dateStr = new Date(o.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    revenueByDate[dateStr] = (revenueByDate[dateStr] || 0) + parseFloat(o.total_price || 0);
+  });
+  
+  const dates = Object.keys(revenueByDate).slice(-15);
+  const revenueValues = dates.map(d => revenueByDate[d]);
+
+  // B. Payment Method Distribution
+  let bkashCount = 0;
+  let codCount = 0;
+  validOrders.forEach(o => {
+    const pay = (o.payment_method || '').toLowerCase();
+    if (pay.includes('bkash')) bkashCount++;
+    else codCount++;
+  });
+
+  // C. Product sales aggregates (What users buy the most)
+  const productSales = {};
+  validOrders.forEach(o => {
+    if (!o.items) return;
+    const itemsList = o.items.split(', ');
+    itemsList.forEach(itemStr => {
+      // Regex parsing: e.g. "2x COSRX Snail Mucin Essence"
+      const match = itemStr.match(/^(\d+)\s*x\s*(.+)$/i);
+      if (match) {
+        const qty = parseInt(match[1]);
+        const title = match[2].trim();
+        productSales[title] = (productSales[title] || 0) + qty;
+      } else {
+        const fallbackTitle = itemStr.trim();
+        if (fallbackTitle) {
+          productSales[fallbackTitle] = (productSales[fallbackTitle] || 0) + 1;
+        }
+      }
+    });
+  });
+
+  // Sort products by quantity sold
+  const sortedProducts = Object.keys(productSales)
+    .map(title => {
+      const quantity = productSales[title];
+      const unitPrice = findProductPriceByTitle(title) || 1100; // default estimate if lookup fails
+      return {
+        title,
+        qty: quantity,
+        estRevenue: quantity * unitPrice
+      };
+    })
+    .sort((a, b) => b.qty - a.qty);
+
+  // Render Rank Table
+  const rankBody = document.getElementById('topProductsRankBody');
+  rankBody.innerHTML = '';
+  if (sortedProducts.length === 0) {
+    rankBody.innerHTML = '<tr><td colspan="3" class="text-soft text-center" style="padding: 1.5rem;">No items sold yet.</td></tr>';
+  } else {
+    sortedProducts.slice(0, 5).forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="padding: 0.65rem 0.5rem; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${p.title}">${p.title}</td>
+        <td style="padding: 0.65rem 0.5rem;" class="text-right bold">${p.qty}</td>
+        <td style="padding: 0.65rem 0.5rem;" class="text-right bold text-soft">৳ ${p.estRevenue.toLocaleString()}</td>
+      `;
+      rankBody.appendChild(tr);
+    });
+  }
+
+  // Get Top 5 arrays for graphical display
+  const top5 = sortedProducts.slice(0, 5);
+  const top5Labels = top5.map(p => p.title.length > 20 ? p.title.substring(0, 18) + '..' : p.title);
+  const top5Values = top5.map(p => p.qty);
+
+  // Initialize Line Chart (Daily Sales)
+  const ctxRev = document.getElementById('revenueChart').getContext('2d');
+  revenueChartInstance = new Chart(ctxRev, {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: [{
+        label: 'Revenue (৳)',
+        data: revenueValues,
+        borderColor: '#6B8F6B', // sage
+        backgroundColor: 'rgba(107, 143, 107, 0.08)',
+        fill: true,
+        tension: 0.3,
+        borderWidth: 2,
+        pointBackgroundColor: '#1A2B1B', // dark
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0, 0, 0, 0.04)' },
+          ticks: { color: '#5A6E5B', font: { size: 10 } }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: '#5A6E5B', font: { size: 10 } }
+        }
+      }
+    }
+  });
+
+  // Initialize Doughnut Chart (Payment Split)
+  const ctxPay = document.getElementById('paymentChart').getContext('2d');
+  paymentChartInstance = new Chart(ctxPay, {
+    type: 'doughnut',
+    data: {
+      labels: ['bKash', 'COD'],
+      datasets: [{
+        data: [bkashCount, codCount],
+        backgroundColor: ['#E2136E', '#6B8F6B'],
+        borderWidth: 2,
+        borderColor: '#FAFAF7'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { boxWidth: 10, color: '#2C3A2D', font: { size: 10 } }
+        }
+      },
+      cutout: '65%'
+    }
+  });
+
+  // Initialize Horizontal Bar Chart (Top Products)
+  const ctxTop = document.getElementById('topProductsChart').getContext('2d');
+  topProductsChartInstance = new Chart(ctxTop, {
+    type: 'bar',
+    data: {
+      labels: top5Labels,
+      datasets: [{
+        label: 'Units Sold',
+        data: top5Values,
+        backgroundColor: '#B8975A', // gold
+        borderRadius: 4,
+        maxBarThickness: 30
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y', // horizontal display
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0, 0, 0, 0.04)' },
+          ticks: { stepSize: 1, color: '#5A6E5B', font: { size: 10 } }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: '#2C3A2D', font: { size: 10 } }
+        }
+      }
+    }
+  });
+}
+
+function findProductPriceByTitle(title) {
+  const normTitle = title.toLowerCase();
+  
+  // Direct match
+  const prod = productsList.find(p => (p.title || '').toLowerCase() === normTitle);
+  if (prod) return parseFloat(prod.price || 0);
+  
+  // Fuzzy match containment
+  const fuzzy = productsList.find(p => {
+    const pTitle = (p.title || '').toLowerCase();
+    return pTitle.includes(normTitle) || normTitle.includes(pTitle);
+  });
+  if (fuzzy) return parseFloat(fuzzy.price || 0);
+  
+  return null;
+}
+
+// 3. Orders Tab Renderer
+function renderOrdersTable() {
+  const tbody = document.getElementById('ordersBody');
+  tbody.innerHTML = '';
+
+  let filtered = ordersList;
+
+  // Status Ribbon filter
+  if (orderStatusFilter !== 'all') {
+    filtered = filtered.filter(o => {
+      const status = (o.status || 'processing').toLowerCase();
+      if (orderStatusFilter === 'processing' && status === '') return true;
+      return status === orderStatusFilter;
+    });
+  }
+
+  // Search input filter
+  const query = document.getElementById('orderSearch').value.toLowerCase().trim();
+  if (query) {
+    filtered = filtered.filter(o => 
+      (o.order_id || '').toLowerCase().includes(query) ||
+      (o.customer_name || '').toLowerCase().includes(query) ||
+      (o.phone || '').toLowerCase().includes(query) ||
+      (o.items || '').toLowerCase().includes(query)
+    );
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="text-soft text-center">No orders match the current filters.</td></tr>`;
+    return;
+  }
+
+  filtered.forEach(order => {
+    const dateStr = new Date(order.created_at).toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric'
+    });
+
+    const status = order.status || 'Processing';
+    const cleanStatus = status.toLowerCase().replace(/\s+/g, '-');
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="bold">${order.order_id}</td>
+      <td class="text-soft">${dateStr}</td>
+      <td>
+        <div class="bold">${order.customer_name}</div>
+        <div class="text-soft" style="font-size:0.78rem;">${order.phone}</div>
+        <div class="text-soft" style="font-size:0.75rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${order.address}">${order.address}</div>
+      </td>
+      <td style="font-size:0.82rem; line-height: 1.4; max-width: 250px;">${order.items || 'None'}</td>
+      <td class="bold">৳ ${parseInt(order.total_price || 0).toLocaleString()}</td>
+      <td>
+        <select class="select-status" onchange="updateOrderStatus('${order.order_id}', this.value)">
+          <option value="Processing" ${status === 'Processing' ? 'selected' : ''}>Processing</option>
+          <option value="Sent to Supplier" ${status === 'Sent to Supplier' ? 'selected' : ''}>Sent to Supplier</option>
+          <option value="Delivered" ${status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+          <option value="Cancelled" ${status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+        </select>
+      </td>
+      <td class="text-right">
+        <button class="btn-action" onclick="openSupplierModal('${order.order_id}')">
+          <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Email Supplier
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterOrdersTable() {
+  renderOrdersTable();
+}
+
+function setOrderStatusFilter(status, btn) {
+  orderStatusFilter = status;
+  document.querySelectorAll('#tabOrders .filter-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderOrdersTable();
+}
+
+// 4. Products Tab Renderer
+function renderProductsTable() {
+  const tbody = document.getElementById('productsBody');
+  tbody.innerHTML = '';
+
+  let filtered = productsList;
+  const query = document.getElementById('productSearch').value.toLowerCase().trim();
+  
+  if (query) {
+    filtered = filtered.filter(p => 
+      (p.title || '').toLowerCase().includes(query) ||
+      (p.brand || '').toLowerCase().includes(query) ||
+      (p.id || '').toLowerCase().includes(query)
+    );
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-soft text-center">No products found in this search query.</td></tr>`;
+    return;
+  }
+
+  filtered.forEach(prod => {
+    const volumeStr = prod.volume ? `${prod.volume} ${prod.volume_unit || ''}`.trim() : 'N/A';
+    const inStock = prod.stock !== false && prod.stock !== 'false';
+    
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="bold text-soft">${prod.id}</td>
+      <td class="bold">${prod.title || '[Untitled]'}</td>
+      <td>${prod.brand || 'No Brand'}</td>
+      <td class="text-soft">${volumeStr}</td>
+      <td class="bold">৳ ${prod.price}</td>
+      <td class="text-right">
+        <button class="btn-stock-toggle ${inStock ? 'in-stock' : 'out-of-stock'}" onclick="toggleProductStock('${prod.id}', ${inStock})">
+          ${inStock ? '✓ In Stock' : '✗ Out of Stock'}
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterProductsTable() {
+  renderProductsTable();
+}
+
+// 5. Customers Tab Renderer
+function renderCustomersTable() {
+  const tbody = document.getElementById('customersBody');
+  tbody.innerHTML = '';
+
+  let filtered = customersList;
+  const query = document.getElementById('customerSearch').value.toLowerCase().trim();
+  
+  if (query) {
+    filtered = filtered.filter(c => 
+      (c.name || '').toLowerCase().includes(query) ||
+      (c.phone || '').toLowerCase().includes(query) ||
+      (c.address || '').toLowerCase().includes(query)
+    );
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" class="text-soft text-center">No customer profiles match this search.</td></tr>`;
+    return;
+  }
+
+  filtered.forEach(cust => {
+    const regDate = cust.created_at ? new Date(cust.created_at).toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric'
+    }) : 'N/A';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="bold">${cust.name}</td>
+      <td>${cust.phone}</td>
+      <td class="text-soft" style="max-width: 350px; line-height: 1.4;">${cust.address || 'No Address Provided'}</td>
+      <td class="text-soft text-right">${regDate}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterCustomersTable() {
+  renderCustomersTable();
+}
+
+// Data Mutation: Update Order Fulfillment Status
+async function updateOrderStatus(orderId, newStatus) {
+  try {
+    const { error } = await supabaseClient
+      .from('orders')
+      .update({ status: newStatus })
+      .eq('order_id', orderId);
+
+    if (error) throw error;
+
+    // Update local state
+    const index = ordersList.findIndex(o => o.order_id === orderId);
+    if (index !== -1) {
+      ordersList[index].status = newStatus;
+    }
+    
+    calculateKPIs();
+    renderDashboard();
+  } catch (err) {
+    console.error("Fulfillment update failed:", err);
+    alert(`Unable to update order status: ${err.message}`);
+  }
+}
+
+// Data Mutation: Toggle Product Stock Status
+async function toggleProductStock(prodId, currentStockState) {
+  const newStockState = !currentStockState;
+  try {
+    const { error } = await supabaseClient
+      .from('products')
+      .update({ stock: newStockState })
+      .eq('id', prodId);
+
+    if (error) throw error;
+
+    // Update local state
+    const index = productsList.findIndex(p => p.id === prodId);
+    if (index !== -1) {
+      productsList[index].stock = newStockState;
+    }
+    
+    renderProductsTable();
+  } catch (err) {
+    console.error("Stock toggle failed:", err);
+    alert(`Unable to update stock status: ${err.message}`);
+  }
+}
+
+// Supplier Modal Controllers
+function toggleSupplierModal(show) {
+  const modal = document.getElementById('supplierModal');
+  if (show) {
+    modal.classList.add('active');
+  } else {
+    modal.classList.remove('active');
+  }
+}
+
+function openSupplierModal(orderId) {
+  const order = ordersList.find(o => o.order_id === orderId);
+  if (!order) return;
+
+  currentFulfillmentOrder = order;
+  document.getElementById('supplierOrderRef').value = orderId;
+  
+  const dateStr = new Date(order.created_at).toLocaleDateString('en-US', {
+    month: 'long', day: 'numeric', year: 'numeric'
+  });
+  
+  const textBody = `DEAR SUPPLIER,
+
+PLEASE DISPATCH THE FOLLOWING ORDER ITEMS FOR SHUCHI (শুচি).
+
+ORDER REFERENCE: ${order.order_id}
+ORDER DATE: ${dateStr}
+
+=======================================
+DISPATCH ITEMS:
+${order.items.replace(/,/g, '\n')}
+=======================================
+
+DELIVERY INFORMATION:
+CUSTOMER: ${order.customer_name}
+PHONE: ${order.phone}
+ADDRESS: ${order.address}
+AREA / REGION: ${order.area || 'N/A'}
+DELIVERY WINDOW: 72 hours max
+
+THANK YOU,
+SHUCHI INVENTORY SYSTEM`;
+
+  document.getElementById('emailPreview').textContent = textBody;
+  toggleSupplierModal(true);
+}
+
+// Action: Copy text block
+function copyEmailPreview() {
+  const text = document.getElementById('emailPreview').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    alert("Order details copied to clipboard!");
+  }).catch(err => {
+    console.error("Clipboard write failed:", err);
+  });
+}
+
+// Action: Send Email (Mailto Client Trigger)
+function sendSupplierEmail() {
+  if (!currentFulfillmentOrder) return;
+  
+  const recipient = document.getElementById('supplierEmailInput').value;
+  const subject = encodeURIComponent(`Shuchi Order Dispatch Reference: ${currentFulfillmentOrder.order_id}`);
+  const body = encodeURIComponent(document.getElementById('emailPreview').textContent);
+  
+  // Open default mail client pre-filled
+  window.location.href = `mailto:${recipient}?subject=${subject}&body=${body}`;
+  
+  // Optionally update status to 'Sent to Supplier' automatically
+  updateOrderStatus(currentFulfillmentOrder.order_id, 'Sent to Supplier');
+  toggleSupplierModal(false);
+}
+</script>
+</body>
+</html>
