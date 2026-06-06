@@ -505,8 +505,12 @@
     <button id="searchClearBtn" class="search-clear-btn" onclick="clearSearch()">×</button>
   </div>
 
-  <div class="filter-bar fi vis" id="brandFilterBar">
-    <button class="filter-btn active">All</button>
+  <div class="filter-bar fi vis" id="brandFilterBar" style="margin-bottom: 0.5rem;">
+    <button class="filter-btn active">All Brands</button>
+  </div>
+
+  <div class="filter-bar fi vis" id="typeFilterBar" style="margin-top: 0.5rem; margin-bottom: 2rem;">
+    <button class="filter-btn active">All Types</button>
   </div>
   
   <div class="products-grid" id="prodGrid">
@@ -588,9 +592,61 @@ let allProducts = [];
 let filteredProducts = [];
 let rawProductsList = [];
 let currentBrand = 'all';
+let currentType = 'all';
 let currentSearchQuery = '';
 let currentPage = 1;
 const itemsPerPage = 15; // 5 rows of 3 items each
+
+// Classification helper
+function classifyProductType(title, desc) {
+  const t = (title || '').toLowerCase();
+  const d = (desc || '').toLowerCase();
+  
+  if (t.includes('shampoo') || t.includes('conditioner') || t.includes('hair wash') || t.includes('hair treatment') || t.includes('scalp')) {
+    return 'Shampoo';
+  }
+  if (t.includes('body wash') || t.includes('shower gel') || t.includes('body cleanser') || t.includes('shower cream')) {
+    return 'Body Wash';
+  }
+  if (t.includes('body cream') || t.includes('body lotion') || t.includes('body milk') || t.includes('body butter') || t.includes('body moisturizer')) {
+    return 'Body Cream';
+  }
+  if (t.includes('sunscreen') || t.includes('sun cream') || t.includes('sunblock') || t.includes('sun gel') || t.includes('sun stick') || t.includes('sun fluid')) {
+    return 'Sunscreen';
+  }
+  if (t.includes('cleansing oil') || t.includes('oil cleanser') || t.includes('cleansing balm') || t.includes('micellar') || t.includes('makeup remover') || t.includes('remover')) {
+    return 'Cleanser';
+  }
+  if (t.includes('facewash') || t.includes('face wash') || t.includes('foam cleanser') || t.includes('cleansing foam') || t.includes('foaming') || t.includes('gel cleanser') || t.includes('gentle cleanser') || t.includes('cleansing gel') || (t.includes('cleanser') && !t.includes('oil') && !t.includes('balm'))) {
+    return 'Facewash';
+  }
+  if (t.includes('toner') || t.includes('tonique') || t.includes('skin refiner') || t.includes('toning')) {
+    return 'Toner';
+  }
+  if (t.includes('essence') || t.includes('mucin') || t.includes('serum') || t.includes('ampoule') || t.includes('treatment essence') || t.includes('booster')) {
+    return 'Essence & Serum';
+  }
+  if (t.includes('lotion') || t.includes('emulsion') || t.includes('moisturizing lotion')) {
+    return 'Lotion';
+  }
+  if (t.includes('cream') || t.includes('gel cream') || t.includes('moisturizer') || t.includes('moisturising') || t.includes('soothing cream') || t.includes('balm') || t.includes('sleeping mask') || t.includes('sleeping pack') || t.includes('water gel')) {
+    return 'Cream';
+  }
+  
+  // Fallbacks by analyzing description
+  if (d.includes('shampoo') || d.includes('hair')) return 'Shampoo';
+  if (d.includes('body wash') || d.includes('shower gel')) return 'Body Wash';
+  if (d.includes('body cream') || d.includes('body lotion')) return 'Body Cream';
+  if (d.includes('sunscreen') || d.includes('sun cream') || d.includes('sunblock')) return 'Sunscreen';
+  if (d.includes('cleansing oil') || d.includes('cleansing balm') || d.includes('makeup remover')) return 'Cleanser';
+  if (d.includes('facewash') || d.includes('face wash') || d.includes('cleansing foam') || d.includes('foaming cleanser')) return 'Facewash';
+  if (d.includes('toner') || d.includes('toning')) return 'Toner';
+  if (d.includes('essence') || d.includes('serum') || d.includes('ampoule')) return 'Essence & Serum';
+  if (d.includes('lotion') || d.includes('emulsion')) return 'Lotion';
+  if (d.includes('cream') || d.includes('moisturizer') || d.includes('gel cream')) return 'Cream';
+
+  return 'Other Skincare';
+}
 
 // Fetch and load
 async function loadStorefrontProducts() {
@@ -618,6 +674,7 @@ async function loadStorefrontProducts() {
         applyFilters(false);
         checkUrlSearchQuery();
         generateBrandFilters(parsed);
+        generateTypeFilters(parsed);
         hasCache = true;
       }
     } catch(e) {
@@ -660,6 +717,7 @@ async function loadStorefrontProducts() {
     applyFilters(false);
     checkUrlSearchQuery();
     generateBrandFilters(liveProducts);
+    generateTypeFilters(liveProducts);
   } catch (error) {
     console.error("Error fetching live products:", error);
     if (!hasCache) {
@@ -685,6 +743,16 @@ function applyFilters(resetPage = true) {
       Object.keys(p).forEach(k => { norm[k.trim().toLowerCase()] = p[k]; });
       const pBrand = norm.brand || '';
       return pBrand.toLowerCase() === currentBrand.toLowerCase();
+    });
+  }
+
+  // 2. Filter by Product Type
+  if (currentType !== 'all') {
+    tempProducts = tempProducts.filter(p => {
+      const norm = {};
+      Object.keys(p).forEach(k => { norm[k.trim().toLowerCase()] = p[k]; });
+      const type = classifyProductType(norm.title, norm.desc);
+      return type.toLowerCase() === currentType.toLowerCase();
     });
   }
 
@@ -717,7 +785,17 @@ function applyFilters(resetPage = true) {
 function filterBrand(brand, btn, resetPage = true) {
   currentBrand = brand;
   if (btn) {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#brandFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  applyFilters(resetPage);
+}
+
+// Product Type Filter
+function filterType(type, btn, resetPage = true) {
+  currentType = type;
+  if (btn) {
+    document.querySelectorAll('#typeFilterBar .filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
   }
   applyFilters(resetPage);
@@ -795,6 +873,41 @@ function generateBrandFilters(products) {
     btn.className = `filter-btn ${activeBrand.toLowerCase() === brand.toLowerCase() ? 'active' : ''}`;
     btn.textContent = brand;
     btn.onclick = function() { filterBrand(brand, this); };
+    filterBar.appendChild(btn);
+  });
+}
+
+// Dynamic product type filters
+function generateTypeFilters(products) {
+  const filterBar = document.getElementById('typeFilterBar');
+  if (!filterBar) return;
+  
+  const activeType = currentType;
+
+  filterBar.innerHTML = '';
+  const btnAll = document.createElement('button');
+  btnAll.className = `filter-btn ${activeType === 'all' ? 'active' : ''}`;
+  btnAll.textContent = 'All Types';
+  btnAll.onclick = function() { filterType('all', this); };
+  filterBar.appendChild(btnAll);
+
+  const types = [];
+  products.forEach(product => {
+    const p = {};
+    Object.keys(product).forEach(k => {
+      p[k.trim().toLowerCase()] = product[k];
+    });
+    const type = classifyProductType(p.title, p.desc);
+    if (type && !types.includes(type)) {
+      types.push(type);
+    }
+  });
+
+  types.sort().forEach(type => {
+    const btn = document.createElement('button');
+    btn.className = `filter-btn ${activeType.toLowerCase() === type.toLowerCase() ? 'active' : ''}`;
+    btn.textContent = type;
+    btn.onclick = function() { filterType(type, this); };
     filterBar.appendChild(btn);
   });
 }
