@@ -124,7 +124,9 @@ function parseCSVToProducts(csvText) {
       skin_type: colIndex.skin_type !== -1 ? String(row[colIndex.skin_type]).trim() : "",
       volume: colIndex.volume !== -1 ? parseFloat(row[colIndex.volume]) || null : null,
       volume_unit: colIndex.volume_unit !== -1 ? String(row[colIndex.volume_unit]).trim() : "",
-      img: colIndex.img !== -1 ? String(row[colIndex.img]).trim() : ""
+      img: colIndex.img !== -1 ? String(row[colIndex.img]).trim() : "",
+      cost_price: null,
+      stock: null
     };
 
     if (colIndex.cost_price !== -1 && row[colIndex.cost_price] !== undefined && String(row[colIndex.cost_price]).trim() !== "") {
@@ -230,14 +232,23 @@ async function runSyncAndBuild() {
     }
     
     const stockMap = {};
+    const costMap = {};
     existingProducts.forEach(p => {
       stockMap[p.id] = p.stock;
+      costMap[p.id] = p.cost_price;
     });
 
-    // Merge existing stock state into parsed products
+    // Merge existing stock state and cost price into parsed products
     parsedProducts.forEach(p => {
-      // If product exists in database, preserve its stock state, otherwise default to true
-      p.stock = (stockMap[p.id] !== undefined && stockMap[p.id] !== null) ? stockMap[p.id] : true;
+      // 1. Stock State: Use sheet value if specified, otherwise preserve database value (default to true)
+      if (p.stock === null || p.stock === undefined) {
+        p.stock = (stockMap[p.id] !== undefined && stockMap[p.id] !== null) ? stockMap[p.id] : true;
+      }
+      
+      // 2. Cost Price: Use sheet value if specified, otherwise preserve database value (default to 0)
+      if (p.cost_price === null || p.cost_price === undefined) {
+        p.cost_price = (costMap[p.id] !== undefined && costMap[p.id] !== null) ? parseFloat(costMap[p.id]) || 0 : 0;
+      }
     });
 
     console.log("⚡ Step 3: Syncing records to Supabase tables...");
