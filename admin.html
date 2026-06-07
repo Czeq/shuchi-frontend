@@ -638,7 +638,7 @@
         <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
         </svg>
-        Referrals
+        Creators
       </a>
     </li>
     <li class="nav-item" id="navCustomers" onclick="switchTab('customers')">
@@ -651,6 +651,12 @@
       <a>
         <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         Financials
+      </a>
+    </li>
+    <li class="nav-item" id="navVideos" onclick="switchTab('videos')">
+      <a>
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Videos
       </a>
     </li>
   </ul>
@@ -915,7 +921,7 @@
     </div>
   </div>
 
-  <!-- TAB: REFERRALS -->
+  <!-- TAB: CREATORS -->
   <div id="tabReferrals" class="tab-content">
     <!-- Referral Metrics -->
     <div class="metrics-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
@@ -945,7 +951,7 @@
         <div class="metric-sub">Total code uses</div>
       </div>
       <div class="metric-card">
-        <div class="metric-label">Active Influencers</div>
+        <div class="metric-label">Active Creators</div>
         <div class="metric-value" id="refCreatorsCount">0</div>
         <div class="metric-sub">Registered codes</div>
       </div>
@@ -1148,6 +1154,33 @@
       </div>
     </div>
 
+    <!-- Creator Payouts Section in Financials -->
+    <div style="background: var(--white); border: 1px solid var(--sage-pale); border-radius: 4px; padding: 1.5rem; margin-bottom: 2rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.75rem;">
+        <div>
+          <h3 class="checkout-title" style="margin: 0; font-size: 1.15rem; font-weight: 500;">Creator Payouts</h3>
+          <p style="font-size: 0.74rem; color: var(--text-soft); margin-top: 0.25rem;">Log commission payouts directly from the Financials tab. All records sync to the creator's dashboard.</p>
+        </div>
+      </div>
+      <div style="overflow-x: auto;">
+        <table style="font-size: 0.8rem; width: 100%;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--cream-deep);">
+              <th style="padding: 0.5rem; text-align: left;">Creator</th>
+              <th style="padding: 0.5rem; text-align: left;">Code</th>
+              <th style="padding: 0.5rem; text-align: right;">Accrued</th>
+              <th style="padding: 0.5rem; text-align: right;">Paid</th>
+              <th style="padding: 0.5rem; text-align: right; color: var(--gold);">Owed</th>
+              <th style="padding: 0.5rem; text-align: center;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="finCreatorPayoutsBody">
+            <tr><td colspan="6" class="text-soft text-center" style="padding: 1.5rem;">No creators registered.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Financial Insights: Products and Customers Grid -->
     <div class="insights-grid">
       <!-- Product Analytics Column -->
@@ -1230,6 +1263,59 @@
       </table>
     </div>
   </div>
+
+  <!-- TAB: VIDEOS -->
+  <div id="tabVideos" class="tab-content">
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; align-items: start;">
+
+      <!-- Add Video Form -->
+      <div style="background: var(--white); border: 1px solid var(--sage-pale); padding: 1.5rem; border-radius: 4px; position: sticky; top: 2rem;">
+        <h3 class="checkout-title" style="margin-top: 0; margin-bottom: 1.2rem; font-size: 1.15rem; font-weight: 500;">Add Video</h3>
+        <form id="addVideoForm" onsubmit="submitVideo(event)">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" style="font-size: 0.74rem;">Video Title</label>
+            <input type="text" id="videoTitle" class="form-input" style="padding: 0.5rem;" required placeholder="e.g. AM Routine for Glass Skin">
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" style="font-size: 0.74rem;">YouTube URL</label>
+            <input type="url" id="videoUrl" class="form-input" style="padding: 0.5rem;" required placeholder="https://www.youtube.com/watch?v=...">
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" style="font-size: 0.74rem;">Category / Tag</label>
+            <input type="text" id="videoCategory" class="form-input" style="padding: 0.5rem;" placeholder="e.g. Routine · Application">
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+            <div>
+              <label class="form-label" style="font-size: 0.74rem;">Duration</label>
+              <input type="text" id="videoDuration" class="form-input" style="padding: 0.5rem;" placeholder="e.g. 8:52">
+            </div>
+            <div>
+              <label class="form-label" style="font-size: 0.74rem;">View Count</label>
+              <input type="text" id="videoViews" class="form-input" style="padding: 0.5rem;" placeholder="e.g. 35K views">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom: 1.2rem;">
+            <label class="form-label" style="font-size: 0.74rem;">Sort Order (lower = first)</label>
+            <input type="number" id="videoSortOrder" class="form-input" style="padding: 0.5rem;" placeholder="e.g. 1" min="0" value="0">
+          </div>
+          <button type="submit" class="btn-action" style="width: 100%; justify-content: center; padding: 0.65rem;">Add Video</button>
+        </form>
+      </div>
+
+      <!-- Videos List -->
+      <div style="background: var(--white); border: 1px solid var(--sage-pale); border-radius: 4px; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+          <h3 class="checkout-title" style="margin: 0; font-size: 1.15rem; font-weight: 500;">Watch &amp; Learn Videos</h3>
+          <span style="font-size: 0.74rem; color: var(--text-soft);">Changes appear live on the storefront</span>
+        </div>
+        <div id="videoListBody" style="display: grid; gap: 1rem;">
+          <div class="text-soft text-center" style="padding: 2rem; font-size: 0.85rem;">Loading videos…</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </main>
 
 <!-- TOAST CONTAINER -->
@@ -2483,6 +2569,9 @@ function switchTab(tabName) {
   } else if (tabName === 'financials') {
     document.getElementById('navFinancials').classList.add('active');
     document.getElementById('tabFinancials').classList.add('active');
+  } else if (tabName === 'videos') {
+    document.getElementById('navVideos').classList.add('active');
+    document.getElementById('tabVideos').classList.add('active');
   }
 
   renderDashboard();
@@ -2505,6 +2594,8 @@ function renderDashboard() {
     renderCustomersTable();
   } else if (activeTab === 'financials') {
     renderFinancials();
+  } else if (activeTab === 'videos') {
+    loadVideos();
   }
 }
 
@@ -3349,9 +3440,41 @@ function renderFinancials() {
       expTbody.appendChild(tr);
     }
   }
+  // Render Creator Payouts table in Financials tab
+  const finPayTbody = document.getElementById('finCreatorPayoutsBody');
+  if (finPayTbody) {
+    finPayTbody.innerHTML = '';
+    const referralDiscountsForFin = discountsList.filter(d => d.scope === 'referral');
+    if (referralDiscountsForFin.length === 0) {
+      finPayTbody.innerHTML = '<tr><td colspan="6" class="text-soft text-center" style="padding: 1.5rem;">No creators registered yet.</td></tr>';
+    } else {
+      referralDiscountsForFin.forEach(disc => {
+        const meta = parseCreatorMetadata(disc);
+        const validOrders = activeOrders.filter(o => (o.items || '').includes('[Referral: ' + disc.id + ']'));
+        const rev = validOrders.reduce((a, o) => a + (parseFloat(o.total_price || 0) - getDeliveryCharge(o)), 0);
+        const accrued = Math.round(rev * 0.05);
+        const paid = meta.payouts.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+        const owed = Math.max(0, accrued - paid);
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid var(--cream-deep)';
+        tr.innerHTML = `
+          <td style="padding: 0.6rem 0.5rem; font-weight: 600;">${escapeHTML(meta.name)}</td>
+          <td style="padding: 0.6rem 0.5rem;"><code style="background: var(--cream); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.78rem;">${escapeHTML(disc.id)}</code></td>
+          <td style="padding: 0.6rem 0.5rem; text-align: right; color: var(--sage);" class="bold">৳ ${accrued.toLocaleString()}</td>
+          <td style="padding: 0.6rem 0.5rem; text-align: right; color: var(--text-soft);" class="bold">৳ ${paid.toLocaleString()}</td>
+          <td style="padding: 0.6rem 0.5rem; text-align: right; color: var(--gold);" class="bold">৳ ${owed.toLocaleString()}</td>
+          <td style="padding: 0.6rem 0.5rem; text-align: center;">
+            <button class="btn-action" style="background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; padding: 0.2rem 0.5rem; font-size: 0.72rem;" onclick="togglePayoutModal(true, '${escapeHTML(disc.id)}')">Payout</button>
+          </td>
+        `;
+        finPayTbody.appendChild(tr);
+      });
+    }
+  }
 
   // 1. Render switchable Product Analytics Table (Most Profitable vs. Margin %)
   const analyticsTbody = document.getElementById('productAnalyticsBody');
+
   analyticsTbody.innerHTML = '';
   
   if (productsRowData.length === 0) {
@@ -3541,6 +3664,108 @@ async function deleteExpense(id) {
     showAdminToast(`Failed to delete expense: ${err.message || err.toString()}`, "error");
   }
 }
+
+// ============================================================
+// VIDEO MANAGEMENT (Watch & Learn)
+// ============================================================
+
+function ytIdFromUrl(url) {
+  if (!url) return null;
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+  return m ? m[1] : null;
+}
+
+async function loadVideos() {
+  const container = document.getElementById('videoListBody');
+  if (!container) return;
+  container.innerHTML = '<div class="text-soft text-center" style="padding:2rem;font-size:0.85rem;">Loading…</div>';
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/learn_videos?order=sort_order.asc,created_at.asc&select=*', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    const videos = await res.json();
+    if (!Array.isArray(videos) || videos.length === 0) {
+      container.innerHTML = '<div class="text-soft text-center" style="padding:2rem;font-size:0.85rem;">No videos added yet. Use the form to add your first video.</div>';
+      return;
+    }
+    container.innerHTML = '';
+    videos.forEach(v => {
+      const ytId = ytIdFromUrl(v.youtube_url);
+      const thumb = ytId ? 'https://img.youtube.com/vi/' + ytId + '/mqdefault.jpg' : '';
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;gap:1rem;align-items:center;padding:0.85rem;border:1px solid var(--cream-deep);border-radius:4px;';
+      row.innerHTML = `
+        ${thumb ? `<img src="${thumb}" style="width:80px;height:55px;object-fit:cover;border-radius:3px;flex-shrink:0;" alt="">` : '<div style="width:80px;height:55px;background:var(--cream);border-radius:3px;flex-shrink:0;"></div>'}
+        <div style="flex:1;min-width:0;">
+          <p style="margin:0;font-weight:600;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(v.title || 'Untitled')}</p>
+          <p style="margin:0.2rem 0 0;font-size:0.74rem;color:var(--text-soft);">${escapeHTML(v.category || '')}${v.duration ? ' · ' + escapeHTML(v.duration) : ''}${v.views ? ' · ' + escapeHTML(v.views) : ''}</p>
+          <p style="margin:0.2rem 0 0;font-size:0.72rem;color:var(--text-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(v.youtube_url || '')}</p>
+        </div>
+        <div style="display:flex;gap:0.5rem;flex-shrink:0;">
+          ${ytId ? `<a href="https://www.youtube.com/watch?v=${ytId}" target="_blank" class="btn-action" style="background:#ebf8ff;color:#2b6cb0;border:1px solid #bee3f8;padding:0.2rem 0.5rem;font-size:0.72rem;text-decoration:none;">Preview</a>` : ''}
+          <button class="btn-action" style="background:#fff5f5;color:#c53030;border:1px solid #fed7d7;padding:0.2rem 0.5rem;font-size:0.72rem;" onclick="deleteVideo('${escapeHTML(v.id)}')">Delete</button>
+        </div>
+      `;
+      container.appendChild(row);
+    });
+  } catch (err) {
+    container.innerHTML = '<div class="text-soft text-center" style="padding:2rem;font-size:0.85rem;">Error loading videos.</div>';
+    console.error('loadVideos error:', err);
+  }
+}
+
+async function submitVideo(event) {
+  event.preventDefault();
+  const btn = event.target.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  btn.textContent = 'Adding…';
+  const payload = {
+    title: document.getElementById('videoTitle').value.trim(),
+    youtube_url: document.getElementById('videoUrl').value.trim(),
+    category: document.getElementById('videoCategory').value.trim() || null,
+    duration: document.getElementById('videoDuration').value.trim() || null,
+    views: document.getElementById('videoViews').value.trim() || null,
+    sort_order: parseInt(document.getElementById('videoSortOrder').value) || 0
+  };
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/learn_videos', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) { const t = await res.text(); throw new Error(t); }
+    showAdminToast('Video added! It\'s now live on the storefront.');
+    event.target.reset();
+    document.getElementById('videoSortOrder').value = 0;
+    loadVideos();
+  } catch (err) {
+    showAdminToast('Failed to add video: ' + (err.message || err), 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Add Video';
+  }
+}
+
+async function deleteVideo(id) {
+  if (!confirm('Remove this video from the storefront?')) return;
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/learn_videos?id=eq.' + encodeURIComponent(id), {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    if (!res.ok) { const t = await res.text(); throw new Error(t); }
+    showAdminToast('Video removed from storefront.');
+    loadVideos();
+  } catch (err) {
+    showAdminToast('Failed to delete: ' + (err.message || err), 'error');
+  }
+}
+
 </script>
 </body>
 </html>

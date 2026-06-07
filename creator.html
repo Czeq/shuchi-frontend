@@ -434,6 +434,11 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
   /* Responsive Design */
   @media (max-width: 950px) {
     .metrics-row {
@@ -512,7 +517,13 @@
         <path d="M478.04 427.924C470.246 393.217 484.887 389.034 502.085 352.27C531.758 305.223 549.852 284.014 589.206 238.634L674.723 314.396C701.444 340.894 699.975 356.68 716.285 391.275C714.156 439.626 705.68 468.205 673.311 522.665L602.112 633.156L529.533 539.712L478.04 427.924Z"/>
       </svg>SHUCHI <span>শুচি</span>
     </a>
-    <button class="nav-btn-logout" onclick="handleCreatorLogout()">Sign Out</button>
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+      <button class="nav-btn-logout" id="syncBtn" onclick="handleCreatorSync()" style="background: rgba(107,143,107,0.15); color: var(--sage); border: 1px solid var(--sage-pale);" title="Refresh your metrics">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" style="vertical-align: middle; margin-right: 0.25rem;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        Sync
+      </button>
+      <button class="nav-btn-logout" onclick="handleCreatorLogout()">Sign Out</button>
+    </div>
   </header>
 
   <!-- MAIN VIEW -->
@@ -1081,6 +1092,21 @@ function handleCreatorLogout() {
   document.getElementById('creatorLoginForm').reset();
   document.getElementById('loginError').style.display = 'none';
 }
+
+// Handle manual sync / refresh
+async function handleCreatorSync() {
+  const btn = document.getElementById('syncBtn');
+  if (!btn || btn.disabled) return;
+  btn.disabled = true;
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" style="vertical-align:middle;margin-right:0.25rem;animation:spin 0.8s linear infinite"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Syncing…`;
+  try {
+    await loadCreatorData();
+  } catch(e) { /* silent */ }
+  btn.disabled = false;
+  btn.innerHTML = originalHTML;
+}
+
 </script>
 </body>
 </html>

@@ -1007,35 +1007,63 @@
 <!-- WATCH & LEARN -->
 <section id="watch">
   <div class="fi">
-    <p class="section-label">Watch & Learn</p>
+    <p class="section-label">Watch &amp; Learn</p>
     <h2 class="section-title">See it on skin<br><em>like yours.</em></h2>
   </div>
-  <div class="watch-grid fi">
-    <div class="video-card">
-      <div class="video-thumb">
-        <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.1" viewBox="0 0 600 400"><circle cx="300" cy="200" r="100" stroke="#6B8F6B" stroke-width="1.5" fill="none"/><circle cx="300" cy="200" r="60" stroke="#A8C4A2" stroke-width="1" fill="none"/><path d="M80 350 Q200 260 320 310 Q440 360 540 270" stroke="#6B8F6B" stroke-width="2" fill="none"/></svg>
-        <div class="vplay"><div class="play-tri"></div></div>
-      </div>
-      <div class="video-info"><p class="video-cat">Routine · Application</p><h3 class="video-title">Full AM Routine for Bangladesh Humidity — 5 Step Glass Skin</h3><p class="video-meta">12:34 · 48K views</p></div>
-    </div>
-    <div class="video-card">
-      <div class="video-thumb">
-        <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.1" viewBox="0 0 400 280"><rect x="60" y="50" width="280" height="180" rx="8" stroke="#6B8F6B" stroke-width="1.5" fill="none"/><rect x="80" y="70" width="90" height="130" rx="4" fill="#A8C4A2" opacity="0.4"/></svg>
-        <div class="vplay"><div class="play-tri"></div></div>
-      </div>
-      <div class="video-info"><p class="video-cat">Unboxing · Review</p><h3 class="video-title">COSRX Snail 96 — Real Texture on South Asian Skin</h3><p class="video-meta">6:18 · 22K views</p></div>
-    </div>
-    <div class="video-card">
-      <div class="video-thumb">
-        <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.1" viewBox="0 0 400 280"><circle cx="200" cy="140" r="70" stroke="#6B8F6B" stroke-width="1.5" fill="none"/><path d="M150 140 Q175 105 200 140 Q225 175 250 140" stroke="#A8C4A2" stroke-width="2" fill="none"/></svg>
-        <div class="vplay"><div class="play-tri"></div></div>
-      </div>
-      <div class="video-info"><p class="video-cat">Education · Ingredients</p><h3 class="video-title">What is Niacinamide? A Bengali Explainer</h3><p class="video-meta">8:52 · 35K views</p></div>
+  <div class="watch-grid fi" id="watchLearnGrid">
+    <!-- Dynamically populated from Supabase learn_videos table -->
+    <div class="video-card" style="grid-column:1/-1;text-align:center;padding:2rem;opacity:0.5;">
+      <p style="font-size:0.9rem;">Loading videos…</p>
     </div>
   </div>
 </section>
 
-<!-- PAYMENT -->
+<script>
+(async function loadWatchLearnVideos() {
+  const SUPABASE_URL = 'https://xiqtmwsscgvmbbsewxpu.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpcXRtd3NzY2d2bWJic2V3eHB1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwOTAyOTMsImV4cCI6MjA2MTY2NjI5M30.I5HwvXEbYBxMJqvEYcXJJVHKH3e6HrPp6F5dTk_LGjA';
+  function ytIdFromUrl(url) {
+    if (!url) return null;
+    const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+    return m ? m[1] : null;
+  }
+  function escHTML(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+  const grid = document.getElementById('watchLearnGrid');
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/learn_videos?order=sort_order.asc,created_at.asc&select=*', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    const videos = await res.json();
+    if (!Array.isArray(videos) || videos.length === 0) {
+      grid.innerHTML = '<div class="video-card" style="grid-column:1/-1;text-align:center;padding:2.5rem;opacity:0.5;"><p style="font-size:0.9rem;">No videos added yet — check back soon!</p></div>';
+      return;
+    }
+    grid.innerHTML = '';
+    videos.forEach(v => {
+      const ytId = ytIdFromUrl(v.youtube_url);
+      const thumb = ytId ? 'https://img.youtube.com/vi/' + ytId + '/mqdefault.jpg' : '';
+      const card = document.createElement('div');
+      card.className = 'video-card';
+      if (ytId) { card.style.cursor = 'pointer'; card.onclick = () => window.open('https://www.youtube.com/watch?v=' + ytId, '_blank'); }
+      card.innerHTML =
+        '<div class="video-thumb"' + (thumb ? ' style="background-image:url(' + thumb + ');background-size:cover;background-position:center;"' : '') + '>' +
+        (!thumb ? '<svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.1" viewBox="0 0 600 400"><circle cx="300" cy="200" r="100" stroke="#6B8F6B" stroke-width="1.5" fill="none"/></svg>' : '') +
+        '<div class="vplay"><div class="play-tri"></div></div>' +
+        '</div>' +
+        '<div class="video-info">' +
+        '<p class="video-cat">' + escHTML(v.category || '') + '</p>' +
+        '<h3 class="video-title">' + escHTML(v.title || 'Untitled') + '</h3>' +
+        ((v.duration || v.views) ? '<p class="video-meta">' + escHTML([v.duration, v.views].filter(Boolean).join(' · ')) + '</p>' : '') +
+        '</div>';
+      grid.appendChild(card);
+    });
+  } catch(e) {
+    grid.innerHTML = '<div class="video-card" style="grid-column:1/-1;text-align:center;padding:2.5rem;opacity:0.5;"><p style="font-size:0.9rem;">Could not load videos.</p></div>';
+  }
+})();
+</script>
+
+
 <div class="payment-strip">
   <p class="payment-label">Accepted Payment Methods</p>
   <div class="payment-methods">

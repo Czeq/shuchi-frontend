@@ -1013,6 +1013,7 @@ function injectAuthUI() {
               <div class="user-avatar-large" id="userAvatarPlaceholder">U</div>
               <h3 class="user-name-title" id="userNameTitle">Customer Name</h3>
               <p class="user-phone-sub" id="userPhoneSub">017XXXXXXXX</p>
+              <p class="user-phone-sub" id="userEmailSub" style="font-size:0.78rem;color:var(--text-soft);margin-top:0.1rem;display:none;"></p>
               
               <div class="user-details-card">
                 <div class="ud-label">Default Address</div>
@@ -1042,6 +1043,10 @@ function injectAuthUI() {
               <div class="form-group">
                 <label class="form-label" for="editName">Full Name</label>
                 <input type="text" id="editName" class="form-input" required placeholder="e.g. Name">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="editEmail">Email Address <span style="font-size:0.72rem;color:var(--text-soft);font-weight:400;">(Optional)</span></label>
+                <input type="email" id="editEmail" class="form-input" placeholder="you@example.com">
               </div>
               <div class="form-group">
                 <label class="form-label" for="editHouse">House / Apartment / Flat No.</label>
