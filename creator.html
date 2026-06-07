@@ -654,7 +654,7 @@ async function loadCreatorData() {
     // Find active creator config
     const activeDisc = discountsList.find(d => d.id === activeCreatorCode && d.scope === 'referral');
     if (!activeDisc) {
-      alert("Active creator account not found. Please log in again.");
+      alert("Active ambassador account not found. Please log in again.");
       handleCreatorLogout();
       return;
     }
@@ -673,7 +673,7 @@ async function loadCreatorData() {
     // Populate dashboard
     renderCreatorDashboard();
   } catch (err) {
-    console.error("Failed to load creator portal data:", err);
+    console.error("Failed to load ambassador portal data:", err);
     alert("Database sync failed. Please check your connection.");
   } finally {
     setLoadingState(false);
@@ -926,7 +926,7 @@ async function handleCreatorLogin(e) {
     }, 400);
 
   } catch(err) {
-    console.error("Creator login error:", err);
+    console.error("Ambassador login error:", err);
     errorEl.textContent = err.message || "Failed to log in. Please check your credentials.";
     errorEl.style.display = 'block';
   }
