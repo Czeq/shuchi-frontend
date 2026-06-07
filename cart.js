@@ -220,18 +220,20 @@ function getDiscountedPrice(product) {
     if (matches) {
       let currentPrice = price;
       let currentOriginalPrice = price;
-      const isReverse = disc.is_reverse || disc.isReverse;
       
-      if (isReverse) {
+      const isStrategic = (disc.type && typeof disc.type === 'string' && disc.type.endsWith('_strategic')) || disc.is_reverse || disc.isReverse;
+      const baseType = isStrategic ? (disc.type ? disc.type.replace('_strategic', '') : '') : (disc.type || '');
+      
+      if (isStrategic) {
         currentPrice = price;
-        if (disc.type === 'percentage') {
+        if (baseType === 'percentage') {
           const val = parseFloat(disc.value);
           currentOriginalPrice = val < 100 ? price / (1 - val / 100) : price;
         } else {
           currentOriginalPrice = price + parseFloat(disc.value);
         }
       } else {
-        if (disc.type === 'percentage') {
+        if (baseType === 'percentage') {
           currentPrice = price * (1 - disc.value / 100);
         } else {
           currentPrice = Math.max(0, price - disc.value);

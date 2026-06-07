@@ -1372,8 +1372,8 @@ function getDiscountedPrice(product) {
     if (matches) {
       let currentPrice = price;
       let currentOriginalPrice = price;
-      const isStrategic = disc.type.endsWith('_strategic') || disc.is_reverse || disc.isReverse;
-      const baseType = isStrategic ? disc.type.replace('_strategic', '') : disc.type;
+      const isStrategic = (disc.type && typeof disc.type === 'string' && disc.type.endsWith('_strategic')) || disc.is_reverse || disc.isReverse;
+      const baseType = isStrategic ? (disc.type ? disc.type.replace('_strategic', '') : '') : (disc.type || '');
       
       if (isStrategic) {
         currentPrice = price;
