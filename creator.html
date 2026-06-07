@@ -644,15 +644,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadCreatorData() {
   setLoadingState(true);
   try {
-    // 1. Fetch discounts
-    const { data: discData, error: discErr } = await supabaseClient
+    // 1. Fetch only the specific discount for this ambassador
+    const { data: activeDisc, error: discErr } = await supabaseClient
       .from('discounts')
-      .select('*');
-    if (discErr) throw discErr;
-    discountsList = discData || [];
+      .select('*')
+      .eq('id', activeCreatorCode)
+      .eq('scope', 'referral')
+      .maybeSingle();
 
-    // Find active creator config
-    const activeDisc = discountsList.find(d => d.id === activeCreatorCode && d.scope === 'referral');
+    if (discErr) throw discErr;
     if (!activeDisc) {
       alert("Active ambassador account not found. Please log in again.");
       handleCreatorLogout();
@@ -662,11 +662,13 @@ async function loadCreatorData() {
     // Parse metadata
     activeCreatorMeta = parseCreatorMetadata(activeDisc);
 
-    // 2. Fetch orders
+    // 2. Fetch only orders placed using this ambassador's referral code
     const { data: ordData, error: ordErr } = await supabaseClient
       .from('orders')
       .select('*')
+      .like('items', `%[Referral: ${activeCreatorCode}]%`)
       .order('created_at', { ascending: false });
+
     if (ordErr) throw ordErr;
     ordersList = ordData || [];
 
