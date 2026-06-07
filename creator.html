@@ -643,34 +643,72 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Load all required data
 async function loadCreatorData() {
   setLoadingState(true);
+  
+  // Get passcode from session storage if available
+  let passcode = '';
+  const sessionData = sessionStorage.getItem('shuchi_creator_session');
+  if (sessionData) {
+    try {
+      passcode = JSON.parse(sessionData).passcode || '';
+    } catch (e) {}
+  }
+
   try {
-    // 1. Fetch only the specific discount for this ambassador
-    const { data: activeDisc, error: discErr } = await supabaseClient
-      .from('discounts')
-      .select('*')
-      .eq('id', activeCreatorCode)
-      .eq('scope', 'referral')
-      .maybeSingle();
-
-    if (discErr) throw discErr;
-    if (!activeDisc) {
-      alert("Active ambassador account not found. Please log in again.");
-      handleCreatorLogout();
-      return;
-    }
+    let rpcSuccess = false;
     
-    // Parse metadata
-    activeCreatorMeta = parseCreatorMetadata(activeDisc);
+    // 1. Try secure RPC data retrieval first
+    if (passcode) {
+      try {
+        const { data: dbData, error: dbErr } = await supabaseClient
+          .rpc('get_influencer_dashboard_data', { promo_code: activeCreatorCode, input_passcode: passcode });
+          
+        if (!dbErr && dbData) {
+          activeCreatorMeta = dbData;
+          
+          // Fetch orders safely using RPC
+          const { data: ordData, error: ordErr } = await supabaseClient
+            .rpc('get_influencer_orders', { promo_code: activeCreatorCode, input_passcode: passcode });
+            
+          if (!ordErr && ordData) {
+            ordersList = ordData || [];
+            rpcSuccess = true;
+          }
+        }
+      } catch (rpcException) {
+        console.warn("RPC data retrieval failed, falling back to legacy select:", rpcException);
+      }
+    }
 
-    // 2. Fetch only orders placed using this ambassador's referral code
-    const { data: ordData, error: ordErr } = await supabaseClient
-      .from('orders')
-      .select('*')
-      .like('items', `%[Referral: ${activeCreatorCode}]%`)
-      .order('created_at', { ascending: false });
+    // 2. Legacy fallback: query discounts and orders directly
+    if (!rpcSuccess) {
+      // Fetch only the specific discount for this ambassador
+      const { data: activeDisc, error: discErr } = await supabaseClient
+        .from('discounts')
+        .select('*')
+        .eq('id', activeCreatorCode)
+        .eq('scope', 'referral')
+        .maybeSingle();
 
-    if (ordErr) throw ordErr;
-    ordersList = ordData || [];
+      if (discErr) throw discErr;
+      if (!activeDisc) {
+        alert("Active ambassador account not found. Please log in again.");
+        handleCreatorLogout();
+        return;
+      }
+      
+      // Parse metadata
+      activeCreatorMeta = parseCreatorMetadata(activeDisc);
+
+      // Fetch referred orders (selecting only safe columns for privacy)
+      const { data: ordData, error: ordErr } = await supabaseClient
+        .from('orders')
+        .select('id, created_at, status, total_price, area, items')
+        .like('items', `%[Referral: ${activeCreatorCode}]%`)
+        .order('created_at', { ascending: false });
+
+      if (ordErr) throw ordErr;
+      ordersList = ordData || [];
+    }
 
     // Populate dashboard
     renderCreatorDashboard();
@@ -886,38 +924,68 @@ async function handleCreatorLogin(e) {
   errorEl.style.display = 'none';
 
   try {
-    // Fetch discount registry to verify credentials
-    const { data, error } = await supabaseClient
-      .from('discounts')
-      .select('*')
-      .eq('id', code)
-      .eq('scope', 'referral')
-      .maybeSingle();
-
-    if (error) throw error;
-
-    if (!data) {
-      throw new Error("Invalid Ambassador Code. Please verify your code.");
-    }
-
-    if (!data.active) {
-      throw new Error("Your ambassador account is currently inactive. Please contact Shuchi partner relations.");
-    }
-
-    const meta = parseCreatorMetadata(data);
+    let meta;
+    let rpcSuccess = false;
     
-    if (!meta.passcode) {
-      throw new Error("No passcode configured for this ambassador account. Please ask partner relations to set one.");
+    // 1. Try secure RPC authentication first
+    try {
+      const { data: rpcData, error: rpcErr } = await supabaseClient
+        .rpc('get_influencer_dashboard_data', { promo_code: code, input_passcode: passcode });
+        
+      if (rpcErr) {
+        const isFuncMissing = rpcErr.message.includes('does not exist') || rpcErr.code === '42883' || rpcErr.status === 404;
+        if (!isFuncMissing) {
+          throw new Error(rpcErr.message || "Authentication failed.");
+        }
+      } else if (rpcData === null) {
+        throw new Error("Incorrect passcode. Please try again.");
+      } else {
+        meta = rpcData;
+        rpcSuccess = true;
+      }
+    } catch (rpcException) {
+      if (rpcException.message && (rpcException.message.includes("passcode") || rpcException.message.includes("Incorrect"))) {
+        throw rpcException;
+      }
+      console.warn("RPC authentication unavailable, using legacy client fallback:", rpcException);
     }
 
-    if (meta.passcode !== passcode) {
-      throw new Error("Incorrect passcode. Please try again.");
+    // 2. Legacy fallback client verification
+    if (!rpcSuccess) {
+      // Fetch discount registry to verify credentials
+      const { data, error } = await supabaseClient
+        .from('discounts')
+        .select('*')
+        .eq('id', code)
+        .eq('scope', 'referral')
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (!data) {
+        throw new Error("Invalid Ambassador Code. Please verify your code.");
+      }
+
+      if (!data.active) {
+        throw new Error("Your ambassador account is currently inactive. Please contact Shuchi partner relations.");
+      }
+
+      const clientMeta = parseCreatorMetadata(data);
+      
+      if (!clientMeta.passcode) {
+        throw new Error("No passcode configured for this ambassador account. Please ask partner relations to set one.");
+      }
+
+      if (clientMeta.passcode !== passcode) {
+        throw new Error("Incorrect passcode. Please try again.");
+      }
+      meta = clientMeta;
     }
 
-    // Success: store creator session
+    // Success: store creator session (including passcode for RPC re-authentication)
     activeCreatorCode = code;
     activeCreatorMeta = meta;
-    sessionStorage.setItem('shuchi_creator_session', JSON.stringify({ code: code, name: meta.name }));
+    sessionStorage.setItem('shuchi_creator_session', JSON.stringify({ code: code, passcode: passcode, name: meta.name }));
     
     // Hide overlay with fade effect
     const overlay = document.getElementById('loginOverlay');
