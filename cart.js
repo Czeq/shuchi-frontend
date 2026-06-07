@@ -170,33 +170,69 @@ async function fetchDiscounts() {
 function classifyProductCategory(title, desc) {
   const t = (title || '').toLowerCase();
   const d = (desc || '').toLowerCase();
-  if (t.includes('shampoo') || t.includes('conditioner') || t.includes('hair')) return 'Shampoo';
-  if (t.includes('body wash') || t.includes('shower gel') || t.includes('body cleanser')) return 'Body Wash';
-  if (t.includes('body cream') || t.includes('body lotion')) return 'Body Cream';
-  if (t.includes('sunscreen') || t.includes('sun cream') || t.includes('sunblock') || t.includes('sun stick')) return 'Sunscreen';
-  if (t.includes('cleansing oil') || t.includes('oil cleanser') || t.includes('cleansing balm') || t.includes('micellar') || t.includes('makeup remover')) return 'Cleanser';
-  if (t.includes('facewash') || t.includes('face wash') || t.includes('foam cleanser') || t.includes('foaming')) return 'Facewash';
-  if (t.includes('toner') || t.includes('skin refiner') || t.includes('toning')) return 'Toner';
-  if (t.includes('essence') || t.includes('mucin') || t.includes('serum') || t.includes('ampoule')) return 'Essence & Serum';
-  if (t.includes('lotion') || t.includes('emulsion')) return 'Lotion';
-  if (t.includes('cream') || t.includes('gel cream') || t.includes('moisturizer') || t.includes('sleeping mask')) return 'Cream';
   
+  if (t.includes('shampoo') || t.includes('conditioner') || t.includes('hair wash') || t.includes('hair treatment') || t.includes('scalp')) {
+    return 'Shampoo';
+  }
+  if (t.includes('body wash') || t.includes('shower gel') || t.includes('body cleanser') || t.includes('shower cream')) {
+    return 'Body Wash';
+  }
+  if (t.includes('body cream') || t.includes('body lotion') || t.includes('body milk') || t.includes('body butter') || t.includes('body moisturizer')) {
+    return 'Body Cream';
+  }
+  if (t.includes('sunscreen') || t.includes('sun cream') || t.includes('sunblock') || t.includes('sun gel') || t.includes('sun stick') || t.includes('sun fluid')) {
+    return 'Sunscreen';
+  }
+  if (t.includes('cleansing oil') || t.includes('oil cleanser') || t.includes('cleansing balm') || t.includes('micellar') || t.includes('makeup remover') || t.includes('remover')) {
+    return 'Cleanser';
+  }
+  if (t.includes('facewash') || t.includes('face wash') || t.includes('foam cleanser') || t.includes('cleansing foam') || t.includes('foaming') || t.includes('gel cleanser') || t.includes('gentle cleanser') || t.includes('cleansing gel') || (t.includes('cleanser') && !t.includes('oil') && !t.includes('balm'))) {
+    return 'Facewash';
+  }
+  if (t.includes('toner') || t.includes('tonique') || t.includes('skin refiner') || t.includes('toning')) {
+    return 'Toner';
+  }
+  if (t.includes('essence') || t.includes('mucin') || t.includes('serum') || t.includes('ampoule') || t.includes('treatment essence') || t.includes('booster')) {
+    return 'Essence & Serum';
+  }
+  if (t.includes('lotion') || t.includes('emulsion') || t.includes('moisturizing lotion')) {
+    return 'Lotion';
+  }
+  if (t.includes('cream') || t.includes('gel cream') || t.includes('moisturizer') || t.includes('moisturising') || t.includes('soothing cream') || t.includes('balm') || t.includes('sleeping mask') || t.includes('sleeping pack') || t.includes('water gel')) {
+    return 'Cream';
+  }
+  
+  // Fallbacks by analyzing description
   if (d.includes('shampoo') || d.includes('hair')) return 'Shampoo';
   if (d.includes('body wash') || d.includes('shower gel')) return 'Body Wash';
   if (d.includes('body cream') || d.includes('body lotion')) return 'Body Cream';
-  if (d.includes('sunscreen') || d.includes('sun cream')) return 'Sunscreen';
-  if (d.includes('cleansing oil') || d.includes('cleansing balm')) return 'Cleanser';
-  if (d.includes('facewash') || d.includes('face wash') || d.includes('cleansing foam')) return 'Facewash';
-  if (d.includes('toner')) return 'Toner';
+  if (d.includes('sunscreen') || d.includes('sun cream') || d.includes('sunblock')) return 'Sunscreen';
+  if (d.includes('cleansing oil') || d.includes('cleansing balm') || d.includes('makeup remover')) return 'Cleanser';
+  if (d.includes('facewash') || d.includes('face wash') || d.includes('cleansing foam') || d.includes('foaming cleanser')) return 'Facewash';
+  if (d.includes('toner') || d.includes('toning')) return 'Toner';
   if (d.includes('essence') || d.includes('serum') || d.includes('ampoule')) return 'Essence & Serum';
   if (d.includes('lotion') || d.includes('emulsion')) return 'Lotion';
-  if (d.includes('cream') || d.includes('moisturizer')) return 'Cream';
+  if (d.includes('cream') || d.includes('moisturizer') || d.includes('gel cream')) return 'Cream';
+
   return 'Other';
 }
 
 // Calculate discounted price for a product based on active rules
 function getDiscountedPrice(product) {
-  const price = parseFloat(product.price || product.Price || 0);
+  let fullProduct = product || {};
+  const price = parseFloat(fullProduct.price || fullProduct.Price || 0);
+  
+  const cachedProds = sessionStorage.getItem('shuchi_products');
+  if (cachedProds && fullProduct.id) {
+    try {
+      const products = JSON.parse(cachedProds);
+      const found = products.find(p => p.id === fullProduct.id);
+      if (found) {
+        fullProduct = found;
+      }
+    } catch(e) {}
+  }
+  
   const activeDiscounts = discountsList.filter(d => d.active);
   if (activeDiscounts.length === 0) return { price: price, originalPrice: price, discount: null };
   
@@ -209,10 +245,10 @@ function getDiscountedPrice(product) {
     if (disc.scope === 'all') {
       matches = true;
     } else if (disc.scope === 'brand') {
-      matches = (product.brand || product.Brand || '').toLowerCase().trim() === (disc.scope_value || '').toLowerCase().trim();
+      matches = (fullProduct.brand || fullProduct.Brand || '').toLowerCase().trim() === (disc.scope_value || '').toLowerCase().trim();
     } else if (disc.scope === 'category') {
-      const pTitle = product.title || product.Title || '';
-      const pDesc = product.desc || product.Desc || '';
+      const pTitle = fullProduct.title || fullProduct.Title || '';
+      const pDesc = fullProduct.desc || fullProduct.Desc || '';
       const pType = classifyProductCategory(pTitle, pDesc);
       matches = pType.toLowerCase().trim() === (disc.scope_value || '').toLowerCase().trim();
     }
@@ -337,7 +373,24 @@ function applyLiveDiscountsToDOM() {
         }
       }
       if (currId) {
-        const product = products.find(p => p.id === currId);
+        let product = products.find(p => p.id === currId);
+        if (!product) {
+          // Fallback: construct product from DOM elements if sessionStorage is empty
+          const brandEl = document.getElementById('brandPlaceholder');
+          const titleEl = document.getElementById('titlePlaceholder');
+          const descEl = document.getElementById('descPlaceholder');
+          const priceText = detailPriceEl.textContent || '';
+          const numericPrice = parseFloat(priceText.replace(/[^0-9.]/g, '')) || 0;
+          if (numericPrice > 0) {
+            product = {
+              id: currId,
+              brand: brandEl ? brandEl.textContent.trim() : '',
+              title: titleEl ? titleEl.textContent.trim() : '',
+              price: numericPrice,
+              desc: descEl ? descEl.textContent.trim() : ''
+            };
+          }
+        }
         if (product) {
           const discInfo = getDiscountedPrice(product);
           if (discInfo.discount) {
