@@ -328,7 +328,14 @@ function applyLiveDiscountsToDOM() {
     const hasDiscountBadge = detailPriceEl.querySelector('.product-badge');
     if (!hasDiscountBadge) {
       const urlParams = new URLSearchParams(window.location.search);
-      const currId = urlParams.get('id') || '';
+      let currId = document.body.dataset.productId || urlParams.get('id') || '';
+      if (!currId) {
+        const path = window.location.pathname;
+        const pathMatch = path.match(/\/([^/]+)\.html$/) || path.match(/\/([^/]+)$/);
+        if (pathMatch && pathMatch[1] !== 'product') {
+          currId = pathMatch[1];
+        }
+      }
       if (currId) {
         const product = products.find(p => p.id === currId);
         if (product) {
@@ -1730,7 +1737,14 @@ async function injectStorefrontCatalogOnDetails() {
     };
 
     const urlParams = new URLSearchParams(window.location.search);
-    const currId = urlParams.get('id') || '';
+    let currId = document.body.dataset.productId || urlParams.get('id') || '';
+    if (!currId) {
+      const path = window.location.pathname;
+      const pathMatch = path.match(/\/([^/]+)\.html$/) || path.match(/\/([^/]+)$/);
+      if (pathMatch && pathMatch[1] !== 'product') {
+        currId = pathMatch[1];
+      }
+    }
     const currBaseId = getBaseProductId(currId);
     
     // Find current product attributes
