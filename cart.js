@@ -21,6 +21,43 @@ function escapeHTML(str) {
   });
 }
 
+// Validate referral code active status and date periods
+function validateReferralCode(d, code) {
+  if ((d.id || '').toUpperCase().trim() !== code || d.scope !== 'referral') {
+    return 'invalid';
+  }
+  if (!d.active) {
+    return 'inactive';
+  }
+  
+  // Extract date values (from separate columns or JSON scope_value fallback)
+  let startDate = d.start_date || null;
+  let endDate = d.end_date || null;
+  
+  if (d.scope_value && d.scope_value.trim().startsWith('{')) {
+    try {
+      const meta = JSON.parse(d.scope_value);
+      startDate = meta.start_date || startDate || null;
+      endDate = meta.end_date || endDate || null;
+    } catch(e) {}
+  }
+  
+  const now = new Date();
+  if (startDate) {
+    const start = new Date(startDate);
+    if (!isNaN(start.getTime()) && start > now) return 'not_started';
+  }
+  if (endDate) {
+    const end = new Date(endDate);
+    if (endDate.length === 10) {
+      end.setHours(23, 59, 59, 999);
+    }
+    if (!isNaN(end.getTime()) && end < now) return 'expired';
+  }
+  
+  return 'valid';
+}
+
 // Global States
 let cartItems = [];
 let currentUser = null; // { name, phone, address }
@@ -147,11 +184,7 @@ async function initCartSystem() {
     const refCode = urlParams.get('ref') || urlParams.get('promo') || urlParams.get('code');
     if (refCode) {
       const code = refCode.trim().toUpperCase();
-      const matched = discountsList.find(d => 
-        d.active && 
-        (d.id || '').toUpperCase().trim() === code && 
-        d.scope === 'referral'
-      );
+      const matched = discountsList.find(d => validateReferralCode(d, code) === 'valid');
       if (matched) {
         appliedReferralCode = code;
         sessionStorage.setItem('shuchi_ref_code', code);
@@ -160,11 +193,7 @@ async function initCartSystem() {
       // Fallback: check if we previously saved it in sessionStorage
       const saved = sessionStorage.getItem('shuchi_ref_code');
       if (saved) {
-        const matched = discountsList.find(d => 
-          d.active && 
-          (d.id || '').toUpperCase().trim() === saved && 
-          d.scope === 'referral'
-        );
+        const matched = discountsList.find(d => validateReferralCode(d, saved) === 'valid');
         if (matched) {
           appliedReferralCode = saved;
         } else {
@@ -499,13 +528,21 @@ function applyPromoCode() {
   }
 
   // Look up referral code in discountsList
-  const matched = discountsList.find(d => 
-    d.active && 
-    (d.id || '').toUpperCase().trim() === rawCode && 
-    d.scope === 'referral'
-  );
+  let validationResult = 'invalid';
+  let matched = null;
+  
+  for (const d of discountsList) {
+    const res = validateReferralCode(d, rawCode);
+    if (res !== 'invalid') {
+      validationResult = res;
+      if (res === 'valid') {
+        matched = d;
+        break;
+      }
+    }
+  }
 
-  if (matched) {
+  if (validationResult === 'valid') {
     appliedReferralCode = rawCode;
     feedbackEl.style.display = 'block';
     feedbackEl.style.color = 'var(--sage)';
@@ -515,7 +552,15 @@ function applyPromoCode() {
     appliedReferralCode = null;
     feedbackEl.style.display = 'block';
     feedbackEl.style.color = '#B8975A';
-    feedbackEl.textContent = "Invalid promo or referral code.";
+    if (validationResult === 'expired') {
+      feedbackEl.textContent = "This referral code has expired.";
+    } else if (validationResult === 'not_started') {
+      feedbackEl.textContent = "This referral code is not active yet.";
+    } else if (validationResult === 'inactive') {
+      feedbackEl.textContent = "This referral code is currently inactive.";
+    } else {
+      feedbackEl.textContent = "Invalid promo or referral code.";
+    }
     updateCartUI();
   }
 }
@@ -537,13 +582,21 @@ function applyCheckoutPromoCode() {
   }
 
   // Look up referral code in discountsList
-  const matched = discountsList.find(d => 
-    d.active && 
-    (d.id || '').toUpperCase().trim() === rawCode && 
-    d.scope === 'referral'
-  );
+  let validationResult = 'invalid';
+  let matched = null;
+  
+  for (const d of discountsList) {
+    const res = validateReferralCode(d, rawCode);
+    if (res !== 'invalid') {
+      validationResult = res;
+      if (res === 'valid') {
+        matched = d;
+        break;
+      }
+    }
+  }
 
-  if (matched) {
+  if (validationResult === 'valid') {
     appliedReferralCode = rawCode;
     feedbackEl.style.display = 'block';
     feedbackEl.style.color = 'var(--sage)';
@@ -553,7 +606,15 @@ function applyCheckoutPromoCode() {
     appliedReferralCode = null;
     feedbackEl.style.display = 'block';
     feedbackEl.style.color = '#B8975A';
-    feedbackEl.textContent = "Invalid promo or referral code.";
+    if (validationResult === 'expired') {
+      feedbackEl.textContent = "This referral code has expired.";
+    } else if (validationResult === 'not_started') {
+      feedbackEl.textContent = "This referral code is not active yet.";
+    } else if (validationResult === 'inactive') {
+      feedbackEl.textContent = "This referral code is currently inactive.";
+    } else {
+      feedbackEl.textContent = "Invalid promo or referral code.";
+    }
     updateCartUI();
   }
 }

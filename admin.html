@@ -976,6 +976,16 @@
             <label class="form-label" style="font-size: 0.74rem;">Buyer Discount Value (%)</label>
             <input type="number" id="refDiscountValue" class="form-input" style="padding: 0.5rem;" required value="10" min="1" max="100">
           </div>
+          <div class="form-group" style="margin-bottom: 1.2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <div>
+              <label class="form-label" style="font-size: 0.74rem;">Start Date (Optional)</label>
+              <input type="date" id="refStartDate" class="form-input" style="padding: 0.5rem;">
+            </div>
+            <div>
+              <label class="form-label" style="font-size: 0.74rem;">End Date (Optional)</label>
+              <input type="date" id="refEndDate" class="form-input" style="padding: 0.5rem;">
+            </div>
+          </div>
           <button type="submit" class="btn-action" style="width: 100%; justify-content: center; padding: 0.65rem;">Create Influencer Code</button>
         </form>
       </div>
@@ -983,6 +993,20 @@
       <!-- Referral Codes Table -->
       <div class="table-container" style="margin-top: 0; background: var(--white); border: 1px solid var(--sage-pale); border-radius: 4px; padding: 1.2rem; min-height: 290px;">
         <h3 class="checkout-title" style="margin-top: 0; margin-bottom: 1.2rem; text-align: left; font-size: 1.15rem; font-weight: 500;">Registered Influencers</h3>
+        
+        <!-- Time Period Metrics Filter for Referrals -->
+        <div style="display: flex; gap: 0.8rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; background: var(--cream); padding: 0.65rem; border-radius: 4px; border: 1px solid var(--cream-deep);">
+          <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <label style="font-size: 0.74rem; color: var(--text-soft); font-weight: 600;">Filter Period:</label>
+            <input type="date" id="influencerFilterStart" class="form-input" style="padding: 0.35rem 0.5rem; font-size: 0.78rem; width: auto; background: var(--white);" onchange="renderReferralsTable()">
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <label style="font-size: 0.74rem; color: var(--text-soft); font-weight: 600;">to</label>
+            <input type="date" id="influencerFilterEnd" class="form-input" style="padding: 0.35rem 0.5rem; font-size: 0.78rem; width: auto; background: var(--white);" onchange="renderReferralsTable()">
+          </div>
+          <button type="button" class="btn-refresh" style="padding: 0.35rem 0.75rem; font-size: 0.74rem; margin-left: auto;" onclick="clearInfluencerFilters()">Clear Filter</button>
+        </div>
+
         <div style="max-height: 400px; overflow-y: auto;">
           <table style="font-size: 0.8rem; width: 100%;">
             <thead>
@@ -1262,6 +1286,86 @@ fetch('https://api.resend.com/emails', {
   </div>
 </div>
 
+<!-- MODAL: RECORD PAYOUT -->
+<div class="modal-overlay" id="payoutModal">
+  <div class="modal-box" style="max-width: 460px;">
+    <button class="modal-close" onclick="togglePayoutModal(false)">×</button>
+    <div class="modal-title">Record Influencer Payout</div>
+    <div class="modal-subtitle">Log a cash dispatch or commission payout record to this partner.</div>
+    
+    <form id="payoutForm" onsubmit="submitPayoutForm(event)">
+      <input type="hidden" id="payoutInfluencerCode">
+      
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label class="form-label" style="font-size: 0.74rem;">Influencer / Referral Code</label>
+        <input type="text" id="payoutLabelDisplay" class="form-input" style="padding: 0.5rem; background: var(--cream);" readonly>
+      </div>
+      
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label class="form-label" style="font-size: 0.74rem;">Payout Amount (৳)</label>
+        <input type="number" id="payoutAmountInput" class="form-input" style="padding: 0.5rem;" required min="1" placeholder="e.g. 5000">
+      </div>
+      
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label class="form-label" style="font-size: 0.74rem;">Payout Date</label>
+        <input type="date" id="payoutDateInput" class="form-input" style="padding: 0.5rem;" required>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1rem;">
+        <label class="form-label" style="font-size: 0.74rem;">Payment Method</label>
+        <select id="payoutMethodSelect" class="form-input" style="padding: 0.5rem;" required>
+          <option value="bKash">bKash</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Cash">Cash</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.5rem;">
+        <label class="form-label" style="font-size: 0.74rem;">Transaction Reference / Note</label>
+        <input type="text" id="payoutRefInput" class="form-input" style="padding: 0.5rem;" placeholder="e.g. bKash txn ID or Bank ref">
+      </div>
+
+      <div style="display: flex; gap: 0.8rem; justify-content: flex-end;">
+        <button type="button" class="btn-refresh" onclick="togglePayoutModal(false)">Cancel</button>
+        <button type="submit" class="btn-action" style="padding: 0.65rem 1.4rem;">Record Payout</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: DISBURSEMENT LEDGER -->
+<div class="modal-overlay" id="payoutHistoryModal">
+  <div class="modal-box" style="max-width: 600px;">
+    <button class="modal-close" onclick="togglePayoutHistoryModal(false)">×</button>
+    <div class="modal-title">Disbursement Ledger</div>
+    <div class="modal-subtitle" id="payoutHistorySubtitle">Disbursement history logs for partner.</div>
+    
+    <div class="table-container" style="margin-top: 1rem; border: 1px solid var(--sage-pale); border-radius: 4px; padding: 0.5rem; max-height: 300px; overflow-y: auto;">
+      <table style="width: 100%; font-size: 0.82rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--cream-deep); text-align: left;">
+            <th style="padding: 0.5rem;">Date</th>
+            <th style="padding: 0.5rem;">Method</th>
+            <th style="padding: 0.5rem;">Reference</th>
+            <th style="padding: 0.5rem; text-align: right;">Amount</th>
+            <th style="padding: 0.5rem; text-align: center;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="payoutHistoryListBody">
+          <tr>
+            <td colspan="5" class="text-center text-soft" style="padding: 2rem;">No payouts recorded.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+      <button class="btn-action" onclick="togglePayoutHistoryModal(false)" style="padding: 0.65rem 1.4rem;">Close Ledger</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // Supabase connection client setup (reusing config from storefront/cart)
 const SUPABASE_URL = "https://okprwbzfsyvrkpygjkum.supabase.co";
@@ -1294,6 +1398,7 @@ let orderStatusFilter = 'all';
 let currentFulfillmentOrder = null;
 let activeProductAnalyticTab = 'profitable';
 let databaseHasCreatorColumns = false;
+let databaseHasDateColumns = false;
 
 // Chart JS Instances
 let revenueChartInstance = null;
@@ -1566,6 +1671,7 @@ async function fetchDiscounts() {
     discountsList = data || [];
     if (discountsList.length > 0) {
       databaseHasCreatorColumns = 'phone' in discountsList[0] || 'passcode' in discountsList[0];
+      databaseHasDateColumns = 'start_date' in discountsList[0] || 'end_date' in discountsList[0];
     }
   } catch (e) {
     console.warn("Discounts table fetch error from database. Falling back to localStorage:", e);
@@ -1875,6 +1981,8 @@ function parseCreatorMetadata(disc) {
   let phone = disc.phone || '';
   let passcode = disc.passcode || '';
   let payouts = [];
+  let start_date = disc.start_date || null;
+  let end_date = disc.end_date || null;
 
   if (disc.payouts) {
     payouts = Array.isArray(disc.payouts) ? disc.payouts : [];
@@ -1886,6 +1994,8 @@ function parseCreatorMetadata(disc) {
       name = meta.name || name;
       phone = meta.phone || phone || '';
       passcode = meta.passcode || passcode || '';
+      start_date = meta.start_date || start_date || null;
+      end_date = meta.end_date || end_date || null;
       if (meta.payouts && Array.isArray(meta.payouts) && payouts.length === 0) {
         payouts = meta.payouts;
       }
@@ -1894,7 +2004,7 @@ function parseCreatorMetadata(disc) {
     }
   }
   
-  return { name, phone, passcode, payouts };
+  return { name, phone, passcode, payouts, start_date, end_date };
 }
 
 // Render creators & referrals registry table
@@ -1903,6 +2013,12 @@ function renderReferralsTable() {
   if (!tbody) return;
   tbody.innerHTML = '';
   
+  const filterStartVal = document.getElementById('influencerFilterStart') ? document.getElementById('influencerFilterStart').value : '';
+  const filterEndVal = document.getElementById('influencerFilterEnd') ? document.getElementById('influencerFilterEnd').value : '';
+  
+  const filterStart = filterStartVal ? new Date(filterStartVal + 'T00:00:00') : null;
+  const filterEnd = filterEndVal ? new Date(filterEndVal + 'T23:59:59') : null;
+
   const referralDiscounts = discountsList.filter(d => d.scope === 'referral');
   
   let totalSales = 0;
@@ -1927,17 +2043,44 @@ function renderReferralsTable() {
   
   referralDiscounts.forEach(disc => {
     const meta = parseCreatorMetadata(disc);
-    const usesCount = ordersList.filter(o => (o.items || '').includes('[Referral: ' + disc.id + ']')).length;
-    const validOrders = ordersList.filter(o => 
+    
+    // Filter orders by referral ID
+    const matchedOrders = ordersList.filter(o => (o.items || '').includes('[Referral: ' + disc.id + ']'));
+    const matchedValidOrders = ordersList.filter(o => 
       (o.items || '').includes('[Referral: ' + disc.id + ']') && 
       (o.status || '').toLowerCase() !== 'cancelled'
     );
-    const revenueTotal = validOrders.reduce((acc, curr) => {
+    
+    // Apply date range filters to orders
+    const filteredMatchedOrders = matchedOrders.filter(o => {
+      const orderDate = new Date(o.created_at);
+      if (filterStart && orderDate < filterStart) return false;
+      if (filterEnd && orderDate > filterEnd) return false;
+      return true;
+    });
+
+    const filteredValidOrders = matchedValidOrders.filter(o => {
+      const orderDate = new Date(o.created_at);
+      if (filterStart && orderDate < filterStart) return false;
+      if (filterEnd && orderDate > filterEnd) return false;
+      return true;
+    });
+
+    const usesCount = filteredMatchedOrders.length;
+    const revenueTotal = filteredValidOrders.reduce((acc, curr) => {
       return acc + (parseFloat(curr.total_price || 0) - getDeliveryCharge(curr));
     }, 0);
     const commission = Math.round(revenueTotal * 0.05);
     
-    const paidAmt = meta.payouts.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+    // Filter payouts by date range if active
+    const filteredPayouts = meta.payouts.filter(p => {
+      const payoutDate = new Date(p.date);
+      if (filterStart && payoutDate < filterStart) return false;
+      if (filterEnd && payoutDate > filterEnd) return false;
+      return true;
+    });
+    
+    const paidAmt = filteredPayouts.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
     const owedAmt = Math.max(0, commission - paidAmt);
     
     totalSales += revenueTotal;
@@ -1954,6 +2097,9 @@ function renderReferralsTable() {
         <div style="font-weight: 600; color: var(--dark);">${escapeHTML(meta.name)}</div>
         <div style="font-size: 0.72rem; color: var(--text-soft); margin-top: 0.1rem;">
           ${meta.phone ? `Phone: ${escapeHTML(meta.phone)}` : 'No phone'} | ${meta.passcode ? `PIN: ${escapeHTML(meta.passcode)}` : 'No PIN'}
+        </div>
+        <div style="font-size: 0.72rem; color: var(--text-soft); margin-top: 0.1rem;">
+          Validity: <span style="font-weight: 500;">${meta.start_date ? meta.start_date : 'Indefinite'}</span> to <span style="font-weight: 500;">${meta.end_date ? meta.end_date : 'Indefinite'}</span>
         </div>
         <div style="display: flex; align-items: center; gap: 0.4rem; margin-top: 0.2rem;">
           <code style="background: var(--cream); padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: bold; color: var(--dark-mid); font-size: 0.8rem; letter-spacing: 0.05em;">${escapeHTML(disc.id)}</code>
@@ -1976,10 +2122,13 @@ function renderReferralsTable() {
       <td style="padding: 0.85rem 0.5rem; text-align: right; white-space: nowrap;">
         <button class="btn-action" 
                 style="background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; padding: 0.2rem 0.4rem; font-size: 0.72rem; margin-right: 0.25rem;" 
-                onclick="promptRecordPayout('${disc.id}')">Payout</button>
+                onclick="togglePayoutModal(true, '${escapeHTML(disc.id)}')">Payout</button>
+        <button class="btn-action" 
+                style="background: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; padding: 0.2rem 0.4rem; font-size: 0.72rem; margin-right: 0.25rem;" 
+                onclick="togglePayoutHistoryModal(true, '${escapeHTML(disc.id)}')">History</button>
         <button class="btn-action" 
                 style="background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; padding: 0.2rem 0.4rem; font-size: 0.72rem;" 
-                onclick="deleteDiscount('${disc.id}')">Delete</button>
+                onclick="deleteDiscount('${escapeHTML(disc.id)}')">Delete</button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -2006,31 +2155,69 @@ function copyReferralLink(code) {
   });
 }
 
-// Prompt for payout recording
-function promptRecordPayout(code) {
-  const amount = prompt("Enter payout amount in ৳ for influencer " + code + ":");
-  if (amount !== null && amount.trim() !== "") {
-    recordCreatorPayout(code, amount.trim());
+function clearInfluencerFilters() {
+  const startEl = document.getElementById('influencerFilterStart');
+  const endEl = document.getElementById('influencerFilterEnd');
+  if (startEl) startEl.value = '';
+  if (endEl) endEl.value = '';
+  renderReferralsTable();
+}
+
+function togglePayoutModal(show, code = '') {
+  const modal = document.getElementById('payoutModal');
+  if (!modal) return;
+  
+  if (show) {
+    const disc = discountsList.find(d => d.id === code);
+    if (!disc) return;
+    
+    const meta = parseCreatorMetadata(disc);
+    document.getElementById('payoutInfluencerCode').value = code;
+    document.getElementById('payoutLabelDisplay').value = `${meta.name} (${code})`;
+    document.getElementById('payoutAmountInput').value = '';
+    
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('payoutDateInput').value = today;
+    document.getElementById('payoutMethodSelect').value = 'bKash';
+    document.getElementById('payoutRefInput').value = '';
+    
+    modal.classList.add('active');
+  } else {
+    modal.classList.remove('active');
   }
 }
 
-// Save creator payout to database (compatible with both JSON and separate column schema)
-async function recordCreatorPayout(code, amountText) {
-  const amount = parseFloat(amountText);
-  if (isNaN(amount) || amount <= 0) {
-    alert("Please enter a valid positive payout amount.");
+async function submitPayoutForm(e) {
+  e.preventDefault();
+  const code = document.getElementById('payoutInfluencerCode').value;
+  const amount = parseFloat(document.getElementById('payoutAmountInput').value);
+  const date = document.getElementById('payoutDateInput').value;
+  const method = document.getElementById('payoutMethodSelect').value;
+  const ref = document.getElementById('payoutRefInput').value.trim() || 'No reference';
+
+  if (!code || isNaN(amount) || amount <= 0 || !date || !method) {
+    showAdminToast("Please fill in all required fields with valid values.", "error");
     return;
   }
 
   const disc = discountsList.find(d => d.id === code);
-  if (!disc) return;
+  if (!disc) {
+    showAdminToast("Influencer code not found.", "error");
+    return;
+  }
 
   const meta = parseCreatorMetadata(disc);
+  const payoutId = 'pay_' + Math.random().toString(36).substr(2, 9);
+  
   const payoutRecord = {
-    date: new Date().toISOString(),
+    id: payoutId,
+    date: new Date(date).toISOString(),
     amount: amount,
-    ref: "Payout recorded by Admin"
+    method: method,
+    ref: ref
   };
+
   meta.payouts.push(payoutRecord);
 
   // Update payload using JSON structure
@@ -2052,10 +2239,116 @@ async function recordCreatorPayout(code, amountText) {
     if (error) throw error;
     
     showAdminToast(`Recorded payout of ৳${amount} for ${meta.name}`);
+    togglePayoutModal(false);
+    
+    // Update local state first to immediately refresh view
+    const localIndex = discountsList.findIndex(d => d.id === code);
+    if (localIndex !== -1) {
+      discountsList[localIndex].scope_value = JSON.stringify(meta);
+      if (databaseHasCreatorColumns) {
+        discountsList[localIndex].payouts = meta.payouts;
+      }
+    }
+    
     await refreshData();
   } catch (err) {
     console.error("Failed to record payout:", err);
     showAdminToast("Failed to record payout: " + err.message, "error");
+  }
+}
+
+function togglePayoutHistoryModal(show, code = '') {
+  const modal = document.getElementById('payoutHistoryModal');
+  if (!modal) return;
+  
+  if (show) {
+    const disc = discountsList.find(d => d.id === code);
+    if (!disc) return;
+    
+    const meta = parseCreatorMetadata(disc);
+    document.getElementById('payoutHistorySubtitle').innerHTML = `Disbursement history logs for <strong>${escapeHTML(meta.name)}</strong> (${escapeHTML(code)}).`;
+    
+    const tbody = document.getElementById('payoutHistoryListBody');
+    tbody.innerHTML = '';
+    
+    if (!meta.payouts || meta.payouts.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center text-soft" style="padding: 2rem;">No payouts recorded for this influencer.</td></tr>`;
+    } else {
+      // Sort payouts by date descending
+      const sortedPayouts = [...meta.payouts].sort((a, b) => new Date(b.date) - new Date(a.date));
+      sortedPayouts.forEach(p => {
+        const dateStr = new Date(p.date).toLocaleDateString('en-US', {
+          month: 'short', day: 'numeric', year: 'numeric'
+        });
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid var(--cream-deep)';
+        tr.innerHTML = `
+          <td style="padding: 0.5rem; text-align: left;">${dateStr}</td>
+          <td style="padding: 0.5rem; text-align: left; font-weight: 500;">${escapeHTML(p.method || 'Other')}</td>
+          <td style="padding: 0.5rem; text-align: left;" class="text-soft">${escapeHTML(p.ref || 'N/A')}</td>
+          <td style="padding: 0.5rem; text-align: right;" class="bold">৳ ${parseFloat(p.amount || 0).toLocaleString()}</td>
+          <td style="padding: 0.5rem; text-align: center;">
+            <button class="btn-action" 
+                    style="background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; padding: 0.15rem 0.35rem; font-size: 0.65rem;" 
+                    onclick="deletePayoutRecord('${escapeHTML(code)}', '${escapeHTML(p.id || p.date)}')">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+    
+    modal.classList.add('active');
+  } else {
+    modal.classList.remove('active');
+  }
+}
+
+async function deletePayoutRecord(code, payoutIdOrDate) {
+  if (!confirm("Are you sure you want to delete this payout log? This action cannot be undone.")) return;
+
+  const disc = discountsList.find(d => d.id === code);
+  if (!disc) return;
+
+  const meta = parseCreatorMetadata(disc);
+  // Filter out the deleted payout
+  const updatedPayouts = meta.payouts.filter(p => (p.id || p.date) !== payoutIdOrDate);
+  meta.payouts = updatedPayouts;
+
+  const updatePayload = {
+    scope_value: JSON.stringify(meta)
+  };
+  if (databaseHasCreatorColumns) {
+    updatePayload.payouts = meta.payouts;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('discounts')
+      .update(updatePayload)
+      .eq('id', code)
+      .select();
+
+    if (error) throw error;
+
+    showAdminToast(`Deleted payout log successfully.`);
+    
+    // Update local state first to immediately refresh modal
+    const localIndex = discountsList.findIndex(d => d.id === code);
+    if (localIndex !== -1) {
+      discountsList[localIndex].scope_value = JSON.stringify(meta);
+      if (databaseHasCreatorColumns) {
+        discountsList[localIndex].payouts = meta.payouts;
+      }
+    }
+    
+    // Refresh the modal view
+    togglePayoutHistoryModal(true, code);
+    
+    // Refresh other stats
+    await refreshData();
+  } catch (err) {
+    console.error("Failed to delete payout log:", err);
+    showAdminToast("Failed to delete payout log: " + err.message, "error");
   }
 }
 
@@ -2067,6 +2360,8 @@ async function submitReferral(e) {
   const passcode = document.getElementById('refPasscode').value.trim();
   const code = document.getElementById('refCodeInput').value.trim().toUpperCase();
   const discountVal = parseFloat(document.getElementById('refDiscountValue').value) || 0;
+  const startDate = document.getElementById('refStartDate').value;
+  const endDate = document.getElementById('refEndDate').value;
   
   if (!name || !code || !phone || !passcode) {
     showAdminToast("All fields are required", "error");
@@ -2095,7 +2390,9 @@ async function submitReferral(e) {
     name: name,
     phone: phone,
     passcode: passcode,
-    payouts: []
+    payouts: [],
+    start_date: startDate || null,
+    end_date: endDate || null
   };
   
   const newReferral = {
@@ -2113,6 +2410,10 @@ async function submitReferral(e) {
     newReferral.phone = phone;
     newReferral.passcode = passcode;
     newReferral.payouts = [];
+  }
+  if (databaseHasDateColumns) {
+    newReferral.start_date = startDate || null;
+    newReferral.end_date = endDate || null;
   }
   
   await saveDiscount(newReferral);
@@ -2976,7 +3277,21 @@ function renderFinancials() {
   // Use actualGrossSales for KPIs to ensure delivery charges are excluded properly
   const grossProfit = actualGrossSales - totalCOGS;
   const grossMarginPercent = actualGrossSales > 0 ? (grossProfit / actualGrossSales) * 100 : 0;
-  const totalExpenses = expensesList.reduce((acc, exp) => acc + parseFloat(exp.amount || 0), 0);
+  // Calculate total accrued influencer commissions (5% share of valid referred orders)
+  let totalInfluencerCommissions = 0;
+  const referralDiscounts = discountsList.filter(d => d.scope === 'referral');
+  referralDiscounts.forEach(disc => {
+    const validOrders = activeOrders.filter(o => 
+      (o.items || '').includes('[Referral: ' + disc.id + ']')
+    );
+    const revenueTotal = validOrders.reduce((acc, curr) => {
+      return acc + (parseFloat(curr.total_price || 0) - getDeliveryCharge(curr));
+    }, 0);
+    const commission = Math.round(revenueTotal * 0.05);
+    totalInfluencerCommissions += commission;
+  });
+
+  const totalExpenses = expensesList.reduce((acc, exp) => acc + parseFloat(exp.amount || 0), 0) + totalInfluencerCommissions;
   const netProfit = grossProfit - totalExpenses;
   const netMarginPercent = actualGrossSales > 0 ? (netProfit / actualGrossSales) * 100 : 0;
 
@@ -2999,7 +3314,7 @@ function renderFinancials() {
   // Render Expense ledger table
   const expTbody = document.getElementById('expensesListBody');
   expTbody.innerHTML = '';
-  if (expensesList.length === 0) {
+  if (expensesList.length === 0 && totalInfluencerCommissions === 0) {
     expTbody.innerHTML = '<tr><td colspan="5" class="text-soft text-center" style="padding: 1.5rem;">No operating expenses recorded yet.</td></tr>';
   } else {
     expensesList.forEach(exp => {
@@ -3018,6 +3333,21 @@ function renderFinancials() {
       `;
       expTbody.appendChild(tr);
     });
+
+    if (totalInfluencerCommissions > 0) {
+      const tr = document.createElement('tr');
+      tr.style.backgroundColor = 'rgba(235, 248, 255, 0.4)';
+      tr.innerHTML = `
+        <td class="text-soft">Auto-managed</td>
+        <td class="bold text-soft" style="font-size: 0.78rem;">Marketing / Commission</td>
+        <td class="bold">Influencer Commissions (Accrued)</td>
+        <td class="bold text-right">৳ ${totalInfluencerCommissions.toLocaleString()}</td>
+        <td class="text-right text-soft" style="font-size: 0.72rem; padding-right: 0.8rem;">
+          <em>System calculated</em>
+        </td>
+      `;
+      expTbody.appendChild(tr);
+    }
   }
 
   // 1. Render switchable Product Analytics Table (Most Profitable vs. Margin %)

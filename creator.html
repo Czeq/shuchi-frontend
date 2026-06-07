@@ -533,6 +533,19 @@
       </div>
     </div>
 
+    <!-- Time Period Filter for Creator -->
+    <div style="display: flex; gap: 0.8rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; background: rgba(255, 255, 255, 0.4); padding: 0.8rem; border-radius: 4px; border: 1px solid var(--cream-deep);">
+      <div style="display: flex; align-items: center; gap: 0.4rem;">
+        <span style="font-size: 0.82rem; color: var(--text-soft); font-weight: 600;">Show metrics for period:</span>
+        <input type="date" id="creatorFilterStart" class="form-input" style="padding: 0.35rem 0.5rem; font-size: 0.8rem; width: auto; border: 1px solid var(--sage-pale); border-radius: 4px;" onchange="renderCreatorDashboard()">
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.4rem;">
+        <span style="font-size: 0.82rem; color: var(--text-soft); font-weight: 600;">to</span>
+        <input type="date" id="creatorFilterEnd" class="form-input" style="padding: 0.35rem 0.5rem; font-size: 0.8rem; width: auto; border: 1px solid var(--sage-pale); border-radius: 4px;" onchange="renderCreatorDashboard()">
+      </div>
+      <button type="button" class="quick-link-btn" style="padding: 0.35rem 0.75rem; font-size: 0.76rem; border-radius: 4px; background: var(--dark); color: var(--white); cursor: pointer;" onclick="clearCreatorFilters()">Clear Filter</button>
+    </div>
+
     <!-- METRICS GRID -->
     <div class="metrics-row">
       <div class="metric-card">
@@ -775,6 +788,14 @@ function getDeliveryCharge(order) {
   return 0;
 }
 
+function clearCreatorFilters() {
+  const startEl = document.getElementById('creatorFilterStart');
+  const endEl = document.getElementById('creatorFilterEnd');
+  if (startEl) startEl.value = '';
+  if (endEl) endEl.value = '';
+  renderCreatorDashboard();
+}
+
 // Render Dashboard Data
 function renderCreatorDashboard() {
   // Set headers
@@ -785,16 +806,46 @@ function renderCreatorDashboard() {
   const origin = window.location.origin;
   document.getElementById('txtPromoLink').value = `${origin}/storefront.html?ref=${activeCreatorCode}`;
 
+  const filterStartVal = document.getElementById('creatorFilterStart') ? document.getElementById('creatorFilterStart').value : '';
+  const filterEndVal = document.getElementById('creatorFilterEnd') ? document.getElementById('creatorFilterEnd').value : '';
+  
+  const filterStart = filterStartVal ? new Date(filterStartVal + 'T00:00:00') : null;
+  const filterEnd = filterEndVal ? new Date(filterEndVal + 'T23:59:59') : null;
+
   // Filter orders for this creator
   const refOrders = ordersList.filter(o => (o.items || '').includes('[Referral: ' + activeCreatorCode + ']'));
   const validOrders = refOrders.filter(o => (o.status || '').toLowerCase() !== 'cancelled');
 
+  // Filtered by date range
+  const filteredRefOrders = refOrders.filter(o => {
+    const orderDate = new Date(o.created_at);
+    if (filterStart && orderDate < filterStart) return false;
+    if (filterEnd && orderDate > filterEnd) return false;
+    return true;
+  });
+
+  const filteredValidOrders = validOrders.filter(o => {
+    const orderDate = new Date(o.created_at);
+    if (filterStart && orderDate < filterStart) return false;
+    if (filterEnd && orderDate > filterEnd) return false;
+    return true;
+  });
+
   // Compute metrics
-  const totalSales = validOrders.reduce((sum, o) => {
+  const totalSales = filteredValidOrders.reduce((sum, o) => {
     return sum + (parseFloat(o.total_price || 0) - getDeliveryCharge(o));
   }, 0);
   const earnedCommission = Math.round(totalSales * 0.05);
-  const totalPaid = activeCreatorMeta.payouts.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+
+  // Filter payouts by date range if active
+  const filteredPayouts = activeCreatorMeta.payouts.filter(p => {
+    const payoutDate = new Date(p.date);
+    if (filterStart && payoutDate < filterStart) return false;
+    if (filterEnd && payoutDate > filterEnd) return false;
+    return true;
+  });
+
+  const totalPaid = filteredPayouts.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
   const owedBalance = Math.max(0, earnedCommission - totalPaid);
 
   // Set KPIs
@@ -807,10 +858,10 @@ function renderCreatorDashboard() {
   const ordersBody = document.getElementById('ordersListBody');
   ordersBody.innerHTML = '';
 
-  if (refOrders.length === 0) {
-    ordersBody.innerHTML = '<tr><td colspan="5" class="text-center text-soft" style="padding: 2.5rem;">No purchases registered under your code yet.</td></tr>';
+  if (filteredRefOrders.length === 0) {
+    ordersBody.innerHTML = '<tr><td colspan="5" class="text-center text-soft" style="padding: 2.5rem;">No purchases registered under your code in this period.</td></tr>';
   } else {
-    refOrders.forEach(o => {
+    filteredRefOrders.forEach(o => {
       const orderVal = parseFloat(o.total_price || 0) - getDeliveryCharge(o);
       const commVal = Math.round(orderVal * 0.05);
       const dateStr = o.created_at ? new Date(o.created_at).toLocaleDateString('en-US', {
@@ -837,11 +888,11 @@ function renderCreatorDashboard() {
   const payoutsBody = document.getElementById('payoutsListBody');
   payoutsBody.innerHTML = '';
 
-  if (activeCreatorMeta.payouts.length === 0) {
-    payoutsBody.innerHTML = '<tr><td colspan="3" class="text-center text-soft" style="padding: 2.5rem;">No payouts recorded yet.</td></tr>';
+  if (filteredPayouts.length === 0) {
+    payoutsBody.innerHTML = '<tr><td colspan="3" class="text-center text-soft" style="padding: 2.5rem;">No payouts recorded in this period.</td></tr>';
   } else {
     // Sort payouts by date descending
-    const sortedPayouts = [...activeCreatorMeta.payouts].sort((a,b) => new Date(b.date) - new Date(a.date));
+    const sortedPayouts = [...filteredPayouts].sort((a,b) => new Date(b.date) - new Date(a.date));
     sortedPayouts.forEach(p => {
       const dateStr = p.date ? new Date(p.date).toLocaleDateString('en-US', {
         month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
