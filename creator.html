@@ -731,7 +731,7 @@ async function loadCreatorData() {
       // Fetch referred orders (selecting only safe columns for privacy)
       const { data: ordData, error: ordErr } = await supabaseClient
         .from('orders')
-        .select('id, created_at, status, total_price, area, items')
+        .select('order_id, created_at, status, total_price, area, items')
         .like('items', `%[Referral: ${activeCreatorCode}]%`)
         .order('created_at', { ascending: false });
 
@@ -874,7 +874,7 @@ function renderCreatorDashboard() {
       
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td class="bold text-soft">${o.id.substring(0, 8)}...</td>
+        <td class="bold text-soft">${(o.order_id || o.id || '').substring(0, 8)}...</td>
         <td>${dateStr}</td>
         <td><span class="badge ${statusLabel}">${statusLabel}</span></td>
         <td class="text-right bold">৳ ${orderVal.toLocaleString()}</td>
