@@ -162,6 +162,19 @@ async function initCartSystem() {
   
   updateCartUI();
   updateAuthUI();
+
+  // Trigger notification if order was just completed
+  try {
+    const orderCompleted = sessionStorage.getItem('shuchi_order_completed_toast');
+    if (orderCompleted === 'true') {
+      sessionStorage.removeItem('shuchi_order_completed_toast');
+      setTimeout(() => {
+        showToast("Order placed! You can track your order status from your Account panel.");
+      }, 1000);
+    }
+  } catch (err) {
+    console.error("Failed to trigger order completed toast:", err);
+  }
   
   // If product.html, inject the storefront catalog at the bottom
   if (window.location.pathname.includes('product.html')) {
@@ -1938,6 +1951,8 @@ async function submitCheckout(e) {
     statusTitle.textContent = "Order Placed Successfully!";
     statusDesc.textContent = `Thank you for shopping with SHUCHI. Your Order ID is ${orderId}. We have registered this order on the Shuchi User database and will contact you via phone within 24 hours.`;
     
+    sessionStorage.setItem('shuchi_order_completed_toast', 'true');
+
     statusBtn.textContent = "Continue Shopping";
     statusBtn.onclick = closeCheckoutAfterSuccess;
     statusBtn.style.display = 'block';

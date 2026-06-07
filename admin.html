@@ -918,7 +918,7 @@
   <!-- TAB: REFERRALS -->
   <div id="tabReferrals" class="tab-content">
     <!-- Referral Metrics -->
-    <div class="metrics-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2rem;">
+    <div class="metrics-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
       <div class="metric-card success">
         <div class="metric-label">Referral Sales</div>
         <div class="metric-value" id="refSalesTotal">৳ 0</div>
@@ -927,7 +927,17 @@
       <div class="metric-card">
         <div class="metric-label">Commissions Accrued</div>
         <div class="metric-value" id="refCommissionsTotal" style="color: var(--sage);">৳ 0</div>
-        <div class="metric-sub">5% creator revenue share</div>
+        <div class="metric-sub">5% creator share</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Commissions Paid</div>
+        <div class="metric-value" id="refPaidTotal" style="color: var(--text-soft);">৳ 0</div>
+        <div class="metric-sub">Total payouts made</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Commissions Owed</div>
+        <div class="metric-value" id="refOwedTotal" style="color: var(--gold);">৳ 0</div>
+        <div class="metric-sub">Pending balance due</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">Referral Orders</div>
@@ -937,7 +947,7 @@
       <div class="metric-card">
         <div class="metric-label">Active Creators</div>
         <div class="metric-value" id="refCreatorsCount">0</div>
-        <div class="metric-sub">Registered creator codes</div>
+        <div class="metric-sub">Registered codes</div>
       </div>
     </div>
 
@@ -949,6 +959,14 @@
           <div class="form-group" style="margin-bottom: 1rem;">
             <label class="form-label" style="font-size: 0.74rem;">Creator Name / Identifier</label>
             <input type="text" id="refCreatorName" class="form-input" style="padding: 0.5rem;" required placeholder="e.g. Sabrina Rahman">
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" style="font-size: 0.74rem;">Creator Phone Number</label>
+            <input type="tel" id="refPhone" class="form-input" style="padding: 0.5rem;" required placeholder="e.g. 017XXXXXXXX" pattern="[0-9]{11}" title="Please enter a valid 11-digit Bangladeshi mobile number">
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" style="font-size: 0.74rem;">Login Passcode (4-digit PIN)</label>
+            <input type="text" id="refPasscode" class="form-input" style="padding: 0.5rem;" required placeholder="e.g. 1234" pattern="[0-9]{4}" title="Please enter a 4-digit numeric passcode">
           </div>
           <div class="form-group" style="margin-bottom: 1rem;">
             <label class="form-label" style="font-size: 0.74rem;">Custom Referral Code</label>
@@ -973,7 +991,9 @@
                 <th style="padding: 0.5rem; text-align: right;">Discount</th>
                 <th style="padding: 0.5rem; text-align: right;">Uses</th>
                 <th style="padding: 0.5rem; text-align: right;">Net Sales</th>
-                <th style="padding: 0.5rem; text-align: right;">Commission</th>
+                <th style="padding: 0.5rem; text-align: right;">Earned</th>
+                <th style="padding: 0.5rem; text-align: right;">Paid</th>
+                <th style="padding: 0.5rem; text-align: right;">Owed</th>
                 <th style="padding: 0.5rem; text-align: center;">Status</th>
                 <th style="padding: 0.5rem; text-align: right;">Action</th>
               </tr>
@@ -1257,6 +1277,7 @@ let activeTab = 'dashboard';
 let orderStatusFilter = 'all';
 let currentFulfillmentOrder = null;
 let activeProductAnalyticTab = 'profitable';
+let databaseHasCreatorColumns = false;
 
 // Chart JS Instances
 let revenueChartInstance = null;
@@ -1527,6 +1548,9 @@ async function fetchDiscounts() {
       .order('created_at', { ascending: false });
     if (error) throw error;
     discountsList = data || [];
+    if (discountsList.length > 0) {
+      databaseHasCreatorColumns = 'phone' in discountsList[0] || 'passcode' in discountsList[0];
+    }
   } catch (e) {
     console.warn("Discounts table fetch error from database. Falling back to localStorage:", e);
     const local = localStorage.getItem('shuchi_discounts');
@@ -1829,6 +1853,34 @@ function renderDiscountsTable() {
   });
 }
 
+// Helper to parse creator metadata supporting both legacy plain-text and JSON formats
+function parseCreatorMetadata(disc) {
+  let name = disc.scope_value || 'Unknown';
+  let phone = disc.phone || '';
+  let passcode = disc.passcode || '';
+  let payouts = [];
+
+  if (disc.payouts) {
+    payouts = Array.isArray(disc.payouts) ? disc.payouts : [];
+  }
+
+  if (disc.scope_value && disc.scope_value.trim().startsWith('{')) {
+    try {
+      const meta = JSON.parse(disc.scope_value);
+      name = meta.name || name;
+      phone = meta.phone || phone || '';
+      passcode = meta.passcode || passcode || '';
+      if (meta.payouts && Array.isArray(meta.payouts) && payouts.length === 0) {
+        payouts = meta.payouts;
+      }
+    } catch (e) {
+      console.warn("Failed to parse scope_value JSON fallback:", e);
+    }
+  }
+  
+  return { name, phone, passcode, payouts };
+}
+
 // Render creators & referrals registry table
 function renderReferralsTable() {
   const tbody = document.getElementById('referralsListBody');
@@ -1839,21 +1891,26 @@ function renderReferralsTable() {
   
   let totalSales = 0;
   let totalCommissions = 0;
+  let totalPaid = 0;
+  let totalOwed = 0;
   let totalOrders = 0;
   let activeCreators = 0;
   
   if (referralDiscounts.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-soft text-center" style="padding: 2rem;">No creators registered.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="text-soft text-center" style="padding: 2rem;">No creators registered.</td></tr>';
     
     // Update metrics cards to 0
     document.getElementById('refSalesTotal').textContent = '৳ 0';
     document.getElementById('refCommissionsTotal').textContent = '৳ 0';
+    document.getElementById('refPaidTotal').textContent = '৳ 0';
+    document.getElementById('refOwedTotal').textContent = '৳ 0';
     document.getElementById('refOrdersCount').textContent = '0';
     document.getElementById('refCreatorsCount').textContent = '0';
     return;
   }
   
   referralDiscounts.forEach(disc => {
+    const meta = parseCreatorMetadata(disc);
     const usesCount = ordersList.filter(o => (o.items || '').includes('[Referral: ' + disc.id + ']')).length;
     const validOrders = ordersList.filter(o => 
       (o.items || '').includes('[Referral: ' + disc.id + ']') && 
@@ -1864,8 +1921,13 @@ function renderReferralsTable() {
     }, 0);
     const commission = Math.round(revenueTotal * 0.05);
     
+    const paidAmt = meta.payouts.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+    const owedAmt = Math.max(0, commission - paidAmt);
+    
     totalSales += revenueTotal;
     totalCommissions += commission;
+    totalPaid += paidAmt;
+    totalOwed += owedAmt;
     totalOrders += usesCount;
     if (disc.active) activeCreators++;
     
@@ -1873,7 +1935,10 @@ function renderReferralsTable() {
     tr.style.borderBottom = '1px solid var(--cream-deep)';
     tr.innerHTML = `
       <td style="padding: 0.85rem 0.5rem;">
-        <div style="font-weight: 600; color: var(--dark);">${disc.scope_value || 'Unknown'}</div>
+        <div style="font-weight: 600; color: var(--dark);">${meta.name}</div>
+        <div style="font-size: 0.72rem; color: var(--text-soft); margin-top: 0.1rem;">
+          ${meta.phone ? `Phone: ${meta.phone}` : 'No phone'} | ${meta.passcode ? `PIN: ${meta.passcode}` : 'No PIN'}
+        </div>
         <div style="display: flex; align-items: center; gap: 0.4rem; margin-top: 0.2rem;">
           <code style="background: var(--cream); padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: bold; color: var(--dark-mid); font-size: 0.8rem; letter-spacing: 0.05em;">${disc.id}</code>
           <button class="btn-action" style="padding: 0.15rem 0.35rem; font-size: 0.65rem;" onclick="copyReferralLink('${disc.id}')" title="Copy Promo Tracking Link">🔗 Link</button>
@@ -1883,6 +1948,8 @@ function renderReferralsTable() {
       <td style="padding: 0.85rem 0.5rem;" class="text-right bold text-soft">${usesCount}</td>
       <td style="padding: 0.85rem 0.5rem;" class="text-right bold">৳ ${revenueTotal.toLocaleString()}</td>
       <td style="padding: 0.85rem 0.5rem; color: var(--sage);" class="text-right bold">৳ ${commission.toLocaleString()}</td>
+      <td style="padding: 0.85rem 0.5rem; color: var(--text-soft);" class="text-right bold">৳ ${paidAmt.toLocaleString()}</td>
+      <td style="padding: 0.85rem 0.5rem; color: var(--gold);" class="text-right bold">৳ ${owedAmt.toLocaleString()}</td>
       <td style="padding: 0.85rem 0.5rem; text-align: center;">
         <button class="btn-stock-toggle ${disc.active ? 'in-stock' : 'out-of-stock'}" 
                 style="font-size: 0.72rem; padding: 0.2rem 0.4rem;" 
@@ -1890,7 +1957,10 @@ function renderReferralsTable() {
           ${disc.active ? 'Active' : 'Inactive'}
         </button>
       </td>
-      <td style="padding: 0.85rem 0.5rem; text-align: right;">
+      <td style="padding: 0.85rem 0.5rem; text-align: right; white-space: nowrap;">
+        <button class="btn-action" 
+                style="background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; padding: 0.2rem 0.4rem; font-size: 0.72rem; margin-right: 0.25rem;" 
+                onclick="promptRecordPayout('${disc.id}')">Payout</button>
         <button class="btn-action" 
                 style="background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; padding: 0.2rem 0.4rem; font-size: 0.72rem;" 
                 onclick="deleteDiscount('${disc.id}')">Delete</button>
@@ -1902,6 +1972,8 @@ function renderReferralsTable() {
   // Update metrics cards
   document.getElementById('refSalesTotal').textContent = `৳ ${totalSales.toLocaleString()}`;
   document.getElementById('refCommissionsTotal').textContent = `৳ ${totalCommissions.toLocaleString()}`;
+  document.getElementById('refPaidTotal').textContent = `৳ ${totalPaid.toLocaleString()}`;
+  document.getElementById('refOwedTotal').textContent = `৳ ${totalOwed.toLocaleString()}`;
   document.getElementById('refOrdersCount').textContent = totalOrders;
   document.getElementById('refCreatorsCount').textContent = activeCreators;
 }
@@ -1918,14 +1990,69 @@ function copyReferralLink(code) {
   });
 }
 
+// Prompt for payout recording
+function promptRecordPayout(code) {
+  const amount = prompt("Enter payout amount in ৳ for creator " + code + ":");
+  if (amount !== null && amount.trim() !== "") {
+    recordCreatorPayout(code, amount.trim());
+  }
+}
+
+// Save creator payout to database (compatible with both JSON and separate column schema)
+async function recordCreatorPayout(code, amountText) {
+  const amount = parseFloat(amountText);
+  if (isNaN(amount) || amount <= 0) {
+    alert("Please enter a valid positive payout amount.");
+    return;
+  }
+
+  const disc = discountsList.find(d => d.id === code);
+  if (!disc) return;
+
+  const meta = parseCreatorMetadata(disc);
+  const payoutRecord = {
+    date: new Date().toISOString(),
+    amount: amount,
+    ref: "Payout recorded by Admin"
+  };
+  meta.payouts.push(payoutRecord);
+
+  // Update payload using JSON structure
+  const updatePayload = {
+    scope_value: JSON.stringify(meta)
+  };
+  // If the SQL migration has run and column exists, update separate columns too
+  if (databaseHasCreatorColumns) {
+    updatePayload.payouts = meta.payouts;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('discounts')
+      .update(updatePayload)
+      .eq('id', code)
+      .select();
+    
+    if (error) throw error;
+    
+    showAdminToast(`Recorded payout of ৳${amount} for ${meta.name}`);
+    await refreshData();
+  } catch (err) {
+    console.error("Failed to record payout:", err);
+    showAdminToast("Failed to record payout: " + err.message, "error");
+  }
+}
+
 // Submit new creator referral code
 async function submitReferral(e) {
   e.preventDefault();
   const name = document.getElementById('refCreatorName').value.trim();
+  const phone = document.getElementById('refPhone').value.trim();
+  const passcode = document.getElementById('refPasscode').value.trim();
   const code = document.getElementById('refCodeInput').value.trim().toUpperCase();
   const discountVal = parseFloat(document.getElementById('refDiscountValue').value) || 0;
   
-  if (!name || !code) {
+  if (!name || !code || !phone || !passcode) {
     showAdminToast("All fields are required", "error");
     return;
   }
@@ -1946,16 +2073,31 @@ async function submitReferral(e) {
     showAdminToast(`Referral code "${code}" already exists`, "error");
     return;
   }
+
+  // Serialize metadata for JSON fallback compatibility
+  const metadataObj = {
+    name: name,
+    phone: phone,
+    passcode: passcode,
+    payouts: []
+  };
   
   const newReferral = {
     id: code,
     type: 'percentage',
     value: discountVal,
     scope: 'referral',
-    scope_value: name,
+    scope_value: JSON.stringify(metadataObj),
     active: true,
     created_at: new Date().toISOString()
   };
+
+  // If separate columns exist, populate them
+  if (databaseHasCreatorColumns) {
+    newReferral.phone = phone;
+    newReferral.passcode = passcode;
+    newReferral.payouts = [];
+  }
   
   await saveDiscount(newReferral);
   renderReferralsTable();
