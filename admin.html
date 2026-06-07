@@ -865,13 +865,19 @@
               <option value="all">All Products</option>
               <option value="brand">Specific Brand</option>
               <option value="category">Specific Product Type (Category)</option>
+              <option value="referral">Creator Referral Code</option>
             </select>
+          </div>
+          <div class="form-group" id="discCodeGroup" style="margin-bottom: 1rem; display: none;">
+            <label class="form-label" style="font-size: 0.74rem;">Custom Referral Code</label>
+            <input type="text" id="discCodeInput" class="form-input" style="padding: 0.5rem; text-transform: uppercase;" placeholder="e.g. SABRINA10">
           </div>
           <div class="form-group" id="discScopeValueGroup" style="margin-bottom: 1.2rem; display: none;">
             <label class="form-label" style="font-size: 0.74rem;" id="discScopeValueLabel">Target Value</label>
             <select id="discScopeValue" class="form-input" style="padding: 0.5rem;">
               <!-- Will be dynamically populated with brands or categories -->
             </select>
+            <input type="text" id="discScopeValueText" class="form-input" style="padding: 0.5rem; display: none;" placeholder="e.g. Sabrina">
           </div>
           <button type="submit" class="btn-action" style="width: 100%; justify-content: center; padding: 0.65rem;">Create Campaign Rule</button>
         </form>
@@ -1531,14 +1537,44 @@ function handleDiscountScopeChange() {
   const group = document.getElementById('discScopeValueGroup');
   const label = document.getElementById('discScopeValueLabel');
   const select = document.getElementById('discScopeValue');
+  const textInput = document.getElementById('discScopeValueText');
+  const codeGroup = document.getElementById('discCodeGroup');
+  const codeInput = document.getElementById('discCodeInput');
   
   if (!group || !select) return;
   
   if (scope === 'all') {
     group.style.display = 'none';
+    select.style.display = 'block';
+    if (textInput) textInput.style.display = 'none';
+    if (codeGroup) codeGroup.style.display = 'none';
+    select.required = false;
+    if (textInput) textInput.required = false;
+    if (codeInput) codeInput.required = false;
+  } else if (scope === 'referral') {
+    group.style.display = 'block';
+    label.textContent = 'Creator Name / ID';
+    select.style.display = 'none';
+    if (textInput) {
+      textInput.style.display = 'block';
+      textInput.required = true;
+    }
+    if (codeGroup) {
+      codeGroup.style.display = 'block';
+      if (codeInput) codeInput.required = true;
+    }
     select.required = false;
   } else {
     group.style.display = 'block';
+    select.style.display = 'block';
+    if (textInput) {
+      textInput.style.display = 'none';
+      textInput.required = false;
+    }
+    if (codeGroup) {
+      codeGroup.style.display = 'none';
+      if (codeInput) codeInput.required = false;
+    }
     select.required = true;
     select.innerHTML = '';
     
@@ -1581,7 +1617,13 @@ async function submitDiscount(e) {
   const discType = document.getElementById('discType').value;
   const value = parseFloat(document.getElementById('discValue').value) || 0;
   const scope = document.getElementById('discScope').value;
-  const scopeValue = scope !== 'all' ? document.getElementById('discScopeValue').value : '';
+  
+  let scopeValue = '';
+  if (scope === 'referral') {
+    scopeValue = document.getElementById('discScopeValueText').value.trim();
+  } else if (scope !== 'all') {
+    scopeValue = document.getElementById('discScopeValue').value;
+  }
   
   if (value <= 0) {
     showAdminToast("Alteration value must be positive", "error");
@@ -1593,11 +1635,24 @@ async function submitDiscount(e) {
     return;
   }
   
+  let code = '';
+  if (scope === 'referral') {
+    code = document.getElementById('discCodeInput').value.trim().toUpperCase();
+    if (!code) {
+      showAdminToast("Referral code is required", "error");
+      return;
+    }
+    if (!/^[A-Z0-9]+$/.test(code)) {
+      showAdminToast("Referral code must be alphanumeric (A-Z, 0-9) only", "error");
+      return;
+    }
+  }
+
   // Encode campaign type directly in type field so schema migration is not required
   const savedType = campType === 'strategic' ? `${discType}_strategic` : discType;
   
   const newDiscount = {
-    id: 'disc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+    id: scope === 'referral' ? code : 'disc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
     type: savedType,
     value: value,
     scope: scope,
@@ -1610,6 +1665,12 @@ async function submitDiscount(e) {
   renderDiscountsTable();
   renderProductsTable();
   document.getElementById('discountForm').reset();
+  
+  const textInput = document.getElementById('discScopeValueText');
+  const codeInput = document.getElementById('discCodeInput');
+  if (textInput) textInput.value = '';
+  if (codeInput) codeInput.value = '';
+  
   handleDiscountScopeChange();
   showAdminToast("Campaign rule created successfully");
 }
@@ -1634,9 +1695,29 @@ function renderDiscountsTable() {
     const badgeBorder = isStrategic ? '#b2f5ea' : '#c6f6d5';
     
     const typeBadge = ` <span class="badge" style="font-size:0.6rem; background:${badgeBg}; color:${badgeColor}; border:1px solid ${badgeBorder}; padding:0.1rem 0.25rem; border-radius:3px; font-weight:600; vertical-align:middle; margin-left:0.2rem; display:inline-block;">${badgeText}</span>`;
-    const scopeText = (disc.scope === 'all' ? 'All Products' : 
-                      disc.scope === 'brand' ? `Brand: ${disc.scope_value}` : 
-                      `Type: ${disc.scope_value}`) + typeBadge;
+    
+    let scopeText = '';
+    if (disc.scope === 'referral') {
+      const referralBadgeText = 'Referral (5% Share)';
+      const referralBadgeBg = '#ebf8ff';
+      const referralBadgeColor = '#2b6cb0';
+      const referralBadgeBorder = '#bee3f8';
+      const referralTypeBadge = ` <span class="badge" style="font-size:0.6rem; background:${referralBadgeBg}; color:${referralBadgeColor}; border:1px solid ${referralBadgeBorder}; padding:0.1rem 0.25rem; border-radius:3px; font-weight:600; vertical-align:middle; margin-left:0.2rem; display:inline-block;">${referralBadgeText}</span>`;
+      
+      const usesCount = ordersList.filter(o => (o.items || '').includes('[Referral: ' + disc.id + ']')).length;
+      const revenueTotal = ordersList
+        .filter(o => (o.items || '').includes('[Referral: ' + disc.id + ']') && (o.status || '').toLowerCase() !== 'cancelled')
+        .reduce((acc, curr) => acc + (parseFloat(curr.total_price || 0) - getDeliveryCharge(curr)), 0);
+      const commission = Math.round(revenueTotal * 0.05);
+      
+      scopeText = `Referral Code: <strong>${disc.id}</strong> (${disc.scope_value})` + referralTypeBadge;
+      scopeText += `<div style="font-size: 0.74rem; color: var(--text-soft); margin-top: 0.25rem; font-weight: normal;">Used: <strong>${usesCount} times</strong> · Net Sales: <strong>৳ ${revenueTotal.toLocaleString()}</strong> · Creator Share (5%): <strong>৳ ${commission.toLocaleString()}</strong></div>`;
+    } else {
+      scopeText = (disc.scope === 'all' ? 'All Products' : 
+                    disc.scope === 'brand' ? `Brand: ${disc.scope_value}` : 
+                    `Type: ${disc.scope_value}`) + typeBadge;
+    }
+    
     const valText = baseType === 'percentage' ? `${disc.value}%` : `৳${disc.value}`;
     
     const tr = document.createElement('tr');

@@ -9,6 +9,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let cartItems = [];
 let currentUser = null; // { name, phone, address }
 let discountsList = [];
+let appliedReferralCode = null;
 
 // Cookie Helper Functions
 function setCookie(name, value, days) {
@@ -419,6 +420,42 @@ function applyLiveDiscountsToDOM() {
   }
 }
 
+// Apply Promo / Referral Code entered by user in the cart
+function applyPromoCode() {
+  const inputEl = document.getElementById('promoCodeInput');
+  const feedbackEl = document.getElementById('promoFeedback');
+  if (!inputEl || !feedbackEl) return;
+
+  const rawCode = inputEl.value.trim().toUpperCase();
+  if (rawCode === "") {
+    feedbackEl.style.display = 'block';
+    feedbackEl.style.color = '#B8975A';
+    feedbackEl.textContent = "Please enter a code.";
+    return;
+  }
+
+  // Look up referral code in discountsList
+  const matched = discountsList.find(d => 
+    d.active && 
+    (d.id || '').toUpperCase().trim() === rawCode && 
+    d.scope === 'referral'
+  );
+
+  if (matched) {
+    appliedReferralCode = rawCode;
+    feedbackEl.style.display = 'block';
+    feedbackEl.style.color = 'var(--sage)';
+    feedbackEl.textContent = `Referral code "${rawCode}" applied! 10% discount has been activated.`;
+    updateCartUI();
+  } else {
+    appliedReferralCode = null;
+    feedbackEl.style.display = 'block';
+    feedbackEl.style.color = '#B8975A';
+    feedbackEl.textContent = "Invalid promo or referral code.";
+    updateCartUI();
+  }
+}
+
 // Watch for DOM changes to apply discounts on dynamically rendered cards
 function initDiscountObserver() {
   applyLiveDiscountsToDOM();
@@ -545,9 +582,20 @@ function injectCartUI() {
         </div>
         <div class="cart-body" id="cartItemsList"></div>
         <div class="cart-footer">
+          <!-- PROMO CODE INPUT -->
+          <div class="promo-code-container" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px dashed rgba(107,143,107,0.15);">
+            <input type="text" id="promoCodeInput" placeholder="Promo / Referral Code" style="flex: 1; padding: 0.5rem 0.8rem; border: 1px solid var(--cream-deep); background: var(--white); font-size: 0.78rem; border-radius: 4px; text-transform: uppercase; font-family: inherit;">
+            <button type="button" onclick="applyPromoCode()" class="btn-primary" style="padding: 0.5rem 1.2rem; font-size: 0.72rem; letter-spacing: 0.05em; height: auto;">Apply</button>
+          </div>
+          <div id="promoFeedback" style="font-size: 0.72rem; margin-top: -0.8rem; margin-bottom: 0.8rem; display: none; font-weight: 500; text-align: left;"></div>
+          
           <div class="cart-summary-line">
             <span>Subtotal</span>
             <span id="cartSubtotal">৳ 0</span>
+          </div>
+          <div class="cart-summary-line" id="promoDiscountRow" style="display: none; color: var(--sage); font-weight: 500;">
+            <span>Referral Discount (10%)</span>
+            <span id="promoDiscountValue">-৳ 0</span>
           </div>
           <div class="cart-summary-line">
             <span>Delivery Charge</span>
@@ -1434,10 +1482,24 @@ function updateCartUI() {
     return acc + (Math.round(discountInfo.price) * item.quantity);
   }, 0);
   
+  let referralDiscount = 0;
+  const promoDiscountRow = document.getElementById('promoDiscountRow');
+  const promoDiscountValue = document.getElementById('promoDiscountValue');
+  
+  if (appliedReferralCode && subtotal > 0) {
+    referralDiscount = Math.round(subtotal * 0.1);
+    if (promoDiscountRow && promoDiscountValue) {
+      promoDiscountRow.style.display = 'flex';
+      promoDiscountValue.textContent = `-৳ ${referralDiscount.toLocaleString()}`;
+    }
+  } else {
+    if (promoDiscountRow) promoDiscountRow.style.display = 'none';
+  }
+  
   const areaSelect = document.getElementById('custArea');
   const areaValue = areaSelect ? areaSelect.value : 'inside';
   const deliveryCharge = totalQuantity === 0 ? 0 : (areaValue === 'inside' ? 60 : 120);
-  const total = subtotal + deliveryCharge;
+  const total = Math.max(0, subtotal - referralDiscount + deliveryCharge);
 
   subtotalEl.textContent = `৳ ${subtotal.toLocaleString()}`;
   deliveryEl.textContent = `৳ ${deliveryCharge.toLocaleString()}`;
@@ -1604,10 +1666,15 @@ async function submitCheckout(e) {
     const discountInfo = getDiscountedPrice(item);
     return acc + (Math.round(discountInfo.price) * item.quantity);
   }, 0);
+  
+  const referralDiscount = appliedReferralCode ? Math.round(subtotal * 0.1) : 0;
   const deliveryCharge = areaSelect.value === 'inside' ? 60 : 120;
-  const totalPrice = subtotal + deliveryCharge;
+  const totalPrice = Math.max(0, subtotal - referralDiscount + deliveryCharge);
 
-  const itemsSummary = cartItems.map(item => `${item.quantity} x ${item.title} (${item.brand})`).join(', ');
+  let itemsSummary = cartItems.map(item => `${item.quantity} x ${item.title} (${item.brand})`).join(', ');
+  if (appliedReferralCode) {
+    itemsSummary += ` | [Referral: ${appliedReferralCode}]`;
+  }
 
   const statusScreen = document.getElementById('checkoutStatusScreen');
   const spinner = document.getElementById('statusSpinner');
@@ -1680,6 +1747,7 @@ async function submitCheckout(e) {
 
     cartItems = [];
     saveCartState();
+    appliedReferralCode = null;
 
     spinner.style.display = 'none';
     successIcon.style.display = 'flex';
