@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Creator Portal — SHUCHI শুচি</title>
+<title>Partner Ambassador Portal — SHUCHI শুচি</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="cart.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -482,14 +482,14 @@
           <path d="M478.04 427.924C470.246 393.217 484.887 389.034 502.085 352.27C531.758 305.223 549.852 284.014 589.206 238.634L674.723 314.396C701.444 340.894 699.975 356.68 716.285 391.275C714.156 439.626 705.68 468.205 673.311 522.665L602.112 633.156L529.533 539.712L478.04 427.924Z"/>
         </svg>
       </div>
-      <h2 class="login-title">Creator Portal</h2>
-      <p class="login-desc">Enter your custom creator details to access your referral earnings ledger.</p>
+      <h2 class="login-title">Ambassador Portal</h2>
+      <p class="login-desc">Please authenticate using your partner promo code and secure passcode PIN to view your curated community metrics and accrued earnings.</p>
       
       <div class="login-error" id="loginError">Invalid credentials.</div>
       
       <form id="creatorLoginForm" onsubmit="handleCreatorLogin(event)">
         <div class="form-group">
-          <label class="form-label" for="loginCode">Referral Promo Code</label>
+          <label class="form-label" for="loginCode">Ambassador Promo Code</label>
           <input type="text" id="loginCode" class="form-input" style="text-transform: uppercase;" required placeholder="e.g. SABRINA10">
         </div>
         <div class="form-group">
@@ -519,13 +519,13 @@
   <main>
     <div class="creator-welcome-section">
       <div>
-        <h1 class="creator-title">Welcome back, <span id="lblCreatorName">Creator</span>!</h1>
-        <p class="creator-subtitle" id="lblCreatorDetails">Tracking performance for Promo Code: ---</p>
+        <h1 class="creator-title">Welcome back, <span id="lblCreatorName">Partner</span>!</h1>
+        <p class="creator-subtitle" id="lblCreatorDetails">Performance metrics for Ambassador Code: ---</p>
       </div>
 
       <!-- Quick Referral Link Copier -->
       <div class="quick-link-box">
-        <span class="quick-link-label">Your Tracking Link</span>
+        <span class="quick-link-label">Your Ambassador Link</span>
         <div class="quick-link-input-wrapper">
           <input type="text" id="txtPromoLink" class="quick-link-input" readonly value="https://...">
           <button class="quick-link-btn" onclick="copyCreatorPromoLink()">Copy</button>
@@ -536,31 +536,31 @@
     <!-- METRICS GRID -->
     <div class="metrics-row">
       <div class="metric-card">
-        <div class="metric-label">Sales Generated</div>
+        <div class="metric-label">Referred Sales</div>
         <div class="metric-value" id="kpiSales">৳ 0</div>
-        <div class="metric-sub">Net revenue generated using your promo code (excluding delivery costs)</div>
+        <div class="metric-sub">Net sales value of authentic K-Beauty curated imports referred by your code (excluding shipping)</div>
       </div>
       <div class="metric-card highlight">
-        <div class="metric-label">Commissions Earned</div>
+        <div class="metric-label">Earnings Accrued (5%)</div>
         <div class="metric-value" id="kpiEarned" style="color: var(--sage);">৳ 0</div>
-        <div class="metric-sub">Accumulated 5% share of generated sales (excluding cancelled orders)</div>
+        <div class="metric-sub">Your 5% ambassador revenue share on referred sales (excluding cancelled orders)</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">Total Paid</div>
         <div class="metric-value" id="kpiPaid" style="color: var(--text-soft);">৳ 0</div>
-        <div class="metric-sub">Sum of payouts completed to date by the SHUCHI team</div>
+        <div class="metric-sub">Total earnings successfully transferred to you</div>
       </div>
       <div class="metric-card gold-highlight">
-        <div class="metric-label">Unpaid Balance Owed</div>
+        <div class="metric-label">Pending Payout</div>
         <div class="metric-value" id="kpiOwed" style="color: var(--gold);">৳ 0</div>
-        <div class="metric-sub">Outstanding commission balance currently owed to you</div>
+        <div class="metric-sub">Accrued earnings ready for checkout payout</div>
       </div>
     </div>
 
     <!-- TABS NAVIGATION -->
     <div class="tabs-header">
-      <button class="tab-btn active" onclick="switchCreatorTab('orders')">Referral Orders</button>
-      <button class="tab-btn" onclick="switchCreatorTab('payouts')">Payout History</button>
+      <button class="tab-btn active" onclick="switchCreatorTab('orders')">Referred Purchases</button>
+      <button class="tab-btn" onclick="switchCreatorTab('payouts')">Disbursement History</button>
     </div>
 
     <!-- TAB: ORDERS -->
@@ -569,11 +569,11 @@
         <table>
           <thead>
             <tr>
-              <th>Order ID</th>
-              <th>Date</th>
+              <th>Reference ID</th>
+              <th>Purchase Date</th>
               <th>Status</th>
-              <th class="text-right">Order Value</th>
-              <th class="text-right">Your Commission</th>
+              <th class="text-right">Referred Value</th>
+              <th class="text-right">Your Earnings (5%)</th>
             </tr>
           </thead>
           <tbody id="ordersListBody">
@@ -591,9 +591,9 @@
         <table>
           <thead>
             <tr>
-              <th>Payout Date</th>
+              <th>Disbursement Date</th>
               <th>Reference Details</th>
-              <th class="text-right">Amount Paid</th>
+              <th class="text-right">Amount Dispatched</th>
             </tr>
           </thead>
           <tbody id="payoutsListBody">
@@ -723,7 +723,7 @@ function getDeliveryCharge(order) {
 function renderCreatorDashboard() {
   // Set headers
   document.getElementById('lblCreatorName').textContent = activeCreatorMeta.name;
-  document.getElementById('lblCreatorDetails').textContent = `Tracking performance for Promo Code: ${activeCreatorCode} (${activeCreatorMeta.phone})`;
+  document.getElementById('lblCreatorDetails').textContent = `Ambassador Code: ${activeCreatorCode} | Contact: ${activeCreatorMeta.phone}`;
   
   // Set promo link
   const origin = window.location.origin;
@@ -752,7 +752,7 @@ function renderCreatorDashboard() {
   ordersBody.innerHTML = '';
 
   if (refOrders.length === 0) {
-    ordersBody.innerHTML = '<tr><td colspan="5" class="text-center text-soft" style="padding: 2.5rem;">No orders placed using your code yet.</td></tr>';
+    ordersBody.innerHTML = '<tr><td colspan="5" class="text-center text-soft" style="padding: 2.5rem;">No purchases registered under your code yet.</td></tr>';
   } else {
     refOrders.forEach(o => {
       const orderVal = parseFloat(o.total_price || 0) - getDeliveryCharge(o);
@@ -820,7 +820,7 @@ function switchCreatorTab(tab) {
 function copyCreatorPromoLink() {
   const linkEl = document.getElementById('txtPromoLink');
   navigator.clipboard.writeText(linkEl.value).then(() => {
-    showCreatorToast("Creator tracking link copied to clipboard!");
+    showCreatorToast("Ambassador referral link copied to clipboard!");
   }).catch(() => {
     showCreatorToast("Failed to copy link.", "error");
   });
@@ -895,17 +895,17 @@ async function handleCreatorLogin(e) {
     if (error) throw error;
 
     if (!data) {
-      throw new Error("Invalid Referral Code. Please verify your code.");
+      throw new Error("Invalid Ambassador Code. Please verify your code.");
     }
 
     if (!data.active) {
-      throw new Error("Your creator account is currently inactive. Please contact the administrator.");
+      throw new Error("Your ambassador account is currently inactive. Please contact Shuchi partner relations.");
     }
 
     const meta = parseCreatorMetadata(data);
     
     if (!meta.passcode) {
-      throw new Error("No passcode set for this creator account. Please ask the administrator to set one.");
+      throw new Error("No passcode configured for this ambassador account. Please ask partner relations to set one.");
     }
 
     if (meta.passcode !== passcode) {
