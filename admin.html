@@ -1268,6 +1268,22 @@ const SUPABASE_URL = "https://okprwbzfsyvrkpygjkum.supabase.co";
 const SUPABASE_KEY = "sb_publishable_LAgGxlaltxGIe6wWu1DBkQ_PJN0DLNG";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// HTML escaping helper to prevent XSS vulnerabilities when rendering user-submitted text
+function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  const s = String(str);
+  return s.replace(/[&<>"']/g, function(m) {
+    switch (m) {
+      case '&': return '&amp;';
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '"': return '&quot;';
+      case "'": return '&#039;';
+      default: return m;
+    }
+  });
+}
+
 // State cache
 let ordersList = [];
 let productsList = [];
@@ -1935,13 +1951,13 @@ function renderReferralsTable() {
     tr.style.borderBottom = '1px solid var(--cream-deep)';
     tr.innerHTML = `
       <td style="padding: 0.85rem 0.5rem;">
-        <div style="font-weight: 600; color: var(--dark);">${meta.name}</div>
+        <div style="font-weight: 600; color: var(--dark);">${escapeHTML(meta.name)}</div>
         <div style="font-size: 0.72rem; color: var(--text-soft); margin-top: 0.1rem;">
-          ${meta.phone ? `Phone: ${meta.phone}` : 'No phone'} | ${meta.passcode ? `PIN: ${meta.passcode}` : 'No PIN'}
+          ${meta.phone ? `Phone: ${escapeHTML(meta.phone)}` : 'No phone'} | ${meta.passcode ? `PIN: ${escapeHTML(meta.passcode)}` : 'No PIN'}
         </div>
         <div style="display: flex; align-items: center; gap: 0.4rem; margin-top: 0.2rem;">
-          <code style="background: var(--cream); padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: bold; color: var(--dark-mid); font-size: 0.8rem; letter-spacing: 0.05em;">${disc.id}</code>
-          <button class="btn-action" style="padding: 0.15rem 0.35rem; font-size: 0.65rem;" onclick="copyReferralLink('${disc.id}')" title="Copy Promo Tracking Link">🔗 Link</button>
+          <code style="background: var(--cream); padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: bold; color: var(--dark-mid); font-size: 0.8rem; letter-spacing: 0.05em;">${escapeHTML(disc.id)}</code>
+          <button class="btn-action" style="padding: 0.15rem 0.35rem; font-size: 0.65rem;" onclick="copyReferralLink('${escapeHTML(disc.id)}')" title="Copy Promo Tracking Link">🔗 Link</button>
         </div>
       </td>
       <td style="padding: 0.85rem 0.5rem;" class="text-right bold">${disc.value}% off</td>
@@ -2209,9 +2225,9 @@ function renderRecentOrders() {
     const delivery = getDeliveryCharge(order);
     const netRevenue = Math.max(0, parseInt(order.total_price || 0) - delivery);
     tr.innerHTML = `
-      <td class="bold">${order.order_id}</td>
-      <td>${order.customer_name || 'Guest'}</td>
-      <td>${order.area || 'Unknown'}</td>
+      <td class="bold">${escapeHTML(order.order_id)}</td>
+      <td>${escapeHTML(order.customer_name || 'Guest')}</td>
+      <td>${escapeHTML(order.area || 'Unknown')}</td>
       <td>
         <span class="bold">৳ ${parseInt(order.total_price || 0).toLocaleString()}</span>
         <div class="text-soft" style="font-size:0.75rem; font-weight:normal; margin-top:0.15rem;">Net: ৳ ${netRevenue.toLocaleString()}</div>
@@ -2470,14 +2486,14 @@ function renderOrdersTable() {
     const delivery = getDeliveryCharge(order);
     const netRevenue = Math.max(0, parseInt(order.total_price || 0) - delivery);
     tr.innerHTML = `
-      <td class="bold">${order.order_id}</td>
+      <td class="bold">${escapeHTML(order.order_id)}</td>
       <td class="text-soft">${dateStr}</td>
       <td>
-        <div class="bold">${order.customer_name}</div>
-        <div class="text-soft" style="font-size:0.78rem;">${order.phone}</div>
-        <div class="text-soft" style="font-size:0.75rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${order.address}">${order.address}</div>
+        <div class="bold">${escapeHTML(order.customer_name)}</div>
+        <div class="text-soft" style="font-size:0.78rem;">${escapeHTML(order.phone)}</div>
+        <div class="text-soft" style="font-size:0.75rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(order.address)}">${escapeHTML(order.address)}</div>
       </td>
-      <td style="font-size:0.82rem; line-height: 1.4; max-width: 250px;">${order.items || 'None'}</td>
+      <td style="font-size:0.82rem; line-height: 1.4; max-width: 250px;">${escapeHTML(order.items || 'None')}</td>
       <td>
         <span class="bold">৳ ${parseInt(order.total_price || 0).toLocaleString()}</span>
         <div class="text-soft" style="font-size:0.75rem; font-weight:normal; margin-top: 0.15rem;">Net: ৳ ${netRevenue.toLocaleString()}</div>
@@ -2606,9 +2622,9 @@ function renderCustomersTable() {
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td class="bold">${cust.name}</td>
-      <td>${cust.phone}</td>
-      <td class="text-soft" style="max-width: 350px; line-height: 1.4;">${cust.address || 'No Address Provided'}</td>
+      <td class="bold">${escapeHTML(cust.name)}</td>
+      <td>${escapeHTML(cust.phone)}</td>
+      <td class="text-soft" style="max-width: 350px; line-height: 1.4;">${escapeHTML(cust.address || 'No Address Provided')}</td>
       <td class="text-soft text-right">${regDate}</td>
     `;
     tbody.appendChild(tr);
@@ -3088,8 +3104,8 @@ function renderFinancials() {
       tr.style.borderBottom = '1px solid var(--cream-deep)';
       tr.innerHTML = `
         <td style="padding: 0.65rem 0.5rem;">
-          <div class="bold" style="font-size: 0.82rem;">${customer.name}</div>
-          <div class="text-soft" style="font-size: 0.74rem; margin-top: 0.1rem;">${customer.phone}</div>
+          <div class="bold" style="font-size: 0.82rem;">${escapeHTML(customer.name)}</div>
+          <div class="text-soft" style="font-size: 0.74rem; margin-top: 0.1rem;">${escapeHTML(customer.phone)}</div>
         </td>
         <td style="padding: 0.65rem 0.5rem;" class="text-center bold">${customer.orders}</td>
         <td style="padding: 0.65rem 0.5rem;" class="text-right bold">৳ ${parseInt(customer.totalSpent || 0).toLocaleString()}</td>

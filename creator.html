@@ -615,6 +615,22 @@ const SUPABASE_URL = "https://okprwbzfsyvrkpygjkum.supabase.co";
 const SUPABASE_KEY = "sb_publishable_LAgGxlaltxGIe6wWu1DBkQ_PJN0DLNG";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// HTML escaping helper to prevent XSS vulnerabilities when rendering user-submitted text
+function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  const s = String(str);
+  return s.replace(/[&<>"']/g, function(m) {
+    switch (m) {
+      case '&': return '&amp;';
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '"': return '&quot;';
+      case "'": return '&#039;';
+      default: return m;
+    }
+  });
+}
+
 // State cache
 let discountsList = [];
 let ordersList = [];
@@ -834,7 +850,7 @@ function renderCreatorDashboard() {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${dateStr}</td>
-        <td class="text-soft">${p.ref || 'Payout completed'}</td>
+        <td class="text-soft">${escapeHTML(p.ref || 'Payout completed')}</td>
         <td class="text-right bold">৳ ${parseFloat(p.amount).toLocaleString()}</td>
       `;
       payoutsBody.appendChild(tr);

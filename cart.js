@@ -5,6 +5,22 @@ const SUPABASE_URL = "https://okprwbzfsyvrkpygjkum.supabase.co";
 const SUPABASE_KEY = "sb_publishable_LAgGxlaltxGIe6wWu1DBkQ_PJN0DLNG";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// HTML escaping helper to prevent XSS vulnerabilities when rendering user-submitted text
+function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  const s = String(str);
+  return s.replace(/[&<>"']/g, function(m) {
+    switch (m) {
+      case '&': return '&amp;';
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '"': return '&quot;';
+      case "'": return '&#039;';
+      default: return m;
+    }
+  });
+}
+
 // Global States
 let cartItems = [];
 let currentUser = null; // { name, phone, address }
@@ -1455,11 +1471,11 @@ async function fetchPurchaseHistory(phone) {
       return `
         <div class="order-history-card">
           <div class="order-hist-header" style="align-items: flex-start;">
-            <span class="order-hist-items-prominent">${order.items}</span>
+            <span class="order-hist-items-prominent">${escapeHTML(order.items)}</span>
             <span class="order-hist-status ${statusClass}">${formattedStatus}</span>
           </div>
           <div class="order-hist-meta-row">
-            <span class="order-hist-id-secondary">Order ${order.order_id}</span>
+            <span class="order-hist-id-secondary">Order ${escapeHTML(order.order_id)}</span>
             <span class="order-hist-date-secondary">${dateStr}</span>
           </div>
           ${trackingHTML}
