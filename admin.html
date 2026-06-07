@@ -633,6 +633,14 @@
         Campaigns
       </a>
     </li>
+    <li class="nav-item" id="navReferrals" onclick="switchTab('referrals')">
+      <a>
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+        Referrals
+      </a>
+    </li>
     <li class="nav-item" id="navCustomers" onclick="switchTab('customers')">
       <a>
         <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
@@ -865,7 +873,6 @@
               <option value="all">All Products</option>
               <option value="brand">Specific Brand</option>
               <option value="category">Specific Product Type (Category)</option>
-              <option value="referral">Creator Referral Code</option>
             </select>
           </div>
           <div class="form-group" id="discCodeGroup" style="margin-bottom: 1rem; display: none;">
@@ -900,6 +907,80 @@
             <tbody id="discountsListBody">
               <tr>
                 <td colspan="5" class="text-soft text-center" style="padding: 1.5rem;">No active discounts defined.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: REFERRALS -->
+  <div id="tabReferrals" class="tab-content">
+    <!-- Referral Metrics -->
+    <div class="metrics-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2rem;">
+      <div class="metric-card success">
+        <div class="metric-label">Referral Sales</div>
+        <div class="metric-value" id="refSalesTotal">৳ 0</div>
+        <div class="metric-sub">Net generated revenue</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Commissions Accrued</div>
+        <div class="metric-value" id="refCommissionsTotal" style="color: var(--sage);">৳ 0</div>
+        <div class="metric-sub">5% creator revenue share</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Referral Orders</div>
+        <div class="metric-value" id="refOrdersCount">0</div>
+        <div class="metric-sub">Total code uses</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Active Creators</div>
+        <div class="metric-value" id="refCreatorsCount">0</div>
+        <div class="metric-sub">Registered creator codes</div>
+      </div>
+    </div>
+
+    <div class="insights-grid">
+      <!-- Create Referral Code Form -->
+      <div style="background: var(--white); border: 1px solid var(--sage-pale); padding: 1.5rem; border-radius: 4px;">
+        <h3 class="checkout-title" style="margin-top: 0; margin-bottom: 1.2rem; text-align: left; font-size: 1.15rem; font-weight: 500;">Add Creator & Referral Code</h3>
+        <form id="referralForm" onsubmit="submitReferral(event)">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" style="font-size: 0.74rem;">Creator Name / Identifier</label>
+            <input type="text" id="refCreatorName" class="form-input" style="padding: 0.5rem;" required placeholder="e.g. Sabrina Rahman">
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" style="font-size: 0.74rem;">Custom Referral Code</label>
+            <input type="text" id="refCodeInput" class="form-input" style="padding: 0.5rem; text-transform: uppercase;" required placeholder="e.g. SABRINA10">
+          </div>
+          <div class="form-group" style="margin-bottom: 1.2rem;">
+            <label class="form-label" style="font-size: 0.74rem;">Buyer Discount Value (%)</label>
+            <input type="number" id="refDiscountValue" class="form-input" style="padding: 0.5rem;" required value="10" min="1" max="100">
+          </div>
+          <button type="submit" class="btn-action" style="width: 100%; justify-content: center; padding: 0.65rem;">Create Creator Code</button>
+        </form>
+      </div>
+
+      <!-- Referral Codes Table -->
+      <div class="table-container" style="margin-top: 0; background: var(--white); border: 1px solid var(--sage-pale); border-radius: 4px; padding: 1.2rem; min-height: 290px;">
+        <h3 class="checkout-title" style="margin-top: 0; margin-bottom: 1.2rem; text-align: left; font-size: 1.15rem; font-weight: 500;">Registered Creators</h3>
+        <div style="max-height: 400px; overflow-y: auto;">
+          <table style="font-size: 0.8rem; width: 100%;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--cream-deep);">
+                <th style="padding: 0.5rem; text-align: left;">Creator / Code</th>
+                <th style="padding: 0.5rem; text-align: right;">Discount</th>
+                <th style="padding: 0.5rem; text-align: right;">Uses</th>
+                <th style="padding: 0.5rem; text-align: right;">Net Sales</th>
+                <th style="padding: 0.5rem; text-align: right;">Commission</th>
+                <th style="padding: 0.5rem; text-align: center;">Status</th>
+                <th style="padding: 0.5rem; text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="referralsListBody">
+              <tr>
+                <td colspan="7" class="text-soft text-center" style="padding: 2rem;">No creators registered.</td>
               </tr>
             </tbody>
           </table>
@@ -1491,6 +1572,7 @@ async function toggleDiscountActive(id, currentActive) {
     await fetchDiscounts();
     renderFinancials();
     renderDiscountsTable();
+    renderReferralsTable();
     renderProductsTable();
   } catch(e) {
     console.warn("Could not toggle discount status in database, using localStorage fallback:", e);
@@ -1501,6 +1583,7 @@ async function toggleDiscountActive(id, currentActive) {
     }
     renderFinancials();
     renderDiscountsTable();
+    renderReferralsTable();
     renderProductsTable();
   }
 }
@@ -1518,6 +1601,7 @@ async function deleteDiscount(id) {
     await fetchDiscounts();
     renderFinancials();
     renderDiscountsTable();
+    renderReferralsTable();
     renderProductsTable();
     showAdminToast("Discount rule deleted");
   } catch(e) {
@@ -1526,6 +1610,7 @@ async function deleteDiscount(id) {
     localStorage.setItem('shuchi_discounts', JSON.stringify(discountsList));
     renderFinancials();
     renderDiscountsTable();
+    renderReferralsTable();
     renderProductsTable();
     showAdminToast("Discount rule deleted");
   }
@@ -1681,12 +1766,13 @@ function renderDiscountsTable() {
   if (!tbody) return;
   tbody.innerHTML = '';
   
-  if (discountsList.length === 0) {
+  const standardDiscounts = discountsList.filter(d => d.scope !== 'referral');
+  if (standardDiscounts.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" class="text-soft text-center" style="padding: 1.5rem;">No active discounts defined.</td></tr>';
     return;
   }
   
-  discountsList.forEach(disc => {
+  standardDiscounts.forEach(disc => {
     const isStrategic = disc.type.endsWith('_strategic') || disc.is_reverse || disc.isReverse;
     const baseType = isStrategic ? disc.type.replace('_strategic', '') : disc.type;
     const badgeText = isStrategic ? 'Strategic Alt' : 'Standard Disc';
@@ -1743,6 +1829,140 @@ function renderDiscountsTable() {
   });
 }
 
+// Render creators & referrals registry table
+function renderReferralsTable() {
+  const tbody = document.getElementById('referralsListBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  const referralDiscounts = discountsList.filter(d => d.scope === 'referral');
+  
+  let totalSales = 0;
+  let totalCommissions = 0;
+  let totalOrders = 0;
+  let activeCreators = 0;
+  
+  if (referralDiscounts.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-soft text-center" style="padding: 2rem;">No creators registered.</td></tr>';
+    
+    // Update metrics cards to 0
+    document.getElementById('refSalesTotal').textContent = '৳ 0';
+    document.getElementById('refCommissionsTotal').textContent = '৳ 0';
+    document.getElementById('refOrdersCount').textContent = '0';
+    document.getElementById('refCreatorsCount').textContent = '0';
+    return;
+  }
+  
+  referralDiscounts.forEach(disc => {
+    const usesCount = ordersList.filter(o => (o.items || '').includes('[Referral: ' + disc.id + ']')).length;
+    const validOrders = ordersList.filter(o => 
+      (o.items || '').includes('[Referral: ' + disc.id + ']') && 
+      (o.status || '').toLowerCase() !== 'cancelled'
+    );
+    const revenueTotal = validOrders.reduce((acc, curr) => {
+      return acc + (parseFloat(curr.total_price || 0) - getDeliveryCharge(curr));
+    }, 0);
+    const commission = Math.round(revenueTotal * 0.05);
+    
+    totalSales += revenueTotal;
+    totalCommissions += commission;
+    totalOrders += usesCount;
+    if (disc.active) activeCreators++;
+    
+    const tr = document.createElement('tr');
+    tr.style.borderBottom = '1px solid var(--cream-deep)';
+    tr.innerHTML = `
+      <td style="padding: 0.85rem 0.5rem;">
+        <div style="font-weight: 600; color: var(--dark);">${disc.scope_value || 'Unknown'}</div>
+        <div style="display: flex; align-items: center; gap: 0.4rem; margin-top: 0.2rem;">
+          <code style="background: var(--cream); padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: bold; color: var(--dark-mid); font-size: 0.8rem; letter-spacing: 0.05em;">${disc.id}</code>
+          <button class="btn-action" style="padding: 0.15rem 0.35rem; font-size: 0.65rem;" onclick="copyReferralLink('${disc.id}')" title="Copy Promo Tracking Link">🔗 Link</button>
+        </div>
+      </td>
+      <td style="padding: 0.85rem 0.5rem;" class="text-right bold">${disc.value}% off</td>
+      <td style="padding: 0.85rem 0.5rem;" class="text-right bold text-soft">${usesCount}</td>
+      <td style="padding: 0.85rem 0.5rem;" class="text-right bold">৳ ${revenueTotal.toLocaleString()}</td>
+      <td style="padding: 0.85rem 0.5rem; color: var(--sage);" class="text-right bold">৳ ${commission.toLocaleString()}</td>
+      <td style="padding: 0.85rem 0.5rem; text-align: center;">
+        <button class="btn-stock-toggle ${disc.active ? 'in-stock' : 'out-of-stock'}" 
+                style="font-size: 0.72rem; padding: 0.2rem 0.4rem;" 
+                onclick="toggleDiscountActive('${disc.id}', ${disc.active})">
+          ${disc.active ? 'Active' : 'Inactive'}
+        </button>
+      </td>
+      <td style="padding: 0.85rem 0.5rem; text-align: right;">
+        <button class="btn-action" 
+                style="background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; padding: 0.2rem 0.4rem; font-size: 0.72rem;" 
+                onclick="deleteDiscount('${disc.id}')">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+  
+  // Update metrics cards
+  document.getElementById('refSalesTotal').textContent = `৳ ${totalSales.toLocaleString()}`;
+  document.getElementById('refCommissionsTotal').textContent = `৳ ${totalCommissions.toLocaleString()}`;
+  document.getElementById('refOrdersCount').textContent = totalOrders;
+  document.getElementById('refCreatorsCount').textContent = activeCreators;
+}
+
+// Copy creator tracking link to clipboard
+function copyReferralLink(code) {
+  let origin = window.location.origin;
+  const link = origin + "/storefront.html?ref=" + code;
+  navigator.clipboard.writeText(link).then(() => {
+    showAdminToast(`Creator promo link copied!`);
+  }).catch(err => {
+    console.error("Failed to copy promo link:", err);
+    showAdminToast("Could not copy link to clipboard", "error");
+  });
+}
+
+// Submit new creator referral code
+async function submitReferral(e) {
+  e.preventDefault();
+  const name = document.getElementById('refCreatorName').value.trim();
+  const code = document.getElementById('refCodeInput').value.trim().toUpperCase();
+  const discountVal = parseFloat(document.getElementById('refDiscountValue').value) || 0;
+  
+  if (!name || !code) {
+    showAdminToast("All fields are required", "error");
+    return;
+  }
+  
+  if (!/^[A-Z0-9]+$/.test(code)) {
+    showAdminToast("Referral code must be alphanumeric (A-Z, 0-9) only", "error");
+    return;
+  }
+  
+  if (discountVal <= 0 || discountVal > 100) {
+    showAdminToast("Discount value must be between 1% and 100%", "error");
+    return;
+  }
+  
+  // Check if code exists
+  const exists = discountsList.some(d => (d.id || '').toUpperCase().trim() === code);
+  if (exists) {
+    showAdminToast(`Referral code "${code}" already exists`, "error");
+    return;
+  }
+  
+  const newReferral = {
+    id: code,
+    type: 'percentage',
+    value: discountVal,
+    scope: 'referral',
+    scope_value: name,
+    active: true,
+    created_at: new Date().toISOString()
+  };
+  
+  await saveDiscount(newReferral);
+  renderReferralsTable();
+  document.getElementById('referralForm').reset();
+  showAdminToast("Creator referral code registered successfully!");
+}
+
 // Delivery Charge Helper
 function getDeliveryCharge(order) {
   const area = (order.area || '').toLowerCase();
@@ -1795,6 +2015,9 @@ function switchTab(tabName) {
   } else if (tabName === 'campaigns') {
     document.getElementById('navCampaigns').classList.add('active');
     document.getElementById('tabCampaigns').classList.add('active');
+  } else if (tabName === 'referrals') {
+    document.getElementById('navReferrals').classList.add('active');
+    document.getElementById('tabReferrals').classList.add('active');
   } else if (tabName === 'customers') {
     document.getElementById('navCustomers').classList.add('active');
     document.getElementById('tabCustomers').classList.add('active');
@@ -1817,6 +2040,8 @@ function renderDashboard() {
     renderProductsTable();
   } else if (activeTab === 'campaigns') {
     renderDiscountsTable();
+  } else if (activeTab === 'referrals') {
+    renderReferralsTable();
   } else if (activeTab === 'customers') {
     renderCustomersTable();
   } else if (activeTab === 'financials') {

@@ -124,6 +124,41 @@ async function initCartSystem() {
   } catch(e) {
     console.warn("Failed to load discounts:", e);
   }
+
+  // Auto-apply referral code from query params
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref') || urlParams.get('promo') || urlParams.get('code');
+    if (refCode) {
+      const code = refCode.trim().toUpperCase();
+      const matched = discountsList.find(d => 
+        d.active && 
+        (d.id || '').toUpperCase().trim() === code && 
+        d.scope === 'referral'
+      );
+      if (matched) {
+        appliedReferralCode = code;
+        sessionStorage.setItem('shuchi_ref_code', code);
+      }
+    } else {
+      // Fallback: check if we previously saved it in sessionStorage
+      const saved = sessionStorage.getItem('shuchi_ref_code');
+      if (saved) {
+        const matched = discountsList.find(d => 
+          d.active && 
+          (d.id || '').toUpperCase().trim() === saved && 
+          d.scope === 'referral'
+        );
+        if (matched) {
+          appliedReferralCode = saved;
+        } else {
+          sessionStorage.removeItem('shuchi_ref_code');
+        }
+      }
+    }
+  } catch(e) {
+    console.warn("Failed to process URL referral code:", e);
+  }
   
   updateCartUI();
   updateAuthUI();

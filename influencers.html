@@ -136,6 +136,79 @@
     .proposal-grid { grid-template-columns: 1fr; gap: 3rem; }
   }
 
+  /* BRAND ELEVATION SECTION */
+  #brand-elevation {
+    background: linear-gradient(180deg, var(--white) 0%, var(--sage-pale) 100%);
+    border-top: 1px solid rgba(107,143,107,0.15);
+    border-bottom: 1px solid rgba(107,143,107,0.15);
+  }
+  .elevation-intro {
+    max-width: 65ch;
+    margin-top: 1.5rem;
+    color: var(--text-soft);
+    font-size: 1.05rem;
+    line-height: 1.8;
+  }
+  .elevation-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+    margin-top: 4rem;
+  }
+  .elevation-card {
+    background: var(--white);
+    border: 1px solid rgba(107,143,107,0.12);
+    padding: 2.5rem;
+    border-radius: 6px;
+    box-shadow: 0 10px 30px rgba(26,43,27,0.01);
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+  }
+  .elevation-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 45px rgba(26,43,27,0.05);
+    border-color: rgba(107,143,107,0.3);
+  }
+  .elevation-icon-container {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--sage-pale);
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.4rem;
+    border: 1px solid rgba(107,143,107,0.2);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+  }
+  .elevation-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .elevation-card-title {
+    font-family: Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--dark);
+  }
+  .elevation-card-text {
+    font-size: 0.9rem;
+    color: var(--text-soft);
+    line-height: 1.7;
+  }
+  
+  @media (max-width: 900px) {
+    .elevation-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+
   /* FOOTER */
   footer { background: var(--dark); color: rgba(245,239,228,0.55); padding: 5rem 8vw 3rem; }
   .footer-top { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 4rem; }
@@ -266,6 +339,50 @@
   </div>
 </section>
 
+<!-- BRAND ELEVATION SECTION -->
+<section id="brand-elevation" class="fi">
+  <p class="section-label">Brand Equity & Association</p>
+  <h2 class="section-title">Elevate your voice by partnering<br><em>with a sector leader.</em></h2>
+  <p class="elevation-intro">Skincare advice requires absolute authenticity. Aligning your personal brand with an up-and-coming, clinical authority like SHUCHI elevates your profile from a general influencer to a trusted expert in skin science.</p>
+  
+  <div class="elevation-grid">
+    <!-- Pillar 1 -->
+    <div class="elevation-card">
+      <div class="elevation-icon-container">🧬</div>
+      <div class="elevation-card-content">
+        <h4 class="elevation-card-title">Clinical Trust Capital</h4>
+        <p class="elevation-card-text">Skincare is a high-stakes, science-driven category. Aligning with Shuchi’s uncompromising formulation standards—100% authentic, climate-optimized, and clinically transparent K-Beauty—adds immediate professional authority to your content.</p>
+      </div>
+    </div>
+    
+    <!-- Pillar 2 -->
+    <div class="elevation-card">
+      <div class="elevation-icon-container">🛡️</div>
+      <div class="elevation-card-content">
+        <h4 class="elevation-card-title">Audience Protection</h4>
+        <p class="elevation-card-text">Say goodbye to promoting unverified products that risk damaging your followers' skin. Partnering with Shuchi ensures you only recommend results-driven, safe formulations, shielding and growing your audience's long-term trust.</p>
+      </div>
+    </div>
+    
+    <!-- Pillar 3 -->
+    <div class="elevation-card">
+      <div class="elevation-icon-container">📈</div>
+      <div class="elevation-card-content">
+        <h4 class="elevation-card-title">Thought Leadership & Education</h4>
+        <p class="elevation-card-text">Move beyond generic routine reviews. Gain direct access to co-create official routine blueprints, co-publish deep-dive ingredient analyses, and lead the scientific skincare education movement in Bangladesh.</p>
+      </div>
+    </div>
+    
+    <!-- Pillar 4 -->
+    <div class="elevation-card">
+      <div class="elevation-icon-container">✦</div>
+      <div class="elevation-card-content">
+        <h4 class="elevation-card-title">Premium Co-Exposure</h4>
+        <p class="elevation-card-text">Amplify your digital presence. Featured partners are highlighted across Shuchi's official storefront, clinical campaigns, and high-production social channels, directing dedicated skincare enthusiasts back to your platforms.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- CREATOR PROPOSAL & REFERRAL -->
 <section class="proposal-section fi">
@@ -275,15 +392,7 @@
   <div class="proposal-grid">
     <div class="proposal-col">
       <div class="proposal-lead">
-        Partnering with an up-and-coming, sector-leading brand like Shuchi elevates your personal brand value, positioning you as a trusted, scientific authority in skincare.
-      </div>
-      
-      <div class="proposal-item">
-        <div class="proposal-icon">✦</div>
-        <div>
-          <h4 class="proposal-title">Brand Elevation & Authority</h4>
-          <p class="proposal-text">By aligning your profile with Shuchi's uncompromising dedication to ingredient integrity, clinical transparency, and direct-import authenticity, you distinguish yourself in a crowded market as an educator, not just an influencer. Position yourself as a science-first skincare voice.</p>
-        </div>
+        As part of our Creator Network, you receive direct product support, co-creation rights, and invitations to exclusive masterclasses to fuel your growth.
       </div>
       
       <div class="proposal-item">
@@ -299,6 +408,14 @@
         <div>
           <h4 class="proposal-title">Research Co-Creation</h4>
           <p class="proposal-text">Gain access to co-create scientific routines, routine blueprints, and formulation breakdowns alongside our panel of skin science experts and curation analysts.</p>
+        </div>
+      </div>
+
+      <div class="proposal-item">
+        <div class="proposal-icon">✓</div>
+        <div>
+          <h4 class="proposal-title">Exclusive Event Access</h4>
+          <p class="proposal-text">Get invited to exclusive skincare panels, masterclasses, and curation workshops organized by Shuchi, collaborating directly with skin health professionals.</p>
         </div>
       </div>
     </div>
