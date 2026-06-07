@@ -839,17 +839,24 @@
     <div class="insights-grid" style="margin-top: 2rem;">
       <!-- Record / Create Discount Form -->
       <div style="background: var(--white); border: 1px solid var(--sage-pale); padding: 1.5rem; border-radius: 4px; display: flex; flex-direction: column;">
-        <h3 class="checkout-title" style="margin-top: 0; margin-bottom: 1.2rem; text-align: left; font-size: 1.15rem; font-weight: 500;">Create Discount Rule</h3>
+        <h3 class="checkout-title" style="margin-top: 0; margin-bottom: 1.2rem; text-align: left; font-size: 1.15rem; font-weight: 500;">Create Campaign Rule</h3>
         <form id="discountForm" onsubmit="submitDiscount(event)">
           <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="form-label" style="font-size: 0.74rem;">Discount Type</label>
+            <label class="form-label" style="font-size: 0.74rem;">Campaign Type</label>
+            <select id="campType" class="form-input" style="padding: 0.5rem;" required>
+              <option value="standard">Standard Discount (Reduce selling price)</option>
+              <option value="strategic">Strategic Price Alteration (Inflate original price, base is final)</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" style="font-size: 0.74rem;">Alteration Type</label>
             <select id="discType" class="form-input" style="padding: 0.5rem;" required>
               <option value="percentage">Percentage (%)</option>
               <option value="flat">Flat Amount (৳)</option>
             </select>
           </div>
           <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="form-label" style="font-size: 0.74rem;">Discount Value</label>
+            <label class="form-label" style="font-size: 0.74rem;">Alteration Value</label>
             <input type="number" id="discValue" class="form-input" style="padding: 0.5rem;" required placeholder="e.g. 10 or 150" min="1">
           </div>
           <div class="form-group" style="margin-bottom: 1rem;">
@@ -866,11 +873,7 @@
               <!-- Will be dynamically populated with brands or categories -->
             </select>
           </div>
-          <div style="margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; user-select: none;">
-            <input type="checkbox" id="discIsReverse" style="width: 14px; height: 14px; cursor: pointer;">
-            <label for="discIsReverse" style="cursor: pointer; font-size: 0.74rem; color: var(--text-soft); font-weight: 500; line-height: 1.2;">Reverse Discount (Treat base price as final price and show inflated original price)</label>
-          </div>
-          <button type="submit" class="btn-action" style="width: 100%; justify-content: center; padding: 0.65rem;">Create Discount</button>
+          <button type="submit" class="btn-action" style="width: 100%; justify-content: center; padding: 0.65rem;">Create Campaign Rule</button>
         </form>
       </div>
 
@@ -1369,18 +1372,19 @@ function getDiscountedPrice(product) {
     if (matches) {
       let currentPrice = price;
       let currentOriginalPrice = price;
-      const isReverse = disc.is_reverse || disc.isReverse;
+      const isStrategic = disc.type.endsWith('_strategic') || disc.is_reverse || disc.isReverse;
+      const baseType = isStrategic ? disc.type.replace('_strategic', '') : disc.type;
       
-      if (isReverse) {
+      if (isStrategic) {
         currentPrice = price;
-        if (disc.type === 'percentage') {
+        if (baseType === 'percentage') {
           const val = parseFloat(disc.value);
           currentOriginalPrice = val < 100 ? price / (1 - val / 100) : price;
         } else {
           currentOriginalPrice = price + parseFloat(disc.value);
         }
       } else {
-        if (disc.type === 'percentage') {
+        if (baseType === 'percentage') {
           currentPrice = price * (1 - disc.value / 100);
         } else {
           currentPrice = Math.max(0, price - disc.value);
@@ -1399,7 +1403,8 @@ function getDiscountedPrice(product) {
   return {
     price: bestPrice,
     originalPrice: bestOriginalPrice,
-    discount: appliedDiscount
+    discount: appliedDiscount,
+    discountType: appliedDiscount ? (appliedDiscount.type.includes('percentage') ? 'percentage' : 'flat') : null
   };
 }
 
@@ -1549,29 +1554,31 @@ function populateDiscountScopeOptions() {
 // Submit discount creation form
 async function submitDiscount(e) {
   e.preventDefault();
-  const type = document.getElementById('discType').value;
+  const campType = document.getElementById('campType').value;
+  const discType = document.getElementById('discType').value;
   const value = parseFloat(document.getElementById('discValue').value) || 0;
   const scope = document.getElementById('discScope').value;
   const scopeValue = scope !== 'all' ? document.getElementById('discScopeValue').value : '';
-  const isReverse = document.getElementById('discIsReverse').checked;
   
   if (value <= 0) {
-    showAdminToast("Discount value must be positive", "error");
+    showAdminToast("Alteration value must be positive", "error");
     return;
   }
   
-  if (type === 'percentage' && value > 100) {
-    showAdminToast("Percentage discount cannot exceed 100%", "error");
+  if (discType === 'percentage' && value > 100) {
+    showAdminToast("Percentage alteration cannot exceed 100%", "error");
     return;
   }
+  
+  // Encode campaign type directly in type field so schema migration is not required
+  const savedType = campType === 'strategic' ? `${discType}_strategic` : discType;
   
   const newDiscount = {
     id: 'disc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-    type: type,
+    type: savedType,
     value: value,
     scope: scope,
     scope_value: scopeValue,
-    is_reverse: isReverse,
     active: true,
     created_at: new Date().toISOString()
   };
@@ -1581,7 +1588,7 @@ async function submitDiscount(e) {
   renderProductsTable();
   document.getElementById('discountForm').reset();
   handleDiscountScopeChange();
-  showAdminToast("Discount rule created successfully");
+  showAdminToast("Campaign rule created successfully");
 }
 
 // Render active discounts table
@@ -1596,18 +1603,24 @@ function renderDiscountsTable() {
   }
   
   discountsList.forEach(disc => {
-    const isReverse = disc.is_reverse || disc.isReverse;
-    const reverseBadge = isReverse ? ` <span class="badge" style="font-size:0.6rem; background:#ebf8ff; color:#2b6cb0; border:1px solid #bee3f8; padding:0.1rem 0.25rem; border-radius:3px; font-weight:600; vertical-align:middle; margin-left:0.2rem; display:inline-block;">Reverse</span>` : '';
+    const isStrategic = disc.type.endsWith('_strategic') || disc.is_reverse || disc.isReverse;
+    const baseType = isStrategic ? disc.type.replace('_strategic', '') : disc.type;
+    const badgeText = isStrategic ? 'Strategic Alt' : 'Standard Disc';
+    const badgeBg = isStrategic ? '#e6fffa' : '#f0fff4';
+    const badgeColor = isStrategic ? '#319795' : '#38a169';
+    const badgeBorder = isStrategic ? '#b2f5ea' : '#c6f6d5';
+    
+    const typeBadge = ` <span class="badge" style="font-size:0.6rem; background:${badgeBg}; color:${badgeColor}; border:1px solid ${badgeBorder}; padding:0.1rem 0.25rem; border-radius:3px; font-weight:600; vertical-align:middle; margin-left:0.2rem; display:inline-block;">${badgeText}</span>`;
     const scopeText = (disc.scope === 'all' ? 'All Products' : 
                       disc.scope === 'brand' ? `Brand: ${disc.scope_value}` : 
-                      `Type: ${disc.scope_value}`) + reverseBadge;
-    const valText = disc.type === 'percentage' ? `${disc.value}%` : `৳${disc.value}`;
+                      `Type: ${disc.scope_value}`) + typeBadge;
+    const valText = baseType === 'percentage' ? `${disc.value}%` : `৳${disc.value}`;
     
     const tr = document.createElement('tr');
     tr.style.borderBottom = '1px solid var(--cream-deep)';
     tr.innerHTML = `
       <td style="padding: 0.65rem 0.5rem;" class="bold">${scopeText}</td>
-      <td style="padding: 0.65rem 0.5rem;" class="text-soft">${disc.type === 'percentage' ? 'Percentage' : 'Flat Amount'}</td>
+      <td style="padding: 0.65rem 0.5rem;" class="text-soft">${baseType === 'percentage' ? 'Percentage' : 'Flat Amount'}</td>
       <td style="padding: 0.65rem 0.5rem;" class="bold text-right">${valText}</td>
       <td style="padding: 0.65rem 0.5rem; text-align: center;">
         <button class="btn-stock-toggle ${disc.active ? 'in-stock' : 'out-of-stock'}" 

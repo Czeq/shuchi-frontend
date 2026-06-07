@@ -250,7 +250,8 @@ function getDiscountedPrice(product) {
   return {
     price: bestPrice,
     originalPrice: bestOriginalPrice,
-    discount: appliedDiscount
+    discount: appliedDiscount,
+    discountType: appliedDiscount ? (appliedDiscount.type.includes('percentage') ? 'percentage' : 'flat') : null
   };
 }
 
@@ -305,7 +306,7 @@ function applyLiveDiscountsToDOM() {
       // Add Badge
       const imgContainer = card.querySelector('.product-card-img');
       if (imgContainer) {
-        const discountLabel = discInfo.discount.type === 'percentage' 
+        const discountLabel = discInfo.discountType === 'percentage' 
           ? `${discInfo.discount.value}% Off` 
           : `৳${discInfo.discount.value} Off`;
         
@@ -332,7 +333,7 @@ function applyLiveDiscountsToDOM() {
           const discInfo = getDiscountedPrice(product);
           if (discInfo.discount) {
             const discountedPrice = Math.round(discInfo.price);
-            const discountLabel = discInfo.discount.type === 'percentage' 
+            const discountLabel = discInfo.discountType === 'percentage' 
               ? `${discInfo.discount.value}% Off` 
               : `৳${discInfo.discount.value} Off`;
             
@@ -1420,7 +1421,7 @@ function updateCartUI() {
              <span style="color:var(--sage); font-weight:600; font-size:0.95rem;">৳ ${discountedPrice.toLocaleString()}</span>
            </div>
            <span style="background:var(--sage-pale); color:var(--dark-mid); font-size:0.65rem; font-weight:600; padding:0.1rem 0.35rem; border-radius:2px; display:inline-block; margin-top:0.15rem; line-height:1;">
-             ${discountInfo.discount.type === 'percentage' ? `${discountInfo.discount.value}% Off` : `৳${discountInfo.discount.value} Off`}
+             ${discountInfo.discountType === 'percentage' ? `${discountInfo.discount.value}% Off` : `৳${discountInfo.discount.value} Off`}
            </span>
          </div>`
       : `৳ ${item.price.toLocaleString()}`;
