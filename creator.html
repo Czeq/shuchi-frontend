@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Partner Ambassador Portal — SHUCHI শুচি</title>
+<title>Partner Creator Portal — SHUCHI শুচি</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="cart.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -482,14 +482,14 @@
           <path d="M478.04 427.924C470.246 393.217 484.887 389.034 502.085 352.27C531.758 305.223 549.852 284.014 589.206 238.634L674.723 314.396C701.444 340.894 699.975 356.68 716.285 391.275C714.156 439.626 705.68 468.205 673.311 522.665L602.112 633.156L529.533 539.712L478.04 427.924Z"/>
         </svg>
       </div>
-      <h2 class="login-title">Ambassador Portal</h2>
-      <p class="login-desc">Please authenticate using your partner promo code and secure passcode PIN to view your curated community metrics and accrued earnings.</p>
+      <h2 class="login-title">Creator Portal</h2>
+      <p class="login-desc">A space for our partnered content creators who see skincare as an essential part of their routine and day. Please enter your creator promo code and passcode PIN below to access your metrics.</p>
       
       <div class="login-error" id="loginError">Invalid credentials.</div>
       
       <form id="creatorLoginForm" onsubmit="handleCreatorLogin(event)">
         <div class="form-group">
-          <label class="form-label" for="loginCode">Ambassador Promo Code</label>
+          <label class="form-label" for="loginCode">Creator Promo Code</label>
           <input type="text" id="loginCode" class="form-input" style="text-transform: uppercase;" required placeholder="e.g. SABRINA10">
         </div>
         <div class="form-group">
@@ -520,12 +520,12 @@
     <div class="creator-welcome-section">
       <div>
         <h1 class="creator-title">Welcome back, <span id="lblCreatorName">Partner</span>!</h1>
-        <p class="creator-subtitle" id="lblCreatorDetails">Performance metrics for Ambassador Code: ---</p>
+        <p class="creator-subtitle" id="lblCreatorDetails">Performance metrics for Creator Code: ---</p>
       </div>
 
       <!-- Quick Referral Link Copier -->
       <div class="quick-link-box">
-        <span class="quick-link-label">Your Ambassador Link</span>
+        <span class="quick-link-label">Your Creator Link</span>
         <div class="quick-link-input-wrapper">
           <input type="text" id="txtPromoLink" class="quick-link-input" readonly value="https://...">
           <button class="quick-link-btn" onclick="copyCreatorPromoLink()">Copy</button>
@@ -556,7 +556,7 @@
       <div class="metric-card highlight">
         <div class="metric-label">Earnings Accrued (5%)</div>
         <div class="metric-value" id="kpiEarned" style="color: var(--sage);">৳ 0</div>
-        <div class="metric-sub">Your 5% ambassador revenue share on referred sales (excluding cancelled orders)</div>
+        <div class="metric-sub">Your 5% creator revenue share on referred sales (excluding cancelled orders)</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">Total Paid</div>
@@ -710,7 +710,7 @@ async function loadCreatorData() {
 
     // 2. Legacy fallback: query discounts and orders directly
     if (!rpcSuccess) {
-      // Fetch only the specific discount for this ambassador
+      // Fetch only the specific discount for this creator
       const { data: activeDisc, error: discErr } = await supabaseClient
         .from('discounts')
         .select('*')
@@ -720,7 +720,7 @@ async function loadCreatorData() {
 
       if (discErr) throw discErr;
       if (!activeDisc) {
-        alert("Active ambassador account not found. Please log in again.");
+        alert("Active creator account not found. Please log in again.");
         handleCreatorLogout();
         return;
       }
@@ -742,7 +742,7 @@ async function loadCreatorData() {
     // Populate dashboard
     renderCreatorDashboard();
   } catch (err) {
-    console.error("Failed to load ambassador portal data:", err);
+    console.error("Failed to load creator portal data:", err);
     alert("Database sync failed. Please check your connection.");
   } finally {
     setLoadingState(false);
@@ -800,7 +800,7 @@ function clearCreatorFilters() {
 function renderCreatorDashboard() {
   // Set headers
   document.getElementById('lblCreatorName').textContent = activeCreatorMeta.name;
-  document.getElementById('lblCreatorDetails').textContent = `Ambassador Code: ${activeCreatorCode} | Contact: ${activeCreatorMeta.phone}`;
+  document.getElementById('lblCreatorDetails').textContent = `Creator Code: ${activeCreatorCode} | Contact: ${activeCreatorMeta.phone}`;
   
   // Set promo link
   const origin = window.location.origin;
@@ -927,7 +927,7 @@ function switchCreatorTab(tab) {
 function copyCreatorPromoLink() {
   const linkEl = document.getElementById('txtPromoLink');
   navigator.clipboard.writeText(linkEl.value).then(() => {
-    showCreatorToast("Ambassador referral link copied to clipboard!");
+    showCreatorToast("Creator referral link copied to clipboard!");
   }).catch(() => {
     showCreatorToast("Failed to copy link.", "error");
   });
@@ -1000,10 +1000,7 @@ async function handleCreatorLogin(e) {
         .rpc('get_influencer_dashboard_data', { promo_code: code, input_passcode: passcode });
         
       if (rpcErr) {
-        const isFuncMissing = rpcErr.message.includes('does not exist') || rpcErr.code === '42883' || rpcErr.status === 404;
-        if (!isFuncMissing) {
-          throw new Error(rpcErr.message || "Authentication failed.");
-        }
+        console.warn("RPC authentication failed or unavailable, falling back to direct select:", rpcErr);
       } else if (rpcData === null) {
         throw new Error("Incorrect passcode. Please try again.");
       } else {
@@ -1011,10 +1008,10 @@ async function handleCreatorLogin(e) {
         rpcSuccess = true;
       }
     } catch (rpcException) {
-      if (rpcException.message && (rpcException.message.includes("passcode") || rpcException.message.includes("Incorrect"))) {
+      if (rpcException.message && rpcException.message.includes("Incorrect passcode")) {
         throw rpcException;
       }
-      console.warn("RPC authentication unavailable, using legacy client fallback:", rpcException);
+      console.warn("RPC authentication exception, using legacy client fallback:", rpcException);
     }
 
     // 2. Legacy fallback client verification
@@ -1030,17 +1027,17 @@ async function handleCreatorLogin(e) {
       if (error) throw error;
 
       if (!data) {
-        throw new Error("Invalid Ambassador Code. Please verify your code.");
+        throw new Error("Invalid Creator Code. Please verify your code.");
       }
 
       if (!data.active) {
-        throw new Error("Your ambassador account is currently inactive. Please contact Shuchi partner relations.");
+        throw new Error("Your creator account is currently inactive. Please contact Shuchi partner relations.");
       }
 
       const clientMeta = parseCreatorMetadata(data);
       
       if (!clientMeta.passcode) {
-        throw new Error("No passcode configured for this ambassador account. Please ask partner relations to set one.");
+        throw new Error("No passcode configured for this creator account. Please ask partner relations to set one.");
       }
 
       if (clientMeta.passcode !== passcode) {
@@ -1063,7 +1060,7 @@ async function handleCreatorLogin(e) {
     }, 400);
 
   } catch(err) {
-    console.error("Ambassador login error:", err);
+    console.error("Creator login error:", err);
     errorEl.textContent = err.message || "Failed to log in. Please check your credentials.";
     errorEl.style.display = 'block';
   }
