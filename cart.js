@@ -491,6 +491,44 @@ function applyPromoCode() {
   }
 }
 
+// Apply Promo / Referral Code entered by user in the checkout overlay
+function applyCheckoutPromoCode() {
+  const inputEl = document.getElementById('checkoutPromoCode');
+  const feedbackEl = document.getElementById('checkoutPromoFeedback');
+  if (!inputEl || !feedbackEl) return;
+
+  const rawCode = inputEl.value.trim().toUpperCase();
+  if (rawCode === "") {
+    feedbackEl.style.display = 'block';
+    feedbackEl.style.color = '#B8975A';
+    feedbackEl.textContent = "Please enter a code.";
+    appliedReferralCode = null;
+    updateCartUI();
+    return;
+  }
+
+  // Look up referral code in discountsList
+  const matched = discountsList.find(d => 
+    d.active && 
+    (d.id || '').toUpperCase().trim() === rawCode && 
+    d.scope === 'referral'
+  );
+
+  if (matched) {
+    appliedReferralCode = rawCode;
+    feedbackEl.style.display = 'block';
+    feedbackEl.style.color = 'var(--sage)';
+    feedbackEl.textContent = `Referral code "${rawCode}" applied! 10% discount activated.`;
+    updateCartUI();
+  } else {
+    appliedReferralCode = null;
+    feedbackEl.style.display = 'block';
+    feedbackEl.style.color = '#B8975A';
+    feedbackEl.textContent = "Invalid promo or referral code.";
+    updateCartUI();
+  }
+}
+
 // Watch for DOM changes to apply discounts on dynamically rendered cards
 function initDiscountObserver() {
   applyLiveDiscountsToDOM();
@@ -617,12 +655,6 @@ function injectCartUI() {
         </div>
         <div class="cart-body" id="cartItemsList"></div>
         <div class="cart-footer">
-          <!-- PROMO CODE INPUT -->
-          <div class="promo-code-container" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px dashed rgba(107,143,107,0.15);">
-            <input type="text" id="promoCodeInput" placeholder="Promo / Referral Code" style="flex: 1; padding: 0.5rem 0.8rem; border: 1px solid var(--cream-deep); background: var(--white); font-size: 0.78rem; border-radius: 4px; text-transform: uppercase; font-family: inherit;">
-            <button type="button" onclick="applyPromoCode()" class="btn-primary" style="padding: 0.5rem 1.2rem; font-size: 0.72rem; letter-spacing: 0.05em; height: auto;">Apply</button>
-          </div>
-          <div id="promoFeedback" style="font-size: 0.72rem; margin-top: -0.8rem; margin-bottom: 0.8rem; display: none; font-weight: 500; text-align: left;"></div>
           
           <div class="cart-summary-line">
             <span>Subtotal</span>
@@ -677,6 +709,16 @@ function injectCartUI() {
               <option value="outside">Outside Dhaka (৳ 120)</option>
             </select>
           </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="checkoutPromoCode">Discount / Referral Code (Optional)</label>
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="text" id="checkoutPromoCode" class="form-input" style="text-transform: uppercase; flex: 1;" placeholder="e.g. SABRINA10">
+              <button type="button" onclick="applyCheckoutPromoCode()" class="btn-primary" style="padding: 0.5rem 1.2rem; font-size: 0.72rem; letter-spacing: 0.05em; height: auto;">Apply</button>
+            </div>
+            <div id="checkoutPromoFeedback" style="font-size: 0.72rem; margin-top: 0.25rem; display: none; font-weight: 500; text-align: left;"></div>
+          </div>
+
           <div class="form-group">
             <label class="form-label">Payment Method</label>
             <div class="payment-options">
@@ -690,6 +732,27 @@ function injectCartUI() {
               </div>
             </div>
           </div>
+
+          <div class="checkout-summary-box" style="background: var(--cream); padding: 1.2rem; border-radius: 6px; margin: 1.5rem 0; border: 1px solid var(--cream-deep);">
+            <h4 style="font-family: Georgia, serif; font-size: 1rem; color: var(--dark); margin-top: 0; margin-bottom: 0.8rem; font-weight: 500; text-align: left;">Order Summary</h4>
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem; color: var(--text-soft);">
+              <span>Items Subtotal</span>
+              <span id="checkoutSubtotal">৳ 0</span>
+            </div>
+            <div id="checkoutDiscountRow" style="display: none; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem; color: var(--sage); font-weight: 500;">
+              <span>Referral Discount (10%)</span>
+              <span id="checkoutDiscountValue">-৳ 0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.4rem; color: var(--text-soft);">
+              <span>Delivery Charge</span>
+              <span id="checkoutDelivery">৳ 0</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.92rem; font-weight: bold; border-top: 1px dashed rgba(107,143,107,0.2); padding-top: 0.6rem; margin-top: 0.6rem; color: var(--dark);">
+              <span>Total to Pay</span>
+              <span id="checkoutTotal">৳ 0</span>
+            </div>
+          </div>
+
           <div class="checkout-actions">
             <button type="button" class="checkout-cancel-btn" onclick="closeCheckout()">Go Back</button>
             <button type="submit" class="checkout-submit-btn">Place Order</button>
@@ -1540,6 +1603,25 @@ function updateCartUI() {
   deliveryEl.textContent = `৳ ${deliveryCharge.toLocaleString()}`;
   totalEl.textContent = `৳ ${total.toLocaleString()}`;
 
+  // Update checkout modal summary fields if present
+  const checkSubtotalEl = document.getElementById('checkoutSubtotal');
+  const checkDiscountRow = document.getElementById('checkoutDiscountRow');
+  const checkDiscountVal = document.getElementById('checkoutDiscountValue');
+  const checkDeliveryEl = document.getElementById('checkoutDelivery');
+  const checkTotalEl = document.getElementById('checkoutTotal');
+
+  if (checkSubtotalEl) checkSubtotalEl.textContent = `৳ ${subtotal.toLocaleString()}`;
+  if (checkDeliveryEl) checkDeliveryEl.textContent = `৳ ${deliveryCharge.toLocaleString()}`;
+  if (checkTotalEl) checkTotalEl.textContent = `৳ ${total.toLocaleString()}`;
+  if (checkDiscountRow && checkDiscountVal) {
+    if (referralDiscount > 0) {
+      checkDiscountRow.style.display = 'flex';
+      checkDiscountVal.textContent = `-৳ ${referralDiscount.toLocaleString()}`;
+    } else {
+      checkDiscountRow.style.display = 'none';
+    }
+  }
+
   if (checkoutBtn) {
     checkoutBtn.disabled = totalQuantity === 0;
     checkoutBtn.style.opacity = totalQuantity === 0 ? '0.4' : '1';
@@ -1630,8 +1712,26 @@ function openCheckout() {
   const checkoutOverlay = document.getElementById('checkoutOverlay');
   if (checkoutOverlay) {
     prefillCheckoutForm(); // fill user profile if logged in
+    
+    // Sync promo code input
+    const checkoutPromoEl = document.getElementById('checkoutPromoCode');
+    const checkoutPromoFeedbackEl = document.getElementById('checkoutPromoFeedback');
+    if (checkoutPromoEl) {
+      checkoutPromoEl.value = appliedReferralCode || '';
+      if (checkoutPromoFeedbackEl) {
+        if (appliedReferralCode) {
+          checkoutPromoFeedbackEl.style.display = 'block';
+          checkoutPromoFeedbackEl.style.color = 'var(--sage)';
+          checkoutPromoFeedbackEl.textContent = `Promo code "${appliedReferralCode}" applied!`;
+        } else {
+          checkoutPromoFeedbackEl.style.display = 'none';
+        }
+      }
+    }
+    
     checkoutOverlay.classList.add('active');
     document.body.style.overflow = 'hidden';
+    updateCartUI(); // trigger summary updates in checkout box
   }
 }
 
@@ -1757,6 +1857,55 @@ async function submitCheckout(e) {
     const step3Animation = animateLayer(3, 800, 0, 80);
     
     const insertPromise = (async () => {
+      // Auto register / log-in guest users
+      if (!currentUser) {
+        try {
+          const { data: existingUser, error: checkError } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('phone', phone)
+            .maybeSingle();
+
+          if (!checkError && existingUser) {
+            saveUserState({
+              name: existingUser.name,
+              phone: existingUser.phone,
+              address: existingUser.address
+            });
+          } else {
+            const { error: insertError } = await supabaseClient
+              .from('profiles')
+              .insert([{ 
+                name, 
+                phone, 
+                address,
+                created_at: new Date().toISOString()
+              }]);
+            
+            if (!insertError) {
+              saveUserState({ name, phone, address });
+            }
+          }
+        } catch (authErr) {
+          console.warn("Auto sign-in failed during checkout:", authErr);
+        }
+      } else {
+        // If already logged in, update address/name if changed
+        try {
+          if (currentUser.name !== name || currentUser.address !== address) {
+            const { error: updateError } = await supabaseClient
+              .from('profiles')
+              .update({ name, address })
+              .eq('phone', phone);
+            if (!updateError) {
+              saveUserState({ name, phone, address });
+            }
+          }
+        } catch (updateErr) {
+          console.warn("Profile update failed during checkout:", updateErr);
+        }
+      }
+
       const { error } = await supabaseClient
         .from('orders')
         .insert([{
