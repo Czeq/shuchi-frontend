@@ -746,11 +746,14 @@
     .section-title { font-size: clamp(1.8rem, 7vw, 2.5rem); }
 
     /* Products */
-    .products-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+    .products-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
     .product-card-img { height: auto; aspect-ratio: 1 / 1; }
-    .product-card-body { padding: 1.2rem; }
-    .product-footer-card { flex-direction: column; align-items: flex-start; gap: 0.8rem; }
-    .wiki-btn { width: 100%; text-align: center; padding: 0.6rem; min-height: 44px; }
+    .product-card-body { padding: 0.8rem; }
+    .product-title-card { font-size: 0.95rem; }
+    .product-desc-card { display: none; }
+    .product-footer-card { flex-direction: column; align-items: flex-start; gap: 0.5rem; padding-top: 0.6rem; }
+    .product-price { font-size: 1.05rem; }
+    .wiki-btn { width: 100%; text-align: center; padding: 0.5rem; min-height: 40px; font-size: 0.65rem; }
 
     /* Filter bar — horizontal scroll */
     .filter-bar { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0.5rem; -webkit-overflow-scrolling: touch; }
@@ -961,7 +964,7 @@
       <p class="section-label">Routine Builder</p>
       <h2 class="section-title">Your skin.<br><em>Your climate.</em><br>Your routine.</h2>
       <p class="routine-desc">Bangladesh's heat and humidity demand a different approach than what Western or even Korean routines prescribe. Our quiz builds a 3–5 step routine for your skin type and local conditions.</p>
-      <a href="#" class="btn-primary" style="background:var(--sage)">Take the Full Quiz</a>
+      <a href="#" class="btn-primary" style="display:none">Take the Full Quiz</a>
     </div>
 
     <div class="fi">

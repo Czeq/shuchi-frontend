@@ -159,6 +159,7 @@
     z-index: 99;
   }
   nav.mopen .nav-links li { border-bottom: 1px solid rgba(245,239,228,0.05); }
+  nav.mopen .nav-links li.nav-dropdown { border-bottom: none; }
   nav.mopen .nav-links a {
     display: block; padding: 0.9rem 0;
     font-size: 0.82rem; color: var(--cream);
@@ -167,6 +168,31 @@
   nav.mopen .nav-cta {
     margin: 1rem auto 0;
     display: block; width: fit-content;
+  }
+
+  /* MOBILE NAV RESPONSIVE */
+  @media (max-width: 900px) {
+    nav { padding: 1rem 5vw; }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    section { padding: 4.5rem 6vw; }
+    .footer-top { grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .payment-strip { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
+  }
+  @media (max-width: 600px) {
+    nav { padding: 0.9rem 5vw; }
+    .nav-logo { font-size: 1.3rem; }
+    section { padding: 3.5rem 5vw; }
+    .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+    footer { padding: 3.5rem 5vw 2rem; }
+    .footer-bottom { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
+    .chero-title { font-size: clamp(1.9rem, 7vw, 2.8rem); }
+    .faq-header { padding: 1.1rem 1.2rem; }
+    .faq-content { padding: 0 1.2rem 1.2rem; }
+    .faq-question { font-size: 1rem; }
+    .faq-tabs { gap: 0.5rem; }
+    .faq-tab-btn { font-size: 0.74rem; padding: 0.5rem 0.9rem; }
+    .payment-strip { padding: 1.8rem 5vw; }
   }
 </style>
 </head>
