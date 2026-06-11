@@ -7,6 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root {
     --sage: #6B8F6B;
@@ -1069,6 +1070,24 @@
 
   <!-- TAB: FINANCIALS -->
   <div id="tabFinancials" class="tab-content">
+    <!-- Financial Date Filters and PDF Export -->
+    <div style="background: var(--white); border: 1px solid var(--sage-pale); border-radius: 4px; padding: 1.25rem; margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <h3 class="checkout-title" style="margin: 0; font-size: 1.15rem; font-weight: 500;">Financial Period</h3>
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: var(--text-soft);">
+          <label for="finFilterStart">From:</label>
+          <input type="date" id="finFilterStart" class="form-input" style="padding: 0.35rem 0.6rem; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--sage-pale);" onchange="renderFinancials()">
+          <label for="finFilterEnd" style="margin-left: 0.5rem;">To:</label>
+          <input type="date" id="finFilterEnd" class="form-input" style="padding: 0.35rem 0.6rem; font-size: 0.8rem; border-radius: 4px; border: 1px solid var(--sage-pale);" onchange="renderFinancials()">
+          <button class="btn-action" style="background: var(--cream); border: 1px solid var(--sage-pale); padding: 0.35rem 0.75rem; font-size: 0.8rem; margin-left: 0.5rem;" onclick="clearFinancialFilters()">Reset</button>
+        </div>
+      </div>
+      <button class="btn-action" style="background: var(--sage); color: var(--white); border: none; padding: 0.5rem 1.2rem; font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; border-radius: 4px; transition: background 0.2s;" onclick="generateFinancialPDF()">
+        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="margin-right: 2px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        Generate PDF Statement
+      </button>
+    </div>
+
     <!-- Financial Metric Cards Row -->
     <div class="metrics-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
       <div class="metric-card" style="background: var(--white); padding: 1.5rem; border: 1px solid var(--sage-pale); border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
@@ -3306,7 +3325,28 @@ function switchProductAnalyticTab(tabName) {
 
 // Render Financial Analytics Tab
 function renderFinancials() {
-  const activeOrders = ordersList.filter(o => (o.status || '').toLowerCase() !== 'cancelled');
+  const filterStartVal = document.getElementById('finFilterStart') ? document.getElementById('finFilterStart').value : '';
+  const filterEndVal = document.getElementById('finFilterEnd') ? document.getElementById('finFilterEnd').value : '';
+  
+  const filterStart = filterStartVal ? new Date(filterStartVal + 'T00:00:00') : null;
+  const filterEnd = filterEndVal ? new Date(filterEndVal + 'T23:59:59') : null;
+
+  let activeOrders = ordersList.filter(o => (o.status || '').toLowerCase() !== 'cancelled');
+  if (filterStart) {
+    activeOrders = activeOrders.filter(o => new Date(o.created_at) >= filterStart);
+  }
+  if (filterEnd) {
+    activeOrders = activeOrders.filter(o => new Date(o.created_at) <= filterEnd);
+  }
+
+  let filteredExpenses = expensesList;
+  if (filterStart) {
+    filteredExpenses = filteredExpenses.filter(e => new Date(e.created_at) >= filterStart);
+  }
+  if (filterEnd) {
+    filteredExpenses = filteredExpenses.filter(e => new Date(e.created_at) <= filterEnd);
+  }
+
   const salesAgg = {};
 
   activeOrders.forEach(order => {
@@ -3382,7 +3422,7 @@ function renderFinancials() {
     totalInfluencerCommissions += commission;
   });
 
-  const totalExpenses = expensesList.reduce((acc, exp) => acc + parseFloat(exp.amount || 0), 0) + totalInfluencerCommissions;
+  const totalExpenses = filteredExpenses.reduce((acc, exp) => acc + parseFloat(exp.amount || 0), 0) + totalInfluencerCommissions;
   const netProfit = grossProfit - totalExpenses;
   const netMarginPercent = actualGrossSales > 0 ? (netProfit / actualGrossSales) * 100 : 0;
 
@@ -3405,10 +3445,10 @@ function renderFinancials() {
   // Render Expense ledger table
   const expTbody = document.getElementById('expensesListBody');
   expTbody.innerHTML = '';
-  if (expensesList.length === 0 && totalInfluencerCommissions === 0) {
+  if (filteredExpenses.length === 0 && totalInfluencerCommissions === 0) {
     expTbody.innerHTML = '<tr><td colspan="5" class="text-soft text-center" style="padding: 1.5rem;">No operating expenses recorded yet.</td></tr>';
   } else {
-    expensesList.forEach(exp => {
+    filteredExpenses.forEach(exp => {
       const dateStr = new Date(exp.created_at).toLocaleDateString('en-US', {
         month: 'short', day: 'numeric', year: 'numeric'
       });
@@ -3453,7 +3493,14 @@ function renderFinancials() {
         const validOrders = activeOrders.filter(o => (o.items || '').includes('[Referral: ' + disc.id + ']'));
         const rev = validOrders.reduce((a, o) => a + (parseFloat(o.total_price || 0) - getDeliveryCharge(o)), 0);
         const accrued = Math.round(rev * 0.05);
-        const paid = meta.payouts.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+        
+        const filteredPayouts = meta.payouts.filter(p => {
+          const payoutDate = new Date(p.date);
+          if (filterStart && payoutDate < filterStart) return false;
+          if (filterEnd && payoutDate > filterEnd) return false;
+          return true;
+        });
+        const paid = filteredPayouts.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
         const owed = Math.max(0, accrued - paid);
         const tr = document.createElement('tr');
         tr.style.borderBottom = '1px solid var(--cream-deep)';
@@ -3526,7 +3573,7 @@ function renderFinancials() {
   customerTbody.innerHTML = '';
   
   const customerAgg = {};
-  ordersList.forEach(order => {
+  activeOrders.forEach(order => {
     const status = (order.status || '').toLowerCase();
     if (status === 'cancelled') return;
     
@@ -3599,6 +3646,407 @@ function renderFinancials() {
       profitTbody.appendChild(tr);
     });
   }
+}
+
+// Clear Financial Date range filters
+function clearFinancialFilters() {
+  const startEl = document.getElementById('finFilterStart');
+  const endEl = document.getElementById('finFilterEnd');
+  if (startEl) startEl.value = '';
+  if (endEl) endEl.value = '';
+  renderFinancials();
+}
+
+// Generate Professional PDF Financial Statement
+function generateFinancialPDF() {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    showAdminToast("jsPDF library not loaded yet. Please wait a moment or reload.", "error");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4');
+  
+  const filterStartVal = document.getElementById('finFilterStart') ? document.getElementById('finFilterStart').value : '';
+  const filterEndVal = document.getElementById('finFilterEnd') ? document.getElementById('finFilterEnd').value : '';
+  
+  const filterStart = filterStartVal ? new Date(filterStartVal + 'T00:00:00') : null;
+  const filterEnd = filterEndVal ? new Date(filterEndVal + 'T23:59:59') : null;
+
+  // Filter orders, expenses, and payouts
+  let activeOrders = ordersList.filter(o => (o.status || '').toLowerCase() !== 'cancelled');
+  if (filterStart) {
+    activeOrders = activeOrders.filter(o => new Date(o.created_at) >= filterStart);
+  }
+  if (filterEnd) {
+    activeOrders = activeOrders.filter(o => new Date(o.created_at) <= filterEnd);
+  }
+
+  let filteredExpenses = expensesList;
+  if (filterStart) {
+    filteredExpenses = filteredExpenses.filter(e => new Date(e.created_at) >= filterStart);
+  }
+  if (filterEnd) {
+    filteredExpenses = filteredExpenses.filter(e => new Date(e.created_at) <= filterEnd);
+  }
+
+  // Aggregate Product sales
+  const salesAgg = {};
+  activeOrders.forEach(order => {
+    if (!order.items) return;
+    const itemsArray = order.items.split(', ');
+    itemsArray.forEach(itemStr => {
+      const match = itemStr.match(/^(\d+)\s*x\s*(.+)$/i);
+      let qty = 1;
+      let rawTitle = itemStr.trim();
+      if (match) {
+        qty = parseInt(match[1]) || 1;
+        rawTitle = match[2].trim();
+      }
+      
+      const product = findProductByTitle(rawTitle);
+      if (product) {
+        const pid = product.id;
+        if (!salesAgg[pid]) {
+          salesAgg[pid] = {
+            title: product.title,
+            qty: 0,
+            price: parseFloat(product.price || 0),
+            cost: parseFloat(product.cost_price || 0)
+          };
+        }
+        salesAgg[pid].qty += qty;
+      } else {
+        const estPrice = findProductPriceByTitle(rawTitle) || 1100;
+        const estCost = findProductCostByTitle(rawTitle) || 0;
+        if (!salesAgg[rawTitle]) {
+          salesAgg[rawTitle] = {
+            title: rawTitle,
+            qty: 0,
+            price: estPrice,
+            cost: estCost
+          };
+        }
+        salesAgg[rawTitle].qty += qty;
+      }
+    });
+  });
+
+  let totalCOGS = 0;
+  Object.values(salesAgg).forEach(item => {
+    totalCOGS += item.qty * item.cost;
+  });
+
+  const actualGrossSales = activeOrders.reduce((acc, curr) => {
+    return acc + (parseFloat(curr.total_price || 0) - getDeliveryCharge(curr));
+  }, 0);
+
+  const grossProfit = actualGrossSales - totalCOGS;
+  const grossMarginPercent = actualGrossSales > 0 ? (grossProfit / actualGrossSales) * 100 : 0;
+
+  let totalInfluencerCommissions = 0;
+  const referralDiscounts = discountsList.filter(d => d.scope === 'referral');
+  referralDiscounts.forEach(disc => {
+    const validOrders = activeOrders.filter(o => 
+      (o.items || '').includes('[Referral: ' + disc.id + ']')
+    );
+    const revenueTotal = validOrders.reduce((acc, curr) => {
+      return acc + (parseFloat(curr.total_price || 0) - getDeliveryCharge(curr));
+    }, 0);
+    const commission = Math.round(revenueTotal * 0.05);
+    totalInfluencerCommissions += commission;
+  });
+
+  const totalExpenses = filteredExpenses.reduce((acc, exp) => acc + parseFloat(exp.amount || 0), 0) + totalInfluencerCommissions;
+  const netProfit = grossProfit - totalExpenses;
+  const netMarginPercent = actualGrossSales > 0 ? (netProfit / actualGrossSales) * 100 : 0;
+
+  // Document Assembly
+  let y = 20;
+
+  function checkPageSpace(neededHeight) {
+    if (y + neededHeight > 275) {
+      doc.addPage();
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(120);
+      doc.text("SHUCHI শুচি — Financial Statement (Continued)", 15, 12);
+      doc.setDrawColor(220, 220, 220);
+      doc.line(15, 14, 195, 14);
+      y = 22;
+    }
+  }
+
+  // Cover / Header Banner
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(22);
+  doc.setTextColor(47, 64, 48); // Sage/Dark-Green accent
+  doc.text("SHUCHI শুচি", 15, y);
+  
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text("Pure Korean skincare, honestly delivered.", 15, y + 6);
+  
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.setTextColor(60);
+  doc.text("FINANCIAL STATEMENT", 195, y, { align: "right" });
+  
+  const periodStr = (filterStartVal || filterEndVal) 
+    ? `Period: ${filterStartVal || 'Beginning'} to ${filterEndVal || 'Present'}`
+    : "Period: All-Time";
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(120);
+  doc.text(periodStr, 195, y + 6, { align: "right" });
+  
+  y += 15;
+  
+  doc.setDrawColor(184, 151, 90); // Gold divider
+  doc.setLineWidth(0.5);
+  doc.line(15, y, 195, y);
+  y += 8;
+
+  // Metadata Row
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(120);
+  doc.text(`Generated: ${new Date().toLocaleString('en-US')}`, 15, y);
+  doc.text(`Active Orders: ${activeOrders.length}`, 195, y, { align: "right" });
+  y += 10;
+
+  // Section 1: KPI Summary
+  checkPageSpace(60);
+  doc.setFillColor(247, 245, 240); // Soft sand background for KPI box
+  doc.rect(15, y, 180, 52, "F");
+  doc.setDrawColor(220, 215, 205);
+  doc.setLineWidth(0.2);
+  doc.rect(15, y, 180, 52, "S");
+
+  // KPI Content
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.setTextColor(60);
+  doc.text("EXECUTIVE FINANCIAL SUMMARY", 20, y + 6);
+  doc.line(20, y + 8, 190, y + 8);
+
+  const kpis = [
+    { label: "Gross Product Sales", value: `৳ ${actualGrossSales.toLocaleString()}` },
+    { label: "Cost of Goods Sold (COGS)", value: `৳ ${totalCOGS.toLocaleString()}` },
+    { label: "Gross Profit & Margin", value: `৳ ${grossProfit.toLocaleString()}  (${grossMarginPercent.toFixed(1)}%)` },
+    { label: "Operating Expenses", value: `৳ ${totalExpenses.toLocaleString()}` },
+    { label: "Net Operating Profit", value: `৳ ${netProfit.toLocaleString()}  (${netMarginPercent.toFixed(1)}%)`, bold: true, color: netProfit >= 0 ? [47, 64, 48] : [178, 34, 34] }
+  ];
+
+  let kpiY = y + 14;
+  kpis.forEach(kpi => {
+    doc.setFont("helvetica", kpi.bold ? "bold" : "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(kpi.color ? kpi.color[0] : 80, kpi.color ? kpi.color[1] : 80, kpi.color ? kpi.color[2] : 80);
+    doc.text(kpi.label, 22, kpiY);
+    doc.text(kpi.value, 188, kpiY, { align: "right" });
+    kpiY += 7;
+  });
+
+  y += 62;
+
+  // Section 2: Product Performance / Revenue Breakdown
+  checkPageSpace(35);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(47, 64, 48);
+  doc.text("PRODUCT SALES BREAKDOWN", 15, y);
+  y += 4;
+  doc.setDrawColor(200, 200, 200);
+  doc.line(15, y, 195, y);
+  y += 4;
+
+  const productRows = Object.values(salesAgg);
+  if (productRows.length === 0) {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    doc.setTextColor(140);
+    doc.text("No product sales recorded in this period.", 15, y);
+    y += 8;
+  } else {
+    // Sort products by qty sold descending
+    productRows.sort((a, b) => b.qty - a.qty);
+    
+    // Draw table header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(60);
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y, 180, 6, "F");
+    doc.text("Product Title", 18, y + 4.5);
+    doc.text("Qty Sold", 130, y + 4.5, { align: "right" });
+    doc.text("Wholesale Cost", 160, y + 4.5, { align: "right" });
+    doc.text("Gross Revenue", 192, y + 4.5, { align: "right" });
+    y += 6;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(80);
+    productRows.forEach(item => {
+      checkPageSpace(10);
+      const titleTrunc = item.title.length > 55 ? item.title.substring(0, 52) + "..." : item.title;
+      doc.text(titleTrunc, 18, y + 5);
+      doc.text(item.qty.toString(), 130, y + 5, { align: "right" });
+      doc.text(`৳ ${(item.qty * item.cost).toLocaleString()}`, 160, y + 5, { align: "right" });
+      doc.text(`৳ ${(item.qty * item.price).toLocaleString()}`, 192, y + 5, { align: "right" });
+      
+      doc.setDrawColor(240, 240, 240);
+      doc.line(15, y + 7.5, 195, y + 7.5);
+      y += 8;
+    });
+  }
+
+  y += 6;
+
+  // Section 3: Operating Expenses Ledger
+  checkPageSpace(35);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(47, 64, 48);
+  doc.text("OPERATING EXPENSES LEDGER", 15, y);
+  y += 4;
+  doc.setDrawColor(200, 200, 200);
+  doc.line(15, y, 195, y);
+  y += 4;
+
+  if (filteredExpenses.length === 0 && totalInfluencerCommissions === 0) {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    doc.setTextColor(140);
+    doc.text("No operating expenses recorded in this period.", 15, y);
+    y += 8;
+  } else {
+    // Draw table header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(60);
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y, 180, 6, "F");
+    doc.text("Date", 18, y + 4.5);
+    doc.text("Category", 50, y + 4.5);
+    doc.text("Details / Expense Title", 100, y + 4.5);
+    doc.text("Amount", 192, y + 4.5, { align: "right" });
+    y += 6;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(80);
+
+    filteredExpenses.forEach(exp => {
+      checkPageSpace(10);
+      const dateStr = new Date(exp.created_at).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric'
+      });
+      const titleTrunc = exp.title.length > 45 ? exp.title.substring(0, 42) + "..." : exp.title;
+      doc.text(dateStr, 18, y + 5);
+      doc.text(exp.category || "General", 50, y + 5);
+      doc.text(titleTrunc, 100, y + 5);
+      doc.text(`৳ ${parseInt(exp.amount || 0).toLocaleString()}`, 192, y + 5, { align: "right" });
+      
+      doc.setDrawColor(240, 240, 240);
+      doc.line(15, y + 7.5, 195, y + 7.5);
+      y += 8;
+    });
+
+    if (totalInfluencerCommissions > 0) {
+      checkPageSpace(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("Auto-calc", 18, y + 5);
+      doc.text("Commissions", 50, y + 5);
+      doc.text("Accrued Influencer Commissions (System Calculated)", 100, y + 5);
+      doc.text(`৳ ${totalInfluencerCommissions.toLocaleString()}`, 192, y + 5, { align: "right" });
+      doc.setFont("helvetica", "normal");
+      
+      doc.setDrawColor(240, 240, 240);
+      doc.line(15, y + 7.5, 195, y + 7.5);
+      y += 8;
+    }
+  }
+
+  y += 6;
+
+  // Section 4: Creator Payout Status
+  checkPageSpace(35);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(47, 64, 48);
+  doc.text("CREATOR PAYOUT SUMMARY", 15, y);
+  y += 4;
+  doc.setDrawColor(200, 200, 200);
+  doc.line(15, y, 195, y);
+  y += 4;
+
+  const referralDiscountsForPDF = discountsList.filter(d => d.scope === 'referral');
+  if (referralDiscountsForPDF.length === 0) {
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    doc.setTextColor(140);
+    doc.text("No registered influencers/creators found.", 15, y);
+    y += 8;
+  } else {
+    // Draw table header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(8.5);
+    doc.setTextColor(60);
+    doc.setFillColor(240, 240, 240);
+    doc.rect(15, y, 180, 6, "F");
+    doc.text("Creator", 18, y + 4.5);
+    doc.text("Promo Code", 65, y + 4.5);
+    doc.text("Accrued Comm.", 110, y + 4.5, { align: "right" });
+    doc.text("Paid Amount", 150, y + 4.5, { align: "right" });
+    doc.text("Owed Amount", 192, y + 4.5, { align: "right" });
+    y += 6;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(80);
+
+    referralDiscountsForPDF.forEach(disc => {
+      checkPageSpace(10);
+      const meta = parseCreatorMetadata(disc);
+      const validOrders = activeOrders.filter(o => (o.items || '').includes('[Referral: ' + disc.id + ']'));
+      const rev = validOrders.reduce((a, o) => a + (parseFloat(o.total_price || 0) - getDeliveryCharge(o)), 0);
+      const accrued = Math.round(rev * 0.05);
+
+      const filteredPayouts = meta.payouts.filter(p => {
+        const payoutDate = new Date(p.date);
+        if (filterStart && payoutDate < filterStart) return false;
+        if (filterEnd && payoutDate > filterEnd) return false;
+        return true;
+      });
+      const paid = filteredPayouts.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+      const owed = Math.max(0, accrued - paid);
+
+      doc.text(meta.name || "Unnamed", 18, y + 5);
+      doc.text(disc.id, 65, y + 5);
+      doc.text(`৳ ${accrued.toLocaleString()}`, 110, y + 5, { align: "right" });
+      doc.text(`৳ ${paid.toLocaleString()}`, 150, y + 5, { align: "right" });
+      doc.text(`৳ ${owed.toLocaleString()}`, 192, y + 5, { align: "right" });
+      
+      doc.setDrawColor(240, 240, 240);
+      doc.line(15, y + 7.5, 195, y + 7.5);
+      y += 8;
+    });
+  }
+
+  // Final Footer Note
+  checkPageSpace(20);
+  y += 10;
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(8);
+  doc.setTextColor(140);
+  doc.text("This is an automatically generated system statement. All transactions sync in real-time with Supabase.", 15, y);
+
+  const startName = filterStartVal ? filterStartVal : "Start";
+  const endName = filterEndVal ? filterEndVal : "End";
+  const fileName = `Shuchi_Financial_Statement_${startName}_to_${endName}.pdf`;
+  doc.save(fileName);
 }
 
 // Form Submission: Add Expense
