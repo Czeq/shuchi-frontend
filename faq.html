@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Data Handling & Cookies — SHUCHI শুচি</title>
-<meta name="description" content="Learn how SHUCHI handles customer names, phone numbers, and addresses securely to facilitate simple order management and checkouts.">
+<title>Frequently Asked Questions — SHUCHI শুচি</title>
+<meta name="description" content="Find answers to common questions about SHUCHI skincare products, authenticity, shipping, orders, returns, and refunds.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://shuchi-frontend.vercel.app/data-handling.html">
-<meta property="og:title" content="Data Handling & Cookies — SHUCHI শুচি">
-<meta property="og:description" content="Learn how SHUCHI handles customer names, phone numbers, and addresses securely.">
+<meta property="og:url" content="https://shuchi-frontend.vercel.app/faq.html">
+<meta property="og:title" content="Frequently Asked Questions — SHUCHI শুচি">
+<meta property="og:description" content="Find answers to common questions about SHUCHI skincare products, authenticity, shipping, orders, returns, and refunds.">
 <meta property="og:image" content="https://shuchi-frontend.vercel.app/shuchi_banner.png">
 <meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://shuchi-frontend.vercel.app/data-handling.html">
-<meta property="twitter:title" content="Data Handling & Cookies — SHUCHI শুচি">
-<meta property="twitter:description" content="Learn how SHUCHI handles customer names, phone numbers, and addresses securely.">
+<meta property="twitter:url" content="https://shuchi-frontend.vercel.app/faq.html">
+<meta property="twitter:title" content="Frequently Asked Questions — SHUCHI শুচি">
+<meta property="twitter:description" content="Find answers to common questions about SHUCHI skincare products, authenticity, shipping, orders, returns, and refunds.">
 <meta property="twitter:image" content="https://shuchi-frontend.vercel.app/shuchi_banner.png">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="cart.css">
@@ -92,19 +92,33 @@
   .section-title { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(2rem, 3.5vw, 3.2rem); font-weight: 300; line-height: 1.15; color: var(--dark); }
   .section-title em { font-style: italic; color: var(--sage); }
 
-  #policy-hero { padding-top: 150px; background: var(--white); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  #faq-hero { padding-top: 150px; background: var(--white); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   .chero-subtitle { font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--sage); margin-bottom: 1rem; }
   .chero-title { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(2.4rem, 5vw, 4.2rem); font-weight: 300; line-height: 1.1; color: var(--dark); max-width: 20ch; margin-bottom: 1.5rem; }
-  .chero-desc { font-size: 1.05rem; color: var(--text-soft); max-width: 55ch; line-height: 1.8; margin-bottom: 3rem; }
+  .chero-desc { font-size: 1.05rem; color: var(--text-soft); max-width: 55ch; line-height: 1.8; margin-bottom: 2rem; }
 
-  .policy-container { max-width: 800px; margin: 0 auto 4rem; background: var(--white); border: 1px solid rgba(107,143,107,0.15); padding: 4rem 3.5rem; border-radius: 4px; box-shadow: 0 15px 45px rgba(26,43,27,0.02); }
-  .policy-block { margin-bottom: 3rem; }
-  .policy-block:last-child { margin-bottom: 0; }
-  .policy-h3 { font-family: Georgia, serif; font-size: 1.5rem; font-weight: 500; color: var(--dark); margin-bottom: 1rem; }
-  .policy-p { font-size: 0.95rem; color: var(--text-soft); line-height: 1.8; margin-bottom: 1.2rem; }
-  .policy-list { list-style: none; margin-left: 1rem; margin-bottom: 1.5rem; }
-  .policy-list li { font-size: 0.92rem; color: var(--text); position: relative; padding-left: 1.5rem; margin-bottom: 0.8rem; line-height: 1.6; }
-  .policy-list li::before { content: '✓'; color: var(--sage); position: absolute; left: 0; font-weight: bold; }
+  /* TABS */
+  .faq-tabs { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; max-width: 900px; }
+  .faq-tab-btn { background: var(--white); border: 1px solid var(--cream-deep); color: var(--text); padding: 0.6rem 1.2rem; border-radius: 20px; font-size: 0.82rem; cursor: pointer; transition: all 0.25s ease; font-weight: 500; }
+  .faq-tab-btn:hover { border-color: var(--sage-light); color: var(--sage); }
+  .faq-tab-btn.active { background: var(--sage); border-color: var(--sage); color: var(--white); }
+
+  /* ACCORDION FAQ */
+  .faq-container { max-width: 800px; margin: 0 auto 5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+  .faq-card { background: var(--white); border: 1px solid rgba(107,143,107,0.12); border-radius: 6px; box-shadow: 0 4px 20px rgba(26,43,27,0.015); overflow: hidden; transition: border-color 0.3s; }
+  .faq-card:hover { border-color: rgba(107,143,107,0.3); }
+  .faq-header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; background: none; border: none; cursor: pointer; text-align: left; gap: 1rem; }
+  .faq-q-container { display: flex; flex-direction: column; align-items: start; gap: 0.4rem; }
+  .faq-cat-tag { font-size: 0.65rem; background: var(--cream); color: var(--text-soft); padding: 0.15rem 0.45rem; border-radius: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .faq-question { font-family: Georgia, serif; font-size: 1.15rem; font-weight: 500; color: var(--dark); line-height: 1.4; }
+  .faq-icon-arrow { width: 20px; height: 20px; color: var(--sage); transition: transform 0.35s ease; flex-shrink: 0; }
+  
+  .faq-body { max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1); }
+  .faq-content { padding: 0 2rem 1.5rem; font-size: 0.96rem; color: var(--text-soft); line-height: 1.8; white-space: pre-wrap; }
+
+  /* Active Accordion Card */
+  .faq-card.active { border-color: var(--sage-light); }
+  .faq-card.active .faq-icon-arrow { transform: rotate(180deg); }
 
   /* PAYMENT */
   .payment-strip {
@@ -148,43 +162,20 @@
   nav.mopen .nav-links a {
     display: block; padding: 0.9rem 0;
     font-size: 0.82rem; color: var(--cream);
+    text-align: center;
   }
-  nav.mopen .nav-links .nav-cta {
-    display: block; text-align: center;
-    margin-top: 0.8rem; padding: 0.9rem;
-    background: var(--cream); color: var(--dark) !important;
-  }
-
-  @media (max-width: 900px) {
-    nav { padding: 1rem 5vw; }
-    .nav-links { display: none; }
-    .hamburger { display: flex; }
-    section { padding: 4.5rem 6vw; }
-    .footer-top { grid-template-columns: 1fr 1fr; gap: 2rem; }
-  }
-
-  @media (max-width: 600px) {
-    .policy-container { padding: 2.2rem 1.8rem; }
-    .footer-top { grid-template-columns: 1fr; }
-    .footer-bottom { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
+  nav.mopen .nav-cta {
+    margin: 1rem auto 0;
+    display: block; width: fit-content;
   }
 </style>
 </head>
 <body>
 
-<!-- NAVIGATION -->
+<!-- NAVIGATION HEADER -->
 <nav id="mainNav">
-  <a href="index.html" class="nav-logo">
-    <svg class="logo-icon" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 1.4em; height: 1.4em; vertical-align: middle; margin-right: 0.4rem; flex-shrink: 0;">
-      <path d="M428.393 458.741C397.367 442.352 389.639 455.699 350.257 463.372C297.897 480.729 273.085 493.192 219.832 520.489L270.021 623.63C288.39 656.569 303.786 659.091 332.525 683.826C379.073 693.884 408.435 692.732 468.538 674.586L591.894 632.338L521.57 537.477L428.393 458.741Z" fill="currentColor"/>
-      <path d="M573.217 875.61C558.753 907.579 544.465 901.772 508.648 919.854C456.64 938.242 429.398 943.607 370.592 954.689L347.01 842.436C341.328 805.152 351.945 793.721 359.486 756.56C390.094 720.077 413.996 702.986 472.604 680.474L595.96 638.226L598.559 756.283L573.217 875.61Z" fill="currentColor"/>
-      <path d="M838.875 684.401C873.212 680.144 872.05 664.541 899.764 635.376C932.621 590.63 945.829 565.89 973.871 512.335L875.613 455.277C842.332 438.408 828.42 445.201 791.288 441.173C747.87 459.682 724.662 477.614 685.954 527.493L609.301 634.042L719.3 672.554L838.875 684.401Z" fill="currentColor"/>
-      <path d="M633.551 876.431C648.671 908.629 662.802 902.957 698.928 921.458C751.214 940.435 778.511 946.098 837.423 957.823L858.536 845.541C863.402 808.225 852.564 796.654 844.24 759.324C812.915 722.431 788.698 705.048 729.738 681.868L605.75 638.226L605.698 756.545L633.551 876.431Z" fill="currentColor"/>
-      <path d="M478.04 427.924C470.246 393.217 484.887 389.034 502.085 352.27C531.758 305.223 549.852 284.014 589.206 238.634L674.723 314.396C701.444 340.894 699.975 356.68 716.285 391.275C714.156 439.626 705.68 468.205 673.311 522.665L602.112 633.156L529.533 539.712L478.04 427.924Z" fill="currentColor"/>
-    </svg>SHUCHI <span>শুচি</span>
-  </a>
+  <a href="index.html" class="nav-logo">SHUCHI <span>শুচি</span></a>
   <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
     <li><a href="storefront.html">Shop</a></li>
     <li><a href="index.html#routine">Routine</a></li>
     <li><a href="index.html#watch">Learn</a></li>
@@ -192,73 +183,36 @@
     <li><a href="storefront.html" class="nav-cta">Shop Now</a></li>
   </ul>
   <div class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('mopen')">
-    <span></span><span></span><span></span>
+    <span></span>
+    <span></span>
+    <span></span>
   </div>
 </nav>
 
-<!-- POLICY HERO -->
-<section id="policy-hero">
-  <p class="chero-subtitle">Data & Transparency</p>
-  <h1 class="chero-title">How we use and <em>handle your data.</em></h1>
-  <p class="chero-desc">At SHUCHI, data handling is simple, secure, and fully transparent. Here is exactly what we store, why we store it, and how your privacy is protected.</p>
-</section>
-
-<!-- POLICY DETAILS -->
-<section style="background: var(--cream); padding: 2rem 8vw 5rem;">
-  <div class="policy-container">
-    
-    <div class="policy-block">
-      <h3 class="policy-h3">1. What Data We Store</h3>
-      <p class="policy-p">We collect and store only the minimal information required to complete your checkout and manage your customer account. This is strictly limited to:</p>
-      <ul class="policy-list">
-        <li><strong>Full Name:</strong> To address your delivery packages.</li>
-        <li><strong>Phone Number:</strong> To contact you for order verification and login authentication (no passwords required).</li>
-        <li><strong>Delivery Address:</strong> To deliver your skincare products to your home or office.</li>
-      </ul>
-      <p class="policy-p">We do <strong>not</strong> request, store, or process any payment credentials, passwords, or secondary personal identifiers.</p>
-    </div>
-
-    <div class="policy-block">
-      <h3 class="policy-h3">2. Why We Store It</h3>
-      <p class="policy-p">Your data is stored solely to improve your shopping experience and manage logistics:</p>
-      <ul class="policy-list">
-        <li><strong>Ease of Checkout:</strong> When you sign in with your phone number, your default name and address automatically pre-fill on the delivery details form so you don't have to type them every time.</li>
-        <li><strong>Purchase History:</strong> Logging in allows you to securely view your past order records, delivery status, and order IDs.</li>
-        <li><strong>Logistics:</strong> To coordinate physical shipping within Dhaka and outer districts in Bangladesh.</li>
-      </ul>
-    </div>
-
-    <div class="policy-block">
-      <h3 class="policy-h3">3. How Cookies Are Used</h3>
-      <p class="policy-p">Cookies are tiny text files stored in your web browser. SHUCHI uses cookies for structural functionality only:</p>
-      <ul class="policy-list">
-        <li><strong>Session Persistence (`shuchi_user`):</strong> We set a secure cookie containing your name, phone, and address once you authenticate. This tells our website that you are logged in and keeps you signed in across pages.</li>
-        <li><strong>Bag State Storage (`shuchi_cart`):</strong> We utilize standard browser local storage to remember what skincare products are currently inside your shopping bag, even if you close the tab.</li>
-      </ul>
-      <p class="policy-p">We do <strong>not</strong> use third-party marketing, analytics, profiling, or tracking cookies of any kind.</p>
-    </div>
-
-    <div class="policy-block">
-      <h3 class="policy-h3">4. Development & Platform Architecture</h3>
-      <p class="policy-p">SHUCHI is developed as an ultra-fast Jamstack static web application built to run efficiently with maximum privacy:</p>
-      <ul class="policy-list">
-        <li><strong>Development Framework:</strong> Built using pure, semantic HTML5, modern vanilla CSS3, and standard vanilla ES6 Javascript. This structure allows the site to run natively in your browser with 0ms loading pre-hydration and no heavy client-side frameworks.</li>
-        <li><strong>Database Registry:</strong> The customer login state and order checkout entries are routed securely to the Shuchi User database registry built on Supabase, an enterprise-grade SQL backend system.</li>
-        <li><strong>Hosting Platform:</strong> Deployed and serving globally from Vercel's Edge Serverless Network, securing the client experience with automated SSL certificates and lightning-fast low-latency delivery.</li>
-      </ul>
-    </div>
-
-    <div class="policy-block" style="border-top: 1px dashed rgba(107, 143, 107, 0.25); padding-top: 2rem;">
-      <h3 class="policy-h3">Our Privacy Promise</h3>
-      <p class="policy-p" style="font-style: italic;">
-        "We treat your information with the same honesty we apply to our skincare curation. We will never sell, lease, share, or monetize your phone number, address, or purchase history with third-party advertising companies. Your records are private and securely stored inside the Shuchi User database."
-      </p>
-    </div>
-
+<!-- FAQ HERO -->
+<section id="faq-hero">
+  <p class="chero-subtitle">Customer Care</p>
+  <h1 class="chero-title">Frequently Asked Questions</h1>
+  <p class="chero-desc">Find answers to commonly asked questions about orders, payments, shipping, returns, and product authenticity.</p>
+  
+  <!-- FAQ Categories -->
+  <div class="faq-tabs">
+    <button class="faq-tab-btn active" onclick="filterFaqs('All', this)">All Questions</button>
+    <button class="faq-tab-btn" onclick="filterFaqs('General', this)">General</button>
+    <button class="faq-tab-btn" onclick="filterFaqs('Shipping & Delivery', this)">Shipping &amp; Delivery</button>
+    <button class="faq-tab-btn" onclick="filterFaqs('Product Authenticity', this)">Product Authenticity</button>
+    <button class="faq-tab-btn" onclick="filterFaqs('Returns & Refunds', this)">Returns &amp; Refunds</button>
   </div>
 </section>
 
-<!-- PAYMENT STRIP -->
+<!-- FAQS CONTAINER -->
+<div class="faq-container" id="faqAccordionContainer">
+  <div class="text-soft text-center" style="padding: 3rem; font-size: 0.95rem; opacity: 0.65;">
+    Loading FAQs from database…
+  </div>
+</div>
+
+<!-- PAYMENT METHODS -->
 <div class="payment-strip">
   <p class="payment-label">Accepted Payment Methods</p>
   <div class="payment-methods">
@@ -312,9 +266,142 @@
 </footer>
 
 <script>
+  let localFaqsList = [];
+  let currentCategoryFilter = 'All';
+
+  // Wait for Supabase to be initialized globally via cart.js
+  function getSupabaseClient() {
+    return window.supabaseClient;
+  }
+
+  // Fetch FAQs from Supabase
+  async function fetchFaqs() {
+    const container = document.getElementById('faqAccordionContainer');
+    const client = getSupabaseClient();
+    if (!client) {
+      // Retry in 200ms if cart.js is still initializing
+      setTimeout(fetchFaqs, 200);
+      return;
+    }
+
+    try {
+      const { data, error } = await client
+        .from('faqs')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: true });
+        
+      if (error) throw error;
+      localFaqsList = data || [];
+      renderFaqs();
+    } catch (err) {
+      console.error("Error fetching FAQs:", err);
+      container.innerHTML = `
+        <div class="text-soft text-center" style="padding: 3rem; font-size: 0.95rem; opacity: 0.65;">
+          Could not load FAQs at the moment. Please check back later.
+        </div>
+      `;
+    }
+  }
+
+  // Render FAQ accordion items
+  function renderFaqs() {
+    const container = document.getElementById('faqAccordionContainer');
+    if (!container) return;
+
+    let filtered = localFaqsList;
+    if (currentCategoryFilter !== 'All') {
+      filtered = localFaqsList.filter(f => f.category === currentCategoryFilter);
+    }
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="text-soft text-center" style="padding: 3rem; font-size: 0.95rem; opacity: 0.65;">
+          No questions found under this category.
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = '';
+    filtered.forEach(faq => {
+      const card = document.createElement('div');
+      card.className = 'faq-card';
+      card.innerHTML = `
+        <button class="faq-header" onclick="toggleAccordion(this)">
+          <div class="faq-q-container">
+            <span class="faq-cat-tag">${escHTML(faq.category)}</span>
+            <span class="faq-question">${escHTML(faq.question)}</span>
+          </div>
+          <svg class="faq-icon-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div class="faq-body">
+          <div class="faq-content">${escHTML(faq.answer)}</div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  // Toggle Accordion Collapse/Expand
+  function toggleAccordion(button) {
+    const card = button.closest('.faq-card');
+    const body = card.querySelector('.faq-body');
+    const isActive = card.classList.contains('active');
+
+    // Close all other accordion cards
+    document.querySelectorAll('.faq-card').forEach(otherCard => {
+      if (otherCard !== card) {
+        otherCard.classList.remove('active');
+        otherCard.querySelector('.faq-body').style.maxHeight = null;
+      }
+    });
+
+    if (isActive) {
+      card.classList.remove('active');
+      body.style.maxHeight = null;
+    } else {
+      card.classList.add('active');
+      body.style.maxHeight = body.scrollHeight + 'px';
+    }
+  }
+
+  // Filter FAQs by category
+  function filterFaqs(category, btn) {
+    currentCategoryFilter = category;
+    
+    // Toggle active class on tab buttons
+    document.querySelectorAll('.faq-tab-btn').forEach(el => el.classList.remove('active'));
+    btn.classList.add('active');
+    
+    renderFaqs();
+  }
+
+  // Helper function to escape HTML to prevent XSS
+  function escHTML(str) {
+    if (str === null || str === undefined) return '';
+    const s = String(str);
+    return s.replace(/[&<>"']/g, function(m) {
+      switch (m) {
+        case '&': return '&amp;';
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '"': return '&quot;';
+        case "'": return '&#039;';
+        default: return m;
+      }
+    });
+  }
+
+  // Nav Padding on Scroll
   window.addEventListener('scroll', () => {
     document.getElementById('mainNav').style.padding = scrollY > 60 ? '0.75rem 4vw' : '';
   });
+
+  // Start initialization
+  fetchFaqs();
 </script>
 </body>
 </html>

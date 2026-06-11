@@ -231,6 +231,18 @@ async function initCartSystem() {
   
   // Initialize dynamic discount DOM observer
   initDiscountObserver();
+
+  // Check if we need to auto-open the order tracking history dashboard
+  try {
+    if (sessionStorage.getItem('open_order_tracking') === 'true') {
+      sessionStorage.removeItem('open_order_tracking');
+      setTimeout(() => {
+        triggerOrderTracking();
+      }, 300);
+    }
+  } catch (e) {
+    console.warn("Failed to check open_order_tracking flag:", e);
+  }
 }
 
 // ── DISCOUNT SYSTEM HELPERS & DYNAMIC DOM RENDERER ──
@@ -942,6 +954,7 @@ function injectCartUI() {
 
           <p class="status-desc" id="statusDesc">Writing order records securely to the Shuchi User database.</p>
           <button class="cart-checkout-btn" id="statusActionBtn" style="display:none; margin-top:1.5rem;" onclick="closeCheckoutAfterSuccess()">Continue Shopping</button>
+          <button class="cart-checkout-btn" id="statusTrackBtn" style="display:none; margin-top:0.75rem; background:var(--gold) !important; border-color:var(--gold) !important; color:var(--white) !important;" onclick="closeCheckoutAndTrack()">Track Order</button>
         </div>
 
       </div>
@@ -2038,6 +2051,11 @@ async function submitCheckout(e) {
     statusBtn.textContent = "Continue Shopping";
     statusBtn.onclick = closeCheckoutAfterSuccess;
     statusBtn.style.display = 'block';
+
+    const statusTrackBtn = document.getElementById('statusTrackBtn');
+    if (statusTrackBtn) {
+      statusTrackBtn.style.display = 'block';
+    }
   } catch (err) {
     console.error("Order submit failed:", err);
     
@@ -2067,6 +2085,11 @@ async function submitCheckout(e) {
       statusScreen.classList.remove('active');
     };
     statusBtn.style.display = 'block';
+
+    const statusTrackBtn = document.getElementById('statusTrackBtn');
+    if (statusTrackBtn) {
+      statusTrackBtn.style.display = 'none';
+    }
   }
 }
 
@@ -2077,6 +2100,12 @@ function closeCheckoutAfterSuccess() {
   closeCheckout();
   window.location.href = "storefront.html";
 }
+
+function closeCheckoutAndTrack() {
+  sessionStorage.setItem('open_order_tracking', 'true');
+  closeCheckoutAfterSuccess();
+}
+window.closeCheckoutAndTrack = closeCheckoutAndTrack;
 
 // ── PRODUCT DETAILS CONTINUOUS STOREFRONT BROWSING ──
 async function injectStorefrontCatalogOnDetails() {

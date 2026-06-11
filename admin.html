@@ -654,10 +654,10 @@
         Financials
       </a>
     </li>
-    <li class="nav-item" id="navVideos" onclick="switchTab('videos')">
+    <li class="nav-item" id="navWebsiteFunctions" onclick="switchTab('websiteFunctions')">
       <a>
-        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        Videos
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        Website Functions
       </a>
     </li>
   </ul>
@@ -1283,10 +1283,15 @@
     </div>
   </div>
 
-  <!-- TAB: VIDEOS -->
-  <div id="tabVideos" class="tab-content">
-    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; align-items: start;">
+  <!-- TAB: WEBSITE FUNCTIONS -->
+  <div id="tabWebsiteFunctions" class="tab-content">
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--sage-pale); padding-bottom: 0.75rem;">
+      <button class="filter-tab active" id="subTabVideosBtn" onclick="switchWebsiteSubTab('videos')">Watch &amp; Learn Videos</button>
+      <button class="filter-tab" id="subTabFaqsBtn" onclick="switchWebsiteSubTab('faqs')">Frequently Asked Questions (FAQs)</button>
+    </div>
 
+    <!-- Sub-Tab: Videos Content -->
+    <div id="subTabVideosContent" style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem; align-items: start;">
       <!-- Add Video Form -->
       <div style="background: var(--white); border: 1px solid var(--sage-pale); padding: 1.5rem; border-radius: 4px; position: sticky; top: 2rem;">
         <h3 class="checkout-title" style="margin-top: 0; margin-bottom: 1.2rem; font-size: 1.15rem; font-weight: 500;">Add Video</h3>
@@ -1331,7 +1336,53 @@
           <div class="text-soft text-center" style="padding: 2rem; font-size: 0.85rem;">Loading videos…</div>
         </div>
       </div>
+    </div>
 
+    <!-- Sub-Tab: FAQs Content -->
+    <div id="subTabFaqsContent" style="display: none; grid-template-columns: 1fr 2fr; gap: 2rem; align-items: start;">
+      <!-- Add/Edit FAQ Form -->
+      <div style="background: var(--white); border: 1px solid var(--sage-pale); padding: 1.5rem; border-radius: 4px; position: sticky; top: 2rem;">
+        <h3 class="checkout-title" style="margin-top: 0; margin-bottom: 1.2rem; font-size: 1.15rem; font-weight: 500;" id="faqFormTitle">Add FAQ</h3>
+        <form id="addFaqForm" onsubmit="submitFaq(event)">
+          <input type="hidden" id="faqId">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" style="font-size: 0.74rem;">Question</label>
+            <input type="text" id="faqQuestion" class="form-input" style="padding: 0.5rem;" required placeholder="e.g. Do you sell original products?">
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" style="font-size: 0.74rem;">Answer</label>
+            <textarea id="faqAnswer" class="form-input" style="padding: 0.5rem; height: 120px; font-family: inherit;" required placeholder="e.g. Yes, we source everything directly from authorized Korean brands..."></textarea>
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" style="font-size: 0.74rem;">Category</label>
+            <select id="faqCategory" class="form-input" style="padding: 0.5rem;" required>
+              <option value="General">General</option>
+              <option value="Shipping &amp; Delivery">Shipping &amp; Delivery</option>
+              <option value="Product Authenticity">Product Authenticity</option>
+              <option value="Returns &amp; Refunds">Returns &amp; Refunds</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 1.2rem;">
+            <label class="form-label" style="font-size: 0.74rem;">Sort Order (lower = first)</label>
+            <input type="number" id="faqSortOrder" class="form-input" style="padding: 0.5rem;" min="0" value="0">
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn-action" style="flex: 1; justify-content: center; padding: 0.65rem;" id="faqSubmitBtn">Add FAQ</button>
+            <button type="button" class="btn-action" style="background: var(--cream); border: 1px solid var(--sage-pale); display: none; padding: 0.65rem;" id="faqCancelEditBtn" onclick="cancelFaqEdit()">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- FAQs List -->
+      <div style="background: var(--white); border: 1px solid var(--sage-pale); border-radius: 4px; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem;">
+          <h3 class="checkout-title" style="margin: 0; font-size: 1.15rem; font-weight: 500;">Frequently Asked Questions</h3>
+          <span style="font-size: 0.74rem; color: var(--text-soft);">Changes appear live on the website</span>
+        </div>
+        <div id="faqListBody" style="display: grid; gap: 1rem;">
+          <div class="text-soft text-center" style="padding: 2rem; font-size: 0.85rem;">Loading FAQs…</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1498,6 +1549,7 @@ let ordersList = [];
 let productsList = [];
 let customersList = [];
 let expensesList = [];
+let faqsList = [];
 let activeTab = 'dashboard';
 let orderStatusFilter = 'all';
 let currentFulfillmentOrder = null;
@@ -2588,9 +2640,9 @@ function switchTab(tabName) {
   } else if (tabName === 'financials') {
     document.getElementById('navFinancials').classList.add('active');
     document.getElementById('tabFinancials').classList.add('active');
-  } else if (tabName === 'videos') {
-    document.getElementById('navVideos').classList.add('active');
-    document.getElementById('tabVideos').classList.add('active');
+  } else if (tabName === 'websiteFunctions') {
+    document.getElementById('navWebsiteFunctions').classList.add('active');
+    document.getElementById('tabWebsiteFunctions').classList.add('active');
   }
 
   renderDashboard();
@@ -2613,8 +2665,9 @@ function renderDashboard() {
     renderCustomersTable();
   } else if (activeTab === 'financials') {
     renderFinancials();
-  } else if (activeTab === 'videos') {
+  } else if (activeTab === 'websiteFunctions') {
     loadVideos();
+    loadFaqs();
   }
 }
 
@@ -4211,6 +4264,165 @@ async function deleteVideo(id) {
     loadVideos();
   } catch (err) {
     showAdminToast('Failed to delete: ' + (err.message || err), 'error');
+  }
+}
+
+// Navigation Tab Switcher for consolidated Website Functions
+function switchWebsiteSubTab(subTab) {
+  const btnVideos = document.getElementById('subTabVideosBtn');
+  const btnFaqs = document.getElementById('subTabFaqsBtn');
+  const contentVideos = document.getElementById('subTabVideosContent');
+  const contentFaqs = document.getElementById('subTabFaqsContent');
+  
+  if (subTab === 'videos') {
+    btnVideos.classList.add('active');
+    btnFaqs.classList.remove('active');
+    contentVideos.style.display = 'grid';
+    contentFaqs.style.display = 'none';
+  } else {
+    btnVideos.classList.remove('active');
+    btnFaqs.classList.add('active');
+    contentVideos.style.display = 'none';
+    contentFaqs.style.display = 'grid';
+    loadFaqs();
+  }
+}
+
+// Load FAQs from Supabase faqs table
+async function loadFaqs() {
+  const container = document.getElementById('faqListBody');
+  if (!container) return;
+  container.innerHTML = '<div class="text-soft text-center" style="padding:2rem;font-size:0.85rem;">Loading FAQs…</div>';
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/faqs?order=sort_order.asc,created_at.asc&select=*', {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    if (!res.ok) {
+      container.innerHTML = '<div class="text-soft text-center" style="padding:2rem;font-size:0.85rem;">No FAQs table found. Please run the SQL query from the create_faqs_table.sql file in Supabase.</div>';
+      return;
+    }
+    const faqs = await res.json();
+    faqsList = faqs || [];
+    if (faqsList.length === 0) {
+      container.innerHTML = '<div class="text-soft text-center" style="padding:2rem;font-size:0.85rem;">No FAQs added yet. Use the form to add your first FAQ.</div>';
+      return;
+    }
+    container.innerHTML = '';
+    faqsList.forEach(faq => {
+      const card = document.createElement('div');
+      card.style.cssText = 'display:flex;gap:1rem;align-items:start;padding:1rem;border:1px solid var(--cream-deep);border-radius:4px;background:var(--white);';
+      card.innerHTML = `
+        <div style="flex:1;min-width:0;">
+          <span style="font-size:0.68rem;background:var(--cream);color:var(--text-soft);padding:0.15rem 0.4rem;border-radius:3px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">${escapeHTML(faq.category)}</span>
+          <h4 style="margin:0.5rem 0 0.25rem;font-size:0.9rem;font-weight:600;color:var(--dark);">${escapeHTML(faq.question)}</h4>
+          <p style="margin:0;font-size:0.82rem;color:var(--text-soft);line-height:1.6;white-space:pre-wrap;">${escapeHTML(faq.answer)}</p>
+          <div style="margin-top:0.4rem;font-size:0.7rem;color:var(--text-soft);opacity:0.6;">Sort Order: ${faq.sort_order}</div>
+        </div>
+        <div style="display:flex;gap:0.4rem;flex-shrink:0;">
+          <button class="btn-action" style="background:#f7fafc;color:#4a5568;border:1px solid #e2e8f0;padding:0.2rem 0.5rem;font-size:0.72rem;" onclick="editFaq('${escapeHTML(faq.id)}')">Edit</button>
+          <button class="btn-action" style="background:#fff5f5;color:#c53030;border:1px solid #fed7d7;padding:0.2rem 0.5rem;font-size:0.72rem;" onclick="deleteFaq('${escapeHTML(faq.id)}')">Delete</button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  } catch (err) {
+    container.innerHTML = '<div class="text-soft text-center" style="padding:2rem;font-size:0.85rem;">Error loading FAQs.</div>';
+    console.error('loadFaqs error:', err);
+  }
+}
+
+// Add or Edit FAQ submit handler
+async function submitFaq(event) {
+  event.preventDefault();
+  const id = document.getElementById('faqId').value;
+  const question = document.getElementById('faqQuestion').value.trim();
+  const answer = document.getElementById('faqAnswer').value.trim();
+  const category = document.getElementById('faqCategory').value;
+  const sortOrder = parseInt(document.getElementById('faqSortOrder').value) || 0;
+
+  const btn = document.getElementById('faqSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = id ? 'Saving Changes…' : 'Adding FAQ…';
+
+  const payload = { question, answer, category, sort_order: sortOrder };
+
+  try {
+    let url = SUPABASE_URL + '/rest/v1/faqs';
+    let method = 'POST';
+    let headers = {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    };
+
+    if (id) {
+      method = 'PATCH';
+      url += '?id=eq.' + encodeURIComponent(id);
+    }
+
+    const res = await fetch(url, {
+      method,
+      headers,
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) { const t = await res.text(); throw new Error(t); }
+
+    showAdminToast(id ? 'FAQ updated successfully!' : 'FAQ added successfully!');
+    cancelFaqEdit();
+    loadFaqs();
+  } catch (err) {
+    showAdminToast('Failed to save FAQ: ' + (err.message || err), 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = id ? 'Save Changes' : 'Add FAQ';
+  }
+}
+
+// Edit Mode Prefill
+function editFaq(id) {
+  const faq = faqsList.find(f => f.id === id);
+  if (!faq) return;
+
+  document.getElementById('faqId').value = faq.id;
+  document.getElementById('faqQuestion').value = faq.question;
+  document.getElementById('faqAnswer').value = faq.answer;
+  document.getElementById('faqCategory').value = faq.category;
+  document.getElementById('faqSortOrder').value = faq.sort_order;
+
+  document.getElementById('faqFormTitle').textContent = 'Edit FAQ';
+  document.getElementById('faqSubmitBtn').textContent = 'Save Changes';
+  document.getElementById('faqCancelEditBtn').style.display = 'block';
+  
+  document.getElementById('addFaqForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Cancel Edit Mode
+function cancelFaqEdit() {
+  document.getElementById('addFaqForm').reset();
+  document.getElementById('faqId').value = '';
+  document.getElementById('faqFormTitle').textContent = 'Add FAQ';
+  document.getElementById('faqSubmitBtn').textContent = 'Add FAQ';
+  document.getElementById('faqCancelEditBtn').style.display = 'none';
+}
+
+// Delete FAQ Entry
+async function deleteFaq(id) {
+  if (!confirm('Remove this FAQ from the website?')) return;
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/faqs?id=eq.' + encodeURIComponent(id), {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    if (!res.ok) { const t = await res.text(); throw new Error(t); }
+    showAdminToast('FAQ removed.');
+    if (document.getElementById('faqId').value === id) {
+      cancelFaqEdit();
+    }
+    loadFaqs();
+  } catch (err) {
+    showAdminToast('Failed to delete FAQ: ' + (err.message || err), 'error');
   }
 }
 
