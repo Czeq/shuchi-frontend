@@ -3770,7 +3770,7 @@ function generateFinancialPDF() {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(8);
       doc.setTextColor(120);
-      doc.text("SHUCHI শুচি — Financial Statement (Continued)", 15, 12);
+      doc.text("SHUCHI — Financial Statement (Continued)", 15, 12);
       doc.setDrawColor(220, 220, 220);
       doc.line(15, 14, 195, 14);
       y = 22;
@@ -3781,7 +3781,7 @@ function generateFinancialPDF() {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
   doc.setTextColor(47, 64, 48); // Sage/Dark-Green accent
-  doc.text("SHUCHI শুচি", 15, y);
+  doc.text("SHUCHI", 15, y);
   
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
@@ -3832,11 +3832,11 @@ function generateFinancialPDF() {
   doc.line(20, y + 8, 190, y + 8);
 
   const kpis = [
-    { label: "Gross Product Sales", value: `৳ ${actualGrossSales.toLocaleString()}` },
-    { label: "Cost of Goods Sold (COGS)", value: `৳ ${totalCOGS.toLocaleString()}` },
-    { label: "Gross Profit & Margin", value: `৳ ${grossProfit.toLocaleString()}  (${grossMarginPercent.toFixed(1)}%)` },
-    { label: "Operating Expenses", value: `৳ ${totalExpenses.toLocaleString()}` },
-    { label: "Net Operating Profit", value: `৳ ${netProfit.toLocaleString()}  (${netMarginPercent.toFixed(1)}%)`, bold: true, color: netProfit >= 0 ? [47, 64, 48] : [178, 34, 34] }
+    { label: "Gross Product Sales", value: `Tk. ${actualGrossSales.toLocaleString()}` },
+    { label: "Cost of Goods Sold (COGS)", value: `Tk. ${totalCOGS.toLocaleString()}` },
+    { label: "Gross Profit & Margin", value: `Tk. ${grossProfit.toLocaleString()}  (${grossMarginPercent.toFixed(1)}%)` },
+    { label: "Operating Expenses", value: `Tk. ${totalExpenses.toLocaleString()}` },
+    { label: "Net Operating Profit", value: `Tk. ${netProfit.toLocaleString()}  (${netMarginPercent.toFixed(1)}%)`, bold: true, color: netProfit >= 0 ? [47, 64, 48] : [178, 34, 34] }
   ];
 
   let kpiY = y + 14;
@@ -3893,8 +3893,8 @@ function generateFinancialPDF() {
       const titleTrunc = item.title.length > 55 ? item.title.substring(0, 52) + "..." : item.title;
       doc.text(titleTrunc, 18, y + 5);
       doc.text(item.qty.toString(), 130, y + 5, { align: "right" });
-      doc.text(`৳ ${(item.qty * item.cost).toLocaleString()}`, 160, y + 5, { align: "right" });
-      doc.text(`৳ ${(item.qty * item.price).toLocaleString()}`, 192, y + 5, { align: "right" });
+      doc.text(`Tk. ${(item.qty * item.cost).toLocaleString()}`, 160, y + 5, { align: "right" });
+      doc.text(`Tk. ${(item.qty * item.price).toLocaleString()}`, 192, y + 5, { align: "right" });
       
       doc.setDrawColor(240, 240, 240);
       doc.line(15, y + 7.5, 195, y + 7.5);
@@ -3947,7 +3947,7 @@ function generateFinancialPDF() {
       doc.text(dateStr, 18, y + 5);
       doc.text(exp.category || "General", 50, y + 5);
       doc.text(titleTrunc, 100, y + 5);
-      doc.text(`৳ ${parseInt(exp.amount || 0).toLocaleString()}`, 192, y + 5, { align: "right" });
+      doc.text(`Tk. ${parseInt(exp.amount || 0).toLocaleString()}`, 192, y + 5, { align: "right" });
       
       doc.setDrawColor(240, 240, 240);
       doc.line(15, y + 7.5, 195, y + 7.5);
@@ -3960,7 +3960,7 @@ function generateFinancialPDF() {
       doc.text("Auto-calc", 18, y + 5);
       doc.text("Commissions", 50, y + 5);
       doc.text("Accrued Influencer Commissions (System Calculated)", 100, y + 5);
-      doc.text(`৳ ${totalInfluencerCommissions.toLocaleString()}`, 192, y + 5, { align: "right" });
+      doc.text(`Tk. ${totalInfluencerCommissions.toLocaleString()}`, 192, y + 5, { align: "right" });
       doc.setFont("helvetica", "normal");
       
       doc.setDrawColor(240, 240, 240);
@@ -4025,9 +4025,9 @@ function generateFinancialPDF() {
 
       doc.text(meta.name || "Unnamed", 18, y + 5);
       doc.text(disc.id, 65, y + 5);
-      doc.text(`৳ ${accrued.toLocaleString()}`, 110, y + 5, { align: "right" });
-      doc.text(`৳ ${paid.toLocaleString()}`, 150, y + 5, { align: "right" });
-      doc.text(`৳ ${owed.toLocaleString()}`, 192, y + 5, { align: "right" });
+      doc.text(`Tk. ${accrued.toLocaleString()}`, 110, y + 5, { align: "right" });
+      doc.text(`Tk. ${paid.toLocaleString()}`, 150, y + 5, { align: "right" });
+      doc.text(`Tk. ${owed.toLocaleString()}`, 192, y + 5, { align: "right" });
       
       doc.setDrawColor(240, 240, 240);
       doc.line(15, y + 7.5, 195, y + 7.5);
