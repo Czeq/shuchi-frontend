@@ -1051,9 +1051,15 @@
         <input type="text" class="search-input" id="productSearch" placeholder="Search products by title, brand, category..." oninput="filterProductsTable()">
         <svg class="search-icon" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
       </div>
-      <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.8rem; color:var(--text-soft);">
-        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        Click any price to edit inline
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.8rem; color:var(--text-soft);">
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Click any price to edit inline
+        </div>
+        <button class="btn-action" style="font-size:0.75rem; padding:0.4rem 0.8rem;" onclick="exportProductsCSV()">
+          <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" style="margin-right:0.3rem; vertical-align:middle;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Export CSV
+        </button>
       </div>
     </div>
 
@@ -1088,6 +1094,17 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- PAGINATION CONTROLS -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem; padding:1rem; background:var(--white); border:1px solid var(--border); border-radius:8px; box-shadow:0 4px 12px rgba(107,143,107,0.03);">
+      <div id="adminPaginationStatus" style="font-size:0.8rem; color:var(--text-soft); font-weight:500;">
+        Loading products...
+      </div>
+      <div style="display:flex; gap:0.5rem;">
+        <button class="btn-action" id="btnAdminPrevPage" onclick="adminPrevPage()" style="padding:0.4rem 0.8rem; font-size:0.75rem;">&lt; Previous</button>
+        <button class="btn-action" id="btnAdminNextPage" onclick="adminNextPage()" style="padding:0.4rem 0.8rem; font-size:0.75rem;">Next &gt;</button>
+      </div>
     </div>
 
     <!-- DELIVERY SETTINGS PANEL -->
@@ -3333,6 +3350,9 @@ function setOrderStatusFilter(status, btn) {
 }
 
 // 4. Products Tab Renderer
+let currentProductsPage = 1;
+const productsPerPage = 18;
+
 function renderProductsTable() {
   const tbody = document.getElementById('productsBody');
   tbody.innerHTML = '';
@@ -3341,10 +3361,17 @@ function renderProductsTable() {
 
   if (filtered.length === 0) {
     tbody.innerHTML = `<tr><td colspan="8" class="text-soft text-center">No products found in this search query.</td></tr>`;
+    updateAdminPaginationControls(0, 0, 0);
     return;
   }
 
-  // Sync header checkbox state
+  // Pagination logic
+  const totalItems = filtered.length;
+  const startIndex = (currentProductsPage - 1) * productsPerPage;
+  const endIndex = Math.min(startIndex + productsPerPage, totalItems);
+  const pageItems = filtered.slice(startIndex, endIndex);
+
+  // Sync header checkbox state based on *current page* or *all filtered*? Let's check all filtered
   const allCheckbox = document.getElementById('selectAllCheckbox');
   if (allCheckbox) {
     const allSelected = filtered.length > 0 && filtered.every(p => selectedProductIds.has(p.id));
@@ -3353,7 +3380,7 @@ function renderProductsTable() {
     allCheckbox.indeterminate = someSelected && !allSelected;
   }
 
-  filtered.forEach(prod => {
+  pageItems.forEach(prod => {
     const volumeStr = prod.volume ? `${prod.volume} ${prod.volume_unit || ''}`.trim() : 'N/A';
     const inStock = prod.stock !== false && prod.stock !== 'false';
     const isChecked = selectedProductIds.has(prod.id);
@@ -3409,10 +3436,94 @@ function renderProductsTable() {
     `;
     tbody.appendChild(tr);
   });
+
+  updateAdminPaginationControls(startIndex + 1, endIndex, totalItems);
+}
+
+function updateAdminPaginationControls(start, end, totalItems) {
+  const totalPages = Math.ceil(totalItems / productsPerPage);
+  const statusEl = document.getElementById('adminPaginationStatus');
+  const btnPrev = document.getElementById('btnAdminPrevPage');
+  const btnNext = document.getElementById('btnAdminNextPage');
+
+  if (totalItems === 0) {
+    if (statusEl) statusEl.textContent = 'No products available.';
+    if (btnPrev) { btnPrev.disabled = true; btnPrev.style.opacity = '0.4'; btnPrev.style.pointerEvents = 'none'; }
+    if (btnNext) { btnNext.disabled = true; btnNext.style.opacity = '0.4'; btnNext.style.pointerEvents = 'none'; }
+    return;
+  }
+
+  if (statusEl) statusEl.textContent = `Showing ${start}–${end} of ${totalItems} products (Page ${currentProductsPage} of ${totalPages})`;
+
+  if (btnPrev) {
+    btnPrev.disabled = currentProductsPage === 1;
+    btnPrev.style.opacity = btnPrev.disabled ? '0.4' : '1';
+    btnPrev.style.pointerEvents = btnPrev.disabled ? 'none' : 'auto';
+  }
+  if (btnNext) {
+    btnNext.disabled = currentProductsPage === totalPages || totalPages === 0;
+    btnNext.style.opacity = btnNext.disabled ? '0.4' : '1';
+    btnNext.style.pointerEvents = btnNext.disabled ? 'none' : 'auto';
+  }
+}
+
+function adminPrevPage() {
+  if (currentProductsPage > 1) {
+    currentProductsPage--;
+    renderProductsTable();
+  }
+}
+
+function adminNextPage() {
+  const filtered = getFilteredProducts();
+  const totalPages = Math.ceil(filtered.length / productsPerPage);
+  if (currentProductsPage < totalPages) {
+    currentProductsPage++;
+    renderProductsTable();
+  }
 }
 
 function filterProductsTable() {
+  currentProductsPage = 1; // Reset to page 1 on new search
   renderProductsTable();
+}
+
+function exportProductsCSV() {
+  const filtered = getFilteredProducts();
+  if (filtered.length === 0) {
+    showAdminToast("No products to export based on current search.", "error");
+    return;
+  }
+
+  // Define headers
+  const headers = ['ID', 'Title', 'Brand', 'Category', 'Volume', 'Price', 'Wholesale Cost', 'Stock Status'];
+  
+  // Format rows
+  const rows = filtered.map(p => {
+    const volumeStr = p.volume ? `${p.volume} ${p.volume_unit || ''}`.trim() : '';
+    const stockStatus = (p.stock !== false && p.stock !== 'false') ? 'In Stock' : 'Out of Stock';
+    return [
+      `"${(p.id || '').replace(/"/g, '""')}"`,
+      `"${(p.title || '').replace(/"/g, '""')}"`,
+      `"${(p.brand || '').replace(/"/g, '""')}"`,
+      `"${(p.category || '').replace(/"/g, '""')}"`,
+      `"${volumeStr.replace(/"/g, '""')}"`,
+      p.price || 0,
+      p.cost_price || 0,
+      `"${stockStatus}"`
+    ].join(',');
+  });
+
+  const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows].join('\n');
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `shuchi_products_export_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  showAdminToast("CSV export completed successfully.");
 }
 
 // 5. Customers Tab Renderer
