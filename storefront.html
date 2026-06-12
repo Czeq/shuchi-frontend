@@ -469,6 +469,64 @@
   .search-clear-btn.active {
     display: flex;
   }
+
+  /* Mobile filter toggle styles */
+  .mobile-filter-toggle-container {
+    display: none;
+  }
+  .storefront-filters-container {
+    display: block;
+  }
+
+  @media (max-width: 600px) {
+    .mobile-filter-toggle-container {
+      display: flex;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      width: 100%;
+      max-width: 480px;
+    }
+    .mobile-filter-toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      background: var(--dark-mid);
+      color: var(--cream);
+      border: 1px solid rgba(168, 196, 162, 0.25);
+      padding: 0.8rem 1.2rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+    .mobile-filter-toggle-btn:hover {
+      background: var(--dark);
+      border-color: var(--sage-light);
+    }
+    .mobile-filter-toggle-btn.active .toggle-arrow {
+      transform: rotate(180deg);
+    }
+    
+    .storefront-filters-container {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+      margin-bottom: 0;
+      width: 100%;
+      max-width: 480px;
+    }
+    .storefront-filters-container.active {
+      max-height: 300px;
+      opacity: 1;
+      margin-bottom: 1.5rem;
+    }
+  }
 </style>
 </head>
 <body>
@@ -518,12 +576,22 @@
     <button id="searchClearBtn" class="search-clear-btn" onclick="clearSearch()">×</button>
   </div>
 
-  <div class="filter-bar fi vis" id="brandFilterBar" style="margin-bottom: 0.5rem;">
-    <button class="filter-btn active">All Brands</button>
+  <div class="mobile-filter-toggle-container fi vis">
+    <button class="mobile-filter-toggle-btn" id="mobileFilterToggleBtn" onclick="toggleMobileFilters()">
+      <svg class="filter-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+      <span>Show Filters</span>
+      <svg class="toggle-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: auto; transition: transform 0.3s;"><path d="M1 1L5 5L9 1"/></svg>
+    </button>
   </div>
 
-  <div class="filter-bar fi vis" id="typeFilterBar" style="margin-top: 0.5rem; margin-bottom: 2rem;">
-    <button class="filter-btn active">All Types</button>
+  <div class="storefront-filters-container" id="storefrontFiltersContainer">
+    <div class="filter-bar fi vis" id="brandFilterBar" style="margin-bottom: 0.5rem;">
+      <button class="filter-btn active">All Brands</button>
+    </div>
+
+    <div class="filter-bar fi vis" id="typeFilterBar" style="margin-top: 0.5rem; margin-bottom: 2rem;">
+      <button class="filter-btn active">All Types</button>
+    </div>
   </div>
   
   <div class="products-grid" id="prodGrid">
@@ -1071,6 +1139,21 @@ document.querySelectorAll('.fi').forEach(el => obs.observe(el));
 window.addEventListener('scroll', () => {
   document.getElementById('mainNav').style.padding = scrollY > 60 ? '0.75rem 4vw' : '';
 });
+
+function toggleMobileFilters() {
+  const container = document.getElementById('storefrontFiltersContainer');
+  const btn = document.getElementById('mobileFilterToggleBtn');
+  
+  if (container && btn) {
+    const isActive = container.classList.toggle('active');
+    btn.classList.toggle('active', isActive);
+    
+    const label = btn.querySelector('span');
+    if (label) {
+      label.textContent = isActive ? 'Hide Filters' : 'Show Filters';
+    }
+  }
+}
 
 // Run
 if (document.readyState === 'loading') {

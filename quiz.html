@@ -330,103 +330,179 @@
   <div class="quiz-box">
     <div class="progress-bar" id="progressBar"></div>
 
-    <!-- STEP 1: Skin Type -->
+    <!-- STEP 1: Skin Concerns -->
     <div class="quiz-step active" id="step1">
-      <span class="q-label">Question 1 of 3</span>
-      <h2 class="q-title">How would you describe your skin type?</h2>
+      <span class="q-label">Question 1 of 5</span>
+      <h2 class="q-title">What are your primary skin concerns?</h2>
       <div class="options-grid" id="opts1">
-        <div class="quiz-opt" onclick="selectOption(1, 'oily', this)">
+        <div class="quiz-opt" onclick="selectOption(1, 'acne', this)">
           <div class="opt-icon">A</div>
           <div class="opt-text">
-            <div class="opt-title">Oily</div>
-            <div class="opt-desc">Shiny all over, prone to enlarged pores.</div>
+            <div class="opt-title">Acne & breakouts</div>
+            <div class="opt-desc">Target active pimples, excess sebum, and clogged pores.</div>
           </div>
         </div>
-        <div class="quiz-opt" onclick="selectOption(1, 'dry', this)">
+        <div class="quiz-opt" onclick="selectOption(1, 'dullness', this)">
           <div class="opt-icon">B</div>
           <div class="opt-text">
-            <div class="opt-title">Dry</div>
-            <div class="opt-desc">Often feels tight, flaky, or rough.</div>
+            <div class="opt-title">Dullness</div>
+            <div class="opt-desc">Brighten tired-looking skin and restore natural radiance.</div>
           </div>
         </div>
-        <div class="quiz-opt" onclick="selectOption(1, 'combo', this)">
+        <div class="quiz-opt" onclick="selectOption(1, 'pigmentation', this)">
           <div class="opt-icon">C</div>
           <div class="opt-text">
-            <div class="opt-title">Combination</div>
-            <div class="opt-desc">Oily T-zone, but dry or normal cheeks.</div>
+            <div class="opt-title">Hyperpigmentation & dark spots</div>
+            <div class="opt-desc">Fade post-acne scars, sun spots, and uneven skin tone.</div>
           </div>
         </div>
-        <div class="quiz-opt" onclick="selectOption(1, 'normal', this)">
+        <div class="quiz-opt" onclick="selectOption(1, 'sensitivity', this)">
           <div class="opt-icon">D</div>
           <div class="opt-text">
-            <div class="opt-title">Normal / Balanced</div>
-            <div class="opt-desc">Rarely breaks out, feels comfortable.</div>
+            <div class="opt-title">Sensitivity & redness</div>
+            <div class="opt-desc">Calm irritation, soothe redness, and repair skin barrier.</div>
           </div>
         </div>
       </div>
       <button class="btn-next" id="btnNext1" onclick="nextStep(2)">Continue</button>
     </div>
 
-    <!-- STEP 2: Main Concern -->
+    <!-- STEP 2: Environment & Sun Exposure -->
     <div class="quiz-step" id="step2">
       <button class="btn-back" onclick="prevStep(1)">← Back</button>
-      <span class="q-label">Question 2 of 3</span>
-      <h2 class="q-title">What is your primary skincare goal?</h2>
+      <span class="q-label">Question 2 of 5</span>
+      <h2 class="q-title">What is your daily environment and sun exposure level?</h2>
       <div class="options-grid" id="opts2">
-        <div class="quiz-opt" onclick="selectOption(2, 'acne', this)">
+        <div class="quiz-opt" onclick="selectOption(2, 'ac', this)">
           <div class="opt-icon">A</div>
           <div class="opt-text">
-            <div class="opt-title">Clear Acne & Breakouts</div>
-            <div class="opt-desc">Target active pimples and unclog pores.</div>
+            <div class="opt-title">Mostly indoors under AC</div>
+            <div class="opt-desc">Air conditioning drying out skin under artificial lights.</div>
           </div>
         </div>
-        <div class="quiz-opt" onclick="selectOption(2, 'pigmentation', this)">
+        <div class="quiz-opt" onclick="selectOption(2, 'outdoors', this)">
           <div class="opt-icon">B</div>
           <div class="opt-text">
-            <div class="opt-title">Fade Dark Spots</div>
-            <div class="opt-desc">Brighten hyperpigmentation and acne scars.</div>
+            <div class="opt-title">Outdoors with frequent direct sun</div>
+            <div class="opt-desc">Frequent sun exposure, needing high protection & recovery.</div>
           </div>
         </div>
-        <div class="quiz-opt" onclick="selectOption(2, 'sensitivity', this)">
+        <div class="quiz-opt" onclick="selectOption(2, 'humid', this)">
           <div class="opt-icon">C</div>
           <div class="opt-text">
-            <div class="opt-title">Soothe Redness</div>
-            <div class="opt-desc">Calm irritation and repair skin barrier.</div>
+            <div class="opt-title">Highly humid & constant sun</div>
+            <div class="opt-desc">Hot, humid climate causing excess sweat and oiliness.</div>
           </div>
         </div>
-        <div class="quiz-opt" onclick="selectOption(2, 'aging', this)">
+        <div class="quiz-opt" onclick="selectOption(2, 'travel', this)">
           <div class="opt-icon">D</div>
           <div class="opt-text">
-            <div class="opt-title">Anti-Aging & Texture</div>
-            <div class="opt-desc">Smooth fine lines and firm up skin.</div>
+            <div class="opt-title">Constantly changing / Frequent travel</div>
+            <div class="opt-desc">Frequent environment shifts needing skin barrier stability.</div>
           </div>
         </div>
       </div>
       <button class="btn-next" id="btnNext2" onclick="nextStep(3)">Continue</button>
     </div>
 
-    <!-- STEP 3: Routine Length -->
+    <!-- STEP 3: Texture Preference -->
     <div class="quiz-step" id="step3">
       <button class="btn-back" onclick="prevStep(2)">← Back</button>
-      <span class="q-label">Question 3 of 3</span>
-      <h2 class="q-title">How many steps do you want in your routine?</h2>
+      <span class="q-label">Question 3 of 5</span>
+      <h2 class="q-title">What texture do you prefer for your leave-on products?</h2>
       <div class="options-grid" id="opts3">
-        <div class="quiz-opt" onclick="selectOption(3, 3, this)">
+        <div class="quiz-opt" onclick="selectOption(3, 'weightless', this)">
           <div class="opt-icon">A</div>
           <div class="opt-text">
-            <div class="opt-title">Minimalist (3 Steps)</div>
-            <div class="opt-desc">Keep it simple: Cleanse, Moisturize, Protect.</div>
+            <div class="opt-title">Weightless & Fast absorbing</div>
+            <div class="opt-desc">Water-like, gel, or light textures that sink in instantly.</div>
           </div>
         </div>
-        <div class="quiz-opt" onclick="selectOption(3, 5, this)">
+        <div class="quiz-opt" onclick="selectOption(3, 'rich', this)">
           <div class="opt-icon">B</div>
           <div class="opt-text">
-            <div class="opt-title">Enthusiast (5 Steps)</div>
-            <div class="opt-desc">Add targeted treatments like Toners & Serums.</div>
+            <div class="opt-title">Rich & nourishing</div>
+            <div class="opt-desc">Thicker, buttery creams that lock in deep moisture.</div>
+          </div>
+        </div>
+        <div class="quiz-opt" onclick="selectOption(3, 'lightweight_dewy', this)">
+          <div class="opt-icon">C</div>
+          <div class="opt-text">
+            <div class="opt-title">Lightweight & dewy</div>
+            <div class="opt-desc">Fresh, glowing finish that keeps skin bouncy but not heavy.</div>
+          </div>
+        </div>
+        <div class="quiz-opt" onclick="selectOption(3, 'no_preference', this)">
+          <div class="opt-icon">D</div>
+          <div class="opt-text">
+            <div class="opt-title">I have no preference</div>
+            <div class="opt-desc">Any texture that delivers the best scientific results.</div>
           </div>
         </div>
       </div>
-      <button class="btn-next" id="btnNext3" onclick="generateRoutine()">Build My Routine</button>
+      <button class="btn-next" id="btnNext3" onclick="nextStep(4)">Continue</button>
+    </div>
+
+    <!-- STEP 4: Age Demographic -->
+    <div class="quiz-step" id="step4">
+      <button class="btn-back" onclick="prevStep(3)">← Back</button>
+      <span class="q-label">Question 4 of 5</span>
+      <h2 class="q-title">What is your age demographic?</h2>
+      <div class="options-grid" id="opts4">
+        <div class="quiz-opt" onclick="selectOption(4, 'under_20', this)">
+          <div class="opt-icon">A</div>
+          <div class="opt-text">
+            <div class="opt-title">Under 20</div>
+            <div class="opt-desc">Young skin focused on gentle balance and sebum control.</div>
+          </div>
+        </div>
+        <div class="quiz-opt" onclick="selectOption(4, '20-35', this)">
+          <div class="opt-icon">B</div>
+          <div class="opt-text">
+            <div class="opt-title">20-35</div>
+            <div class="opt-desc">Hydration, early prevention, and maintaining skin glow.</div>
+          </div>
+        </div>
+        <div class="quiz-opt" onclick="selectOption(4, '36-50', this)">
+          <div class="opt-icon">C</div>
+          <div class="opt-text">
+            <div class="opt-title">36-50</div>
+            <div class="opt-desc">Targeting fine lines, cell turnover, and skin elasticity.</div>
+          </div>
+        </div>
+        <div class="quiz-opt" onclick="selectOption(4, 'above_50', this)">
+          <div class="opt-icon">D</div>
+          <div class="opt-text">
+            <div class="opt-title">Above 50</div>
+            <div class="opt-desc">Deep replenishment, moisture retention, and firming.</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-next" id="btnNext4" onclick="nextStep(5)">Continue</button>
+    </div>
+
+    <!-- STEP 5: Routine Length -->
+    <div class="quiz-step" id="step5">
+      <button class="btn-back" onclick="prevStep(4)">← Back</button>
+      <span class="q-label">Question 5 of 5</span>
+      <h2 class="q-title">How many steps do you want in your routine?</h2>
+      <div class="options-grid" id="opts5">
+        <div class="quiz-opt" onclick="selectOption(5, 3, this)">
+          <div class="opt-icon">A</div>
+          <div class="opt-text">
+            <div class="opt-title">3-4 steps</div>
+            <div class="opt-desc">Cleanse, (optional) Tone, Moisturize, Protect. Simple & efficient.</div>
+          </div>
+        </div>
+        <div class="quiz-opt" onclick="selectOption(5, 5, this)">
+          <div class="opt-icon">B</div>
+          <div class="opt-text">
+            <div class="opt-title">5-more steps</div>
+            <div class="opt-desc">Cleanse, Tone, Treat/Serum, Moisturize, Protect. Fully targeted regimen.</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-next" id="btnNext5" onclick="generateRoutine()">Build My Routine</button>
     </div>
 
     <!-- LOADING STEP -->
@@ -462,29 +538,37 @@
 <script>
   // ── QUIZ STATE & LOGIC ── //
   const state = {
-    skinType: null,
     concern: null,
+    environment: null,
+    texture: null,
+    age: null,
     steps: null
   };
   let recommendedIds = [];
 
   function selectOption(step, value, element) {
     // Save state
-    if (step === 1) state.skinType = value;
-    if (step === 2) state.concern = value;
-    if (step === 3) state.steps = parseInt(value);
+    if (step === 1) state.concern = value;
+    if (step === 2) state.environment = value;
+    if (step === 3) state.texture = value;
+    if (step === 4) state.age = value;
+    if (step === 5) state.steps = parseInt(value);
 
     // Update UI
     const container = document.getElementById('opts' + step);
-    container.querySelectorAll('.quiz-opt').forEach(el => el.classList.remove('selected'));
+    if (container) {
+      container.querySelectorAll('.quiz-opt').forEach(el => el.classList.remove('selected'));
+    }
     element.classList.add('selected');
 
     // Enable next button
     const btn = document.getElementById('btnNext' + step);
-    btn.classList.add('enabled');
+    if (btn) {
+      btn.classList.add('enabled');
+    }
 
     // Auto advance if not the last step
-    if (step < 3) {
+    if (step < 5) {
       setTimeout(() => {
         nextStep(step + 1);
       }, 350);
@@ -493,14 +577,24 @@
 
   function nextStep(step) {
     document.querySelectorAll('.quiz-step').forEach(el => el.classList.remove('active'));
-    document.getElementById('step' + step).classList.add('active');
-    document.getElementById('progressBar').style.width = (step * 33.33) + '%';
+    const stepEl = document.getElementById('step' + step);
+    if (stepEl) stepEl.classList.add('active');
+    
+    const progressBar = document.getElementById('progressBar');
+    if (progressBar) {
+      progressBar.style.width = (step * 20) + '%';
+    }
   }
 
   function prevStep(step) {
     document.querySelectorAll('.quiz-step').forEach(el => el.classList.remove('active'));
-    document.getElementById('step' + step).classList.add('active');
-    document.getElementById('progressBar').style.width = (step * 33.33) + '%';
+    const stepEl = document.getElementById('step' + step);
+    if (stepEl) stepEl.classList.add('active');
+    
+    const progressBar = document.getElementById('progressBar');
+    if (progressBar) {
+      progressBar.style.width = (step * 20) + '%';
+    }
   }
 
   // ── PRODUCT MAPPING LOGIC ── //
@@ -523,76 +617,212 @@
     return FALLBACK_DB;
   }
 
-  function getProductForStep(stepCategory, sType, sConcern, allProds) {
-    const tType = sType.toLowerCase();
-    const tConcern = sConcern.toLowerCase();
+  function getProductForStep(stepCategory, state, allProds) {
+    const targetConcern = (state.concern || '').toLowerCase().trim();
+    const targetEnv = (state.environment || '').toLowerCase().trim();
+    const targetTexture = (state.texture || '').toLowerCase().trim();
+    const targetAge = (state.age || '').toLowerCase().trim();
 
     let keywordCheck = () => false;
     if (stepCategory === 'cleanse') {
-      keywordCheck = (t, i) => t.includes('cleanser') || t.includes('foam') || t.includes('gel') || t.includes('wash');
+      keywordCheck = (title, id) => {
+        const t = `${title} ${id}`.toLowerCase();
+        return t.includes('cleanser') || t.includes('foam') || t.includes('gel') || t.includes('wash') || t.includes('cleansing');
+      };
     } else if (stepCategory === 'tone') {
-      keywordCheck = (t, i) => t.includes('toner') || t.includes('tone');
+      keywordCheck = (title, id) => {
+        const t = `${title} ${id}`.toLowerCase();
+        return t.includes('toner') || t.includes('tone') || t.includes('peeling') || t.includes('skin');
+      };
     } else if (stepCategory === 'treat') {
-      keywordCheck = (t, i) => t.includes('serum') || t.includes('essence') || t.includes('ampoule');
+      keywordCheck = (title, id) => {
+        const t = `${title} ${id}`.toLowerCase();
+        return t.includes('serum') || t.includes('essence') || t.includes('ampoule') || t.includes('treatment') || t.includes('mucin');
+      };
     } else if (stepCategory === 'moisturize') {
-      keywordCheck = (t, i) => t.includes('cream') || t.includes('emulsion') || t.includes('lotion');
+      keywordCheck = (title, id) => {
+        const t = `${title} ${id}`.toLowerCase();
+        return t.includes('cream') || t.includes('emulsion') || t.includes('lotion') || t.includes('moisturizer');
+      };
     } else if (stepCategory === 'protect') {
-      keywordCheck = (t, i) => t.includes('sun') || t.includes('spf');
+      keywordCheck = (title, id) => {
+        const t = `${title} ${id}`.toLowerCase();
+        return t.includes('sun') || t.includes('spf') || t.includes('block') || t.includes('screen');
+      };
     }
 
     const catProds = allProds.filter(p => {
       const title = (p.title || p.Title || '').toLowerCase();
       const id = (p.id || p.ID || '').toLowerCase();
-      return keywordCheck(title, id) && p.stock !== false && p.stock !== 'false'; // Ensure in stock
+      const inStock = p.stock !== false && p.stock !== 'false';
+      return keywordCheck(title, id) && inStock;
     });
 
-    if (catProds.length === 0) return FALLBACK_DB[0];
+    const getFallback = () => {
+      return FALLBACK_DB.find(p => p.id.toLowerCase().includes(stepCategory.toLowerCase())) || 
+             FALLBACK_DB.find(p => {
+               const t = p.id.toLowerCase();
+               if (stepCategory === 'cleanse') return t.includes('lowph') || t.includes('cleanse');
+               if (stepCategory === 'tone') return t.includes('aha') || t.includes('tone');
+               if (stepCategory === 'treat') return t.includes('snail') || t.includes('treat');
+               if (stepCategory === 'moisturize') return t.includes('emulsion') || t.includes('cream');
+               if (stepCategory === 'protect') return t.includes('sungel') || t.includes('protect');
+               return false;
+             }) || FALLBACK_DB[0];
+    };
 
-    // Filter by concern
-    let matched = catProds.filter(p => {
-      const text = `${p.title || ''} ${p.desc || p.Desc || ''}`.toLowerCase();
-      const keywordsMap = {
-        acne: ['acne', 'bha', 'salicylic', 'trouble', 'clear'],
-        pigmentation: ['dark spot', 'glow', 'whitening', 'brightening', 'vitamin c', 'niacinamide'],
-        sensitivity: ['sensitive', 'calming', 'soothing', 'cica', 'centella', 'panthenol'],
-        aging: ['aging', 'wrinkle', 'firming', 'collagen', 'peptide', 'retinol']
+    if (catProds.length === 0) return getFallback();
+
+    // Score each product
+    let bestProd = null;
+    let maxScore = -999;
+
+    catProds.forEach(p => {
+      let score = 0;
+      const title = (p.title || p.Title || '').toLowerCase();
+      const id = (p.id || p.ID || '').toLowerCase();
+      const desc = (p.desc || p.Desc || '').toLowerCase();
+      const fullText = `${title} ${id} ${desc}`;
+      const pSkinType = (p.skin_type || p.skintype || p.Skin_type || '').toLowerCase();
+
+      // 1. Concern Matching (Weight: 5)
+      const concernKeywords = {
+        acne: ['acne', 'breakout', 'trouble', 'clear', 'bha', 'salicylic', 'sebum', 'pore', 'tea tree', 'clay'],
+        dullness: ['dull', 'radiance', 'glow', 'bright', 'whitening', 'vitamin c', 'niacinamide', 'galactomyces', 'ferment', 'rice'],
+        pigmentation: ['pigmentation', 'dark spot', 'scar', 'fade', 'brightening', 'niacinamide', 'vitamin c', 'tranexamic', 'glutathione'],
+        sensitivity: ['sensitive', 'calming', 'soothing', 'centella', 'cica', 'panthenol', 'barrier', 'soon jung', 'soonjung', 'heartleaf', 'azulene']
       };
-      const kw = keywordsMap[tConcern] || [];
-      return kw.some(k => text.includes(k));
+      const cKw = concernKeywords[targetConcern] || [];
+      const concernMatched = cKw.some(k => fullText.includes(k));
+      if (concernMatched) {
+        score += 5;
+      }
+
+      // 2. Environment & Sun Exposure Matching (Weight: 3)
+      if (targetEnv === 'ac') {
+        const acKeywords = ['hydrat', 'moist', 'hyaluronic', 'snail', 'mucin', 'water', 'dry'];
+        if (acKeywords.some(k => fullText.includes(k))) {
+          score += 3;
+        }
+      } else if (targetEnv === 'outdoors') {
+        if (stepCategory === 'protect') {
+          const outdoorSpfKeywords = ['spf50', 'pa++++', 'waterproof', 'outdoor', 'sport'];
+          if (outdoorSpfKeywords.some(k => fullText.includes(k))) {
+            score += 3;
+          }
+        } else {
+          const soothingKeywords = ['soothing', 'calming', 'barrier', 'cica', 'centella', 'aloe', 'panthenol', 'vitamin c', 'green tea'];
+          if (soothingKeywords.some(k => fullText.includes(k))) {
+            score += 3;
+          }
+        }
+      } else if (targetEnv === 'humid') {
+        const humidKeywords = ['gel', 'light', 'sebum', 'matte', 'pore', 'watery', 'aloe', 'non-greasy', 'physical'];
+        if (humidKeywords.some(k => fullText.includes(k))) {
+          score += 3;
+        }
+      } else if (targetEnv === 'travel') {
+        const travelKeywords = ['barrier', 'ceramide', 'panthenol', 'bifida', 'probiotic', 'strengthening', 'repair', 'soon jung', 'soonjung'];
+        if (travelKeywords.some(k => fullText.includes(k))) {
+          score += 3;
+        }
+      }
+
+      // 3. Texture Preference Matching (Weight: 4)
+      if (targetTexture === 'weightless') {
+        if (stepCategory === 'cleanse') {
+          if (['gel', 'foam'].some(k => fullText.includes(k))) score += 4;
+        } else if (stepCategory === 'tone' || stepCategory === 'treat') {
+          if (['water', 'liquid', 'light'].some(k => fullText.includes(k))) score += 4;
+        } else if (stepCategory === 'moisturize') {
+          if (['gel', 'emulsion', 'lotion', 'lightweight', 'water cream'].some(k => fullText.includes(k))) score += 4;
+          if (['rich', 'heavy', 'thick', 'butter', 'balm'].some(k => fullText.includes(k))) score -= 3;
+        } else if (stepCategory === 'protect') {
+          if (['watery', 'sun gel', 'essence', 'fluid', 'lightweight'].some(k => fullText.includes(k))) score += 4;
+        }
+      } else if (targetTexture === 'rich') {
+        if (stepCategory === 'cleanse') {
+          if (['balm', 'milk', 'cream', 'oil'].some(k => fullText.includes(k))) score += 4;
+        } else if (stepCategory === 'tone' || stepCategory === 'treat') {
+          if (['viscous', 'milky', 'rich', 'nourishing'].some(k => fullText.includes(k))) score += 4;
+        } else if (stepCategory === 'moisturize') {
+          if (['cream', 'balm', 'rich', 'intensive', 'nourishing', 'deep moisture'].some(k => fullText.includes(k))) score += 4;
+          if (['gel', 'lightweight', 'water cream'].some(k => fullText.includes(k)) && !fullText.includes('cream')) score -= 3;
+        } else if (stepCategory === 'protect') {
+          if (['cream', 'moisturizing', 'sun cream'].some(k => fullText.includes(k))) score += 4;
+        }
+      } else if (targetTexture === 'lightweight_dewy') {
+        const dewyKeywords = ['dewy', 'glow', 'bouncy', 'mucin', 'snail', 'hyaluronic', 'watery', 'essence'];
+        if (dewyKeywords.some(k => fullText.includes(k))) {
+          score += 4;
+        }
+      }
+
+      // 4. Age Demographic Matching (Weight: 2)
+      if (targetAge === 'under_20') {
+        const youthKeywords = ['gentle', 'mild', 'balance', 'sebum', 'pore', 'clear', 'acne', 'calming'];
+        if (youthKeywords.some(k => fullText.includes(k))) {
+          score += 2;
+        }
+      } else if (targetAge === '20-35') {
+        const midKeywords = ['hydrat', 'glow', 'radiance', 'barrier', 'moist', 'snail', 'niacinamide'];
+        if (midKeywords.some(k => fullText.includes(k))) {
+          score += 2;
+        }
+      } else if (targetAge === '36-50' || targetAge === 'above_50') {
+        const matureKeywords = ['anti-aging', 'wrinkle', 'firming', 'collagen', 'peptide', 'retinol', 'ginseng', 'bifida', 'nourishing', 'rich', 'ceramide'];
+        if (matureKeywords.some(k => fullText.includes(k))) {
+          score += 2;
+        }
+      }
+
+      // 5. Skin Type Match (Tie-breaker / Weight: 1)
+      if (pSkinType.includes('all') || pSkinType === '') {
+        score += 1;
+      }
+
+      if (score > maxScore) {
+        maxScore = score;
+        bestProd = p;
+      }
     });
 
-    // If no exact concern match, fallback to category
-    if (matched.length === 0) matched = catProds;
-
-    // Filter by skin type
-    const typeMatched = matched.find(p => {
-      const st = (p.skin_type || p.skintype || p.Skin_type || '').toLowerCase();
-      return st.includes(tType) || st.includes('all');
-    });
-
-    return typeMatched || matched[0];
+    return bestProd || catProds[0] || getFallback();
   }
 
   function generateRoutine() {
     // Show loader
     document.querySelectorAll('.quiz-step').forEach(el => el.classList.remove('active'));
-    document.getElementById('stepLoading').classList.add('active');
-    document.getElementById('progressBar').style.width = '100%';
+    const loadingStep = document.getElementById('stepLoading');
+    if (loadingStep) loadingStep.classList.add('active');
+    
+    const progressBar = document.getElementById('progressBar');
+    if (progressBar) progressBar.style.width = '100%';
 
     setTimeout(() => {
       const allProducts = getProductsList();
       const routine = [];
       
       const add = (stepNum, label, cat) => {
-        const prod = getProductForStep(cat, state.skinType, state.concern, allProducts);
+        const prod = getProductForStep(cat, state, allProducts);
         routine.push({ num: stepNum, label, product: prod });
       };
 
+      // Custom 3 vs 4 vs 5 steps routine matching:
       if (state.steps === 3) {
-        add(1, 'Cleanse', 'cleanse');
-        add(2, 'Moisturize', 'moisturize');
-        add(3, 'Protect', 'protect');
+        // Upgrade to 4 steps if they have specific active concerns that benefit highly from a toner
+        if (state.concern === 'acne' || state.concern === 'pigmentation' || state.concern === 'dullness') {
+          add(1, 'Cleanse', 'cleanse');
+          add(2, 'Tone', 'tone');
+          add(3, 'Moisturize', 'moisturize');
+          add(4, 'Protect', 'protect');
+        } else {
+          add(1, 'Cleanse', 'cleanse');
+          add(2, 'Moisturize', 'moisturize');
+          add(3, 'Protect', 'protect');
+        }
       } else {
+        // 5 steps
         add(1, 'Cleanse', 'cleanse');
         add(2, 'Tone', 'tone');
         add(3, 'Treat', 'treat');
@@ -605,66 +835,116 @@
   }
 
   function renderResults(routine) {
-    document.getElementById('stepLoading').classList.remove('active');
+    const loadingStep = document.getElementById('stepLoading');
+    if (loadingStep) loadingStep.classList.remove('active');
+    
     const resultStep = document.getElementById('result-step');
-    resultStep.classList.add('active');
+    if (resultStep) resultStep.classList.add('active');
 
     // Set subtitle
-    const typeMap = { oily: 'Oily', dry: 'Dry', combo: 'Combination', normal: 'Normal' };
-    const concernMap = { acne: 'Acne & Breakouts', pigmentation: 'Dark Spots', sensitivity: 'Sensitive Skin', aging: 'Anti-Aging' };
-    document.getElementById('resultDesc').innerHTML = `Formulated for <strong>${typeMap[state.skinType]}</strong> skin targeting <strong>${concernMap[state.concern]}</strong>.`;
+    const concernMap = {
+      acne: 'Acne & Breakouts',
+      dullness: 'Dullness',
+      pigmentation: 'Dark Spots & Hyperpigmentation',
+      sensitivity: 'Sensitivity & Redness'
+    };
+    const envMap = {
+      ac: 'AC/Indoors',
+      outdoors: 'Direct Sun/Outdoors',
+      humid: 'Hot & Humid Climate',
+      travel: 'Frequent Travel'
+    };
+    const textureMap = {
+      weightless: 'Weightless',
+      rich: 'Rich & Nourishing',
+      lightweight_dewy: 'Lightweight Dewy',
+      no_preference: 'Customized'
+    };
+    const ageMap = {
+      under_20: 'Under 20',
+      '20-35': '20-35 yrs',
+      '36-50': '36-50 yrs',
+      above_50: 'Above 50 yrs'
+    };
+
+    const descEl = document.getElementById('resultDesc');
+    if (descEl) {
+      descEl.innerHTML = `Formulated for <strong>${ageMap[state.age] || 'your'}</strong> skin targeting <strong>${concernMap[state.concern] || 'skincare concerns'}</strong> in a <strong>${envMap[state.environment] || 'various'}</strong> setting with a <strong>${textureMap[state.texture] || 'optimal'}</strong> finish.`;
+    }
 
     // Render items
     const list = document.getElementById('routineList');
-    list.innerHTML = '';
-    let total = 0;
-    recommendedIds = [];
+    if (list) {
+      list.innerHTML = '';
+      let total = 0;
+      recommendedIds = [];
 
-    routine.forEach(r => {
-      const p = r.product;
-      const pTitle = p.title || p.Title || 'Product';
-      const pBrand = p.brand || p.Brand || 'Brand';
-      const pPrice = parseInt(p.price || p.Price || 0);
-      const pImage = p.img || p.image || p.imageurl || '';
-      const pId = p.id || p.ID || '';
-      
-      total += pPrice;
-      if (pId) recommendedIds.push(pId);
+      routine.forEach(r => {
+        const p = r.product;
+        const pTitle = p.title || p.Title || 'Product';
+        const pBrand = p.brand || p.Brand || 'Brand';
+        const pPrice = parseInt(p.price || p.Price || 0);
+        const pImage = p.img || p.image || p.imageurl || '';
+        const pId = p.id || p.ID || '';
+        
+        total += pPrice;
+        if (pId) recommendedIds.push(pId);
 
-      const imgHTML = pImage ? `<img src="${pImage}" alt="${pTitle}">` : 
-        `<div style="width:100%; height:100%; background:var(--sage-pale); border-radius:4px;"></div>`;
+        const imgHTML = pImage ? `<img src="${pImage}" alt="${pTitle}">` : 
+          `<div style="width:100%; height:100%; background:var(--sage-pale); border-radius:4px;"></div>`;
 
-      list.innerHTML += `
-        <div class="routine-item">
-          <div class="ri-num">${r.num}</div>
-          <div class="ri-img">${imgHTML}</div>
-          <div class="ri-content">
-            <div class="ri-type">${r.label}</div>
-            <div class="ri-name">${pTitle}</div>
-            <div class="ri-brand">${pBrand}</div>
+        list.innerHTML += `
+          <div class="routine-item">
+            <div class="ri-num">${r.num}</div>
+            <div class="ri-img">${imgHTML}</div>
+            <div class="ri-content">
+              <div class="ri-type">${r.label}</div>
+              <div class="ri-name">${pTitle}</div>
+              <div class="ri-brand">${pBrand}</div>
+            </div>
+            <div class="ri-price">৳${pPrice.toLocaleString()}</div>
           </div>
-          <div class="ri-price">৳${pPrice.toLocaleString()}</div>
-        </div>
-      `;
-    });
+        `;
+      });
 
-    document.getElementById('routineTotal').textContent = `৳ ${total.toLocaleString()}`;
+      const totalEl = document.getElementById('routineTotal');
+      if (totalEl) {
+        totalEl.textContent = `৳ ${total.toLocaleString()}`;
+      }
+    }
+  }
+
+  async function addEntireRoutineToCart(idsString) {
+    const ids = idsString.split(',');
+    const allProducts = getProductsList();
+    
+    for (const id of ids) {
+      const p = allProducts.find(item => (item.id || item.ID) === id);
+      if (p) {
+        const pTitle = p.title || p.Title || '';
+        const pBrand = p.brand || p.Brand || '';
+        const pPrice = p.price || p.Price || 0;
+        const pImage = p.img || p.image || p.imageurl || '';
+        const pId = p.id || p.ID || id;
+        
+        if (typeof addToCart === 'function') {
+          addToCart(pId, pTitle, pBrand, pPrice, pImage);
+        }
+      }
+    }
+    
+    if (typeof toggleCartDrawer === 'function') {
+      toggleCartDrawer();
+    }
   }
 
   function addRoutineToCart() {
     if (recommendedIds.length === 0) return;
+    addEntireRoutineToCart(recommendedIds.join(','));
     
-    // Call the global cart function
-    if (typeof addEntireRoutineToCart === 'function') {
-      addEntireRoutineToCart(recommendedIds.join(','));
-      
-      // Optionally redirect to storefront or open cart
-      setTimeout(() => {
-        window.location.href = "storefront.html";
-      }, 500);
-    } else {
-      alert("Cart functionality is loading. Please try again in a moment.");
-    }
+    setTimeout(() => {
+      window.location.href = "storefront.html";
+    }, 500);
   }
 
   // Check URL if they came from the homepage quick start
