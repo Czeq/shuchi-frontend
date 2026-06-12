@@ -21,6 +21,22 @@ function escapeHTML(str) {
   });
 }
 
+// ── DELIVERY CHARGE HELPER (reads from admin settings via localStorage) ──
+// Admin panel saves rates to localStorage key 'shuchi_delivery_settings'
+function getCartDeliveryCharges() {
+  try {
+    const stored = localStorage.getItem('shuchi_delivery_settings');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      return {
+        inside: parseFloat(parsed.inside) || 60,
+        outside: parseFloat(parsed.outside) || 120
+      };
+    }
+  } catch (e) {}
+  return { inside: 60, outside: 120 }; // fallback defaults
+}
+
 // Validate referral code active status and date periods
 function validateReferralCode(d, code) {
   if ((d.id || '').toUpperCase().trim() !== code || d.scope !== 'referral') {
@@ -1713,7 +1729,8 @@ function updateCartUI() {
   
   const areaSelect = document.getElementById('custArea');
   const areaValue = areaSelect ? areaSelect.value : 'inside';
-  const deliveryCharge = totalQuantity === 0 ? 0 : (areaValue === 'inside' ? 60 : 120);
+  const _dc = getCartDeliveryCharges();
+  const deliveryCharge = totalQuantity === 0 ? 0 : (areaValue === 'inside' ? _dc.inside : _dc.outside);
   const total = Math.max(0, subtotal - referralDiscount + deliveryCharge);
 
   subtotalEl.textContent = `৳ ${subtotal.toLocaleString()}`;
@@ -1846,6 +1863,19 @@ function openCheckout() {
       }
     }
     
+    // Update delivery dropdown labels with dynamic rates
+    const areaSelect = document.getElementById('custArea');
+    if (areaSelect && areaSelect.options.length >= 2) {
+      const _dc = getCartDeliveryCharges();
+      for (let i = 0; i < areaSelect.options.length; i++) {
+        if (areaSelect.options[i].value === 'inside') {
+          areaSelect.options[i].text = `Inside Dhaka (৳ ${_dc.inside})`;
+        } else if (areaSelect.options[i].value === 'outside') {
+          areaSelect.options[i].text = `Outside Dhaka (৳ ${_dc.outside})`;
+        }
+      }
+    }
+
     checkoutOverlay.classList.add('active');
     document.body.style.overflow = 'hidden';
     updateCartUI(); // trigger summary updates in checkout box
@@ -1920,7 +1950,8 @@ async function submitCheckout(e) {
   }, 0);
   
   const referralDiscount = appliedReferralCode ? Math.round(subtotal * 0.1) : 0;
-  const deliveryCharge = areaSelect.value === 'inside' ? 60 : 120;
+  const _dc2 = getCartDeliveryCharges();
+  const deliveryCharge = areaSelect.value === 'inside' ? _dc2.inside : _dc2.outside;
   const totalPrice = Math.max(0, subtotal - referralDiscount + deliveryCharge);
 
   let itemsSummary = cartItems.map(item => `${item.quantity} x ${item.title} (${item.brand})`).join(', ');

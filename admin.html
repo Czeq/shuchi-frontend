@@ -559,7 +559,168 @@
     margin-bottom: 2rem;
     align-items: start;
   }
-  
+
+  /* PRICE MANAGEMENT TOOLBAR */
+  .price-mgmt-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(107,143,107,0.03);
+  }
+  .price-mgmt-panel h4 {
+    font-family: Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--dark);
+    margin-bottom: 0.25rem;
+  }
+  .price-mgmt-panel .panel-desc {
+    font-size: 0.78rem;
+    color: var(--text-soft);
+    margin-bottom: 1.2rem;
+    line-height: 1.5;
+  }
+  .price-tool-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr auto;
+    gap: 0.75rem;
+    align-items: end;
+  }
+  .price-tool-grid label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-soft);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+  .price-tool-grid select,
+  .price-tool-grid input[type="number"] {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.86rem;
+    background: var(--white);
+    border: 1.5px solid var(--cream-deep);
+    border-radius: 6px;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+  .price-tool-grid select:focus,
+  .price-tool-grid input:focus {
+    border-color: var(--sage);
+  }
+  .price-apply-btn {
+    background: var(--dark);
+    color: var(--cream);
+    border: none;
+    border-radius: 6px;
+    padding: 0.6rem 1.4rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.25s;
+    white-space: nowrap;
+  }
+  .price-apply-btn:hover {
+    background: var(--sage);
+  }
+  .price-apply-btn.danger {
+    background: #a33b3b;
+  }
+  .price-apply-btn.danger:hover {
+    background: #831e1e;
+  }
+  .selection-bar {
+    display: none;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(107, 143, 107, 0.07);
+    border: 1px solid var(--sage-light);
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    margin-top: 0.75rem;
+    font-size: 0.82rem;
+    color: var(--dark-mid);
+    font-weight: 500;
+  }
+  .selection-bar.active { display: flex; }
+
+  /* DELIVERY SETTINGS PANEL */
+  .delivery-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    box-shadow: 0 4px 12px rgba(107,143,107,0.03);
+  }
+  .delivery-panel h4 {
+    font-family: Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--dark);
+    margin-bottom: 0.25rem;
+  }
+  .delivery-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 1rem;
+    align-items: end;
+    margin-top: 1.2rem;
+  }
+  .delivery-grid label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-soft);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+  .delivery-grid input[type="number"] {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.9rem;
+    background: var(--white);
+    border: 1.5px solid var(--cream-deep);
+    border-radius: 6px;
+    outline: none;
+    font-family: inherit;
+    font-weight: 600;
+    transition: border-color 0.2s;
+  }
+  .delivery-grid input:focus { border-color: var(--sage); }
+
+  /* INLINE PRICE EDIT */
+  .price-inline-input {
+    padding: 0.3rem 0.5rem;
+    width: 100px;
+    border: 1.5px solid var(--sage-light);
+    border-radius: 4px;
+    font-size: 0.86rem;
+    font-family: inherit;
+    font-weight: 600;
+    outline: none;
+    background: #f8fdf8;
+    transition: border-color 0.2s;
+  }
+  .price-inline-input:focus {
+    border-color: var(--sage);
+    background: #fff;
+  }
+
+  /* ROW CHECKBOX */
+  .row-checkbox {
+    width: 16px; height: 16px;
+    accent-color: var(--sage);
+    cursor: pointer;
+  }
+
   /* RESPONSIVE */
   @media (max-width: 1024px) {
     .metrics-grid { grid-template-columns: 1fr 1fr; }
@@ -840,10 +1001,59 @@
 
   <!-- TAB: PRODUCTS -->
   <div id="tabProducts" class="tab-content">
+    
+    <!-- PRICE MANAGEMENT TOOLBAR -->
+    <div class="price-mgmt-panel">
+      <h4>📊 Bulk Price Adjustment</h4>
+      <p class="panel-desc">Adjust selling prices across all products or a specific scope due to market factors. Changes are committed directly to the database. Individual prices can also be edited inline in the table below.</p>
+      <div class="price-tool-grid">
+        <div>
+          <label>Scope</label>
+          <select id="bulkPriceScope" onchange="handleBulkScopeChange()">
+            <option value="all">All Products</option>
+            <option value="brand">Specific Brand</option>
+            <option value="selected">Selected Items Only</option>
+          </select>
+        </div>
+        <div id="bulkScopeValueWrap" style="display:none;">
+          <label>Target Brand</label>
+          <select id="bulkScopeValue"><option value="">Select brand...</option></select>
+        </div>
+        <div id="bulkScopeValuePlaceholder"></div>
+        <div>
+          <label>Adjustment Type</label>
+          <select id="bulkAdjType">
+            <option value="pct_increase">% Increase</option>
+            <option value="pct_decrease">% Decrease</option>
+            <option value="flat_increase">Flat Increase (৳)</option>
+            <option value="flat_decrease">Flat Decrease (৳)</option>
+            <option value="set_exact">Set Exact Price (৳)</option>
+          </select>
+        </div>
+        <div>
+          <label>Value</label>
+          <input type="number" id="bulkAdjValue" min="0" step="any" placeholder="e.g. 10">
+        </div>
+        <div>
+          <button class="price-apply-btn" onclick="applyBulkPriceAdjustment()">Apply Price Change</button>
+        </div>
+      </div>
+      <div class="selection-bar" id="selectionBar">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span id="selectedCountLabel">0 items selected</span>
+        <button class="btn-action" style="font-size:0.74rem; padding:0.25rem 0.6rem;" onclick="selectAllProducts()">Select All</button>
+        <button class="btn-action" style="font-size:0.74rem; padding:0.25rem 0.6rem; background:#fff5f5; color:#e53e3e; border-color:#fed7d7;" onclick="clearProductSelection()">Clear</button>
+      </div>
+    </div>
+
     <div class="table-actions">
       <div class="search-wrapper">
         <input type="text" class="search-input" id="productSearch" placeholder="Search products by title, brand, category..." oninput="filterProductsTable()">
         <svg class="search-icon" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+      <div style="display:flex; align-items:center; gap:0.5rem; font-size:0.8rem; color:var(--text-soft);">
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Click any price to edit inline
       </div>
     </div>
 
@@ -851,18 +1061,19 @@
       <table id="productsTable">
         <thead>
           <tr>
+            <th style="width:36px;"><input type="checkbox" class="row-checkbox" id="selectAllCheckbox" title="Select all" onchange="toggleSelectAll(this.checked)"></th>
             <th>ID / SKU</th>
             <th>Product Title</th>
             <th>Brand</th>
             <th>Volume</th>
-            <th>Price</th>
+            <th>Selling Price</th>
             <th>Wholesale Cost</th>
             <th class="text-right">Stock Status</th>
           </tr>
         </thead>
         <tbody id="productsBody">
           <tr>
-            <td colspan="7" style="padding: 4rem 2rem; text-align: center;">
+            <td colspan="8" style="padding: 4rem 2rem; text-align: center;">
               <div style="display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.8rem;">
                 <svg class="logo-loader" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 48px; height: 48px; margin: 0 auto;">
                   <path d="M428.393 458.741C397.367 442.352 389.639 455.699 350.257 463.372C297.897 480.729 273.085 493.192 219.832 520.489L270.021 623.63C288.39 656.569 303.786 659.091 332.525 683.826C379.073 693.884 408.435 692.732 468.538 674.586L591.894 632.338L521.57 537.477L428.393 458.741Z" fill="currentColor"/>
@@ -877,6 +1088,28 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- DELIVERY SETTINGS PANEL -->
+    <div class="delivery-panel">
+      <h4>🚚 Delivery Charge Settings</h4>
+      <p style="font-size:0.78rem; color:var(--text-soft); margin:0.25rem 0 0; line-height:1.5;">Set the delivery fees charged to customers at checkout. Changes are saved to the database and synced across the storefront immediately.</p>
+      <div class="delivery-grid">
+        <div>
+          <label>Inside Dhaka Delivery (৳)</label>
+          <input type="number" id="deliveryInsideDhaka" min="0" step="1" placeholder="60" value="60">
+        </div>
+        <div>
+          <label>Outside Dhaka Delivery (৳)</label>
+          <input type="number" id="deliveryOutsideDhaka" min="0" step="1" placeholder="120" value="120">
+        </div>
+        <div style="display:flex; gap:0.75rem; align-items:flex-end;">
+          <button class="price-apply-btn" onclick="saveDeliverySettings()" id="deliverySaveBtn">Save Delivery Rates</button>
+        </div>
+      </div>
+      <div id="deliveryCurrentRates" style="margin-top:0.85rem; font-size:0.78rem; color:var(--text-soft); display:flex; gap:1.5rem; flex-wrap:wrap;">
+        <span>Current rates: loading...</span>
+      </div>
     </div>
 
   </div>
@@ -1719,11 +1952,13 @@ async function refreshData() {
       fetchProducts(),
       fetchCustomers(),
       fetchExpenses(),
-      fetchDiscounts()
+      fetchDiscounts(),
+      loadDeliverySettings()
     ]);
     calculateKPIs();
     renderDashboard();
     populateDiscountScopeOptions();
+    handleBulkScopeChange(); // Populate brand dropdown if brand scope is selected
   } catch (error) {
     console.error("Failed to sync database records:", error);
     alert("Database connection failed. Please ensure Supabase keys are active.");
@@ -1755,7 +1990,7 @@ function setLoadingState(isLoading) {
   if (isLoading) {
     document.getElementById('recentOrdersBody').innerHTML = getTableLoadingRow(6, "Syncing live orders...");
     document.getElementById('ordersBody').innerHTML = getTableLoadingRow(7, "Syncing orders database...");
-    document.getElementById('productsBody').innerHTML = getTableLoadingRow(7, "Syncing inventory lists...");
+    document.getElementById('productsBody').innerHTML = getTableLoadingRow(8, "Syncing inventory lists...");
     document.getElementById('customersBody').innerHTML = getTableLoadingRow(4, "Syncing profiles registry...");
   }
 }
@@ -2681,8 +2916,9 @@ async function submitReferral(e) {
   showAdminToast("Influencer referral code registered successfully!");
 }
 
-// Delivery Charge Helper
-function getDeliveryCharge(order) {
+// Delivery Charge Helper - NOTE: This is the legacy static version kept for reference.
+// The dynamic version (using deliverySettings) is defined below with the Price Management functions.
+function getDeliveryCharge_legacy(order) {
   const area = (order.area || '').toLowerCase();
   if (area.includes('outside') || area.includes('120')) {
     return 120;
@@ -2691,6 +2927,8 @@ function getDeliveryCharge(order) {
   }
   return 0;
 }
+// The active getDeliveryCharge() function is defined in the Price Management section below.
+// It reads from deliverySettings which is loaded from Supabase/localStorage.
 
 // KPI Calculation
 function calculateKPIs() {
@@ -3099,43 +3337,60 @@ function renderProductsTable() {
   const tbody = document.getElementById('productsBody');
   tbody.innerHTML = '';
 
-  let filtered = productsList;
-  const query = document.getElementById('productSearch').value.toLowerCase().trim();
-  
-  if (query) {
-    filtered = filtered.filter(p => 
-      (p.title || '').toLowerCase().includes(query) ||
-      (p.brand || '').toLowerCase().includes(query) ||
-      (p.id || '').toLowerCase().includes(query)
-    );
-  }
+  let filtered = getFilteredProducts();
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" class="text-soft text-center">No products found in this search query.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-soft text-center">No products found in this search query.</td></tr>`;
     return;
+  }
+
+  // Sync header checkbox state
+  const allCheckbox = document.getElementById('selectAllCheckbox');
+  if (allCheckbox) {
+    const allSelected = filtered.length > 0 && filtered.every(p => selectedProductIds.has(p.id));
+    const someSelected = filtered.some(p => selectedProductIds.has(p.id));
+    allCheckbox.checked = allSelected;
+    allCheckbox.indeterminate = someSelected && !allSelected;
   }
 
   filtered.forEach(prod => {
     const volumeStr = prod.volume ? `${prod.volume} ${prod.volume_unit || ''}`.trim() : 'N/A';
     const inStock = prod.stock !== false && prod.stock !== 'false';
+    const isChecked = selectedProductIds.has(prod.id);
     
     const discountInfo = getDiscountedPrice(prod);
-    let priceHTML = `<span class="bold">৳ ${prod.price}</span>`;
+    let priceHTML;
     if (discountInfo.discount) {
       const discountLabel = discountInfo.discount.type === 'percentage' 
         ? `${discountInfo.discount.value}% off` 
         : `৳${discountInfo.discount.value} off`;
       priceHTML = `
-        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;">
-          <span class="text-soft" style="text-decoration: line-through; font-size: 0.76rem; font-weight: normal;">৳ ${Math.round(discountInfo.originalPrice).toLocaleString()}</span>
-          <span class="bold" style="color: var(--sage);">৳ ${Math.round(discountInfo.price).toLocaleString()}</span>
-          <span class="badge" style="font-size: 0.65rem; background: var(--sage-pale); color: var(--dark); padding: 0.1rem 0.35rem; border-radius: 3px; font-weight: 600; margin-top: 0.1rem; line-height: 1;">${discountLabel}</span>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem;">
+          <input type="number" class="price-inline-input" value="${prod.price}" min="0" step="1"
+                 title="Click to edit selling price"
+                 onblur="if(this.value != '${prod.price}') updateProductPrice('${prod.id}', this.value)"
+                 onkeydown="if(event.key==='Enter'){this.blur();} if(event.key==='Escape'){this.value='${prod.price}';this.blur();}">
+          <span class="text-soft" style="font-size: 0.72rem;">Displayed: <s>৳${Math.round(discountInfo.originalPrice).toLocaleString()}</s> → <strong style="color:var(--sage);">৳${Math.round(discountInfo.price).toLocaleString()}</strong></span>
+          <span class="badge" style="font-size: 0.65rem; background: var(--sage-pale); color: var(--dark); padding: 0.1rem 0.35rem; border-radius: 3px; font-weight: 600; line-height: 1;">${discountLabel}</span>
         </div>
+      `;
+    } else {
+      priceHTML = `
+        <input type="number" class="price-inline-input" value="${prod.price}" min="0" step="1"
+               title="Click to edit selling price"
+               onblur="if(this.value != '${prod.price}') updateProductPrice('${prod.id}', this.value)"
+               onkeydown="if(event.key==='Enter'){this.blur();} if(event.key==='Escape'){this.value='${prod.price}';this.blur();}"
+               style="width:100px;">
       `;
     }
     
     const tr = document.createElement('tr');
+    if (isChecked) tr.style.background = 'rgba(107,143,107,0.05)';
     tr.innerHTML = `
+      <td style="vertical-align: middle; text-align:center;">
+        <input type="checkbox" class="row-checkbox" ${isChecked ? 'checked' : ''}
+               onchange="toggleProductSelection('${prod.id}', this.checked)">
+      </td>
       <td class="bold text-soft" style="vertical-align: middle;">${prod.id}</td>
       <td class="bold" style="vertical-align: middle;">${prod.title || '[Untitled]'}</td>
       <td style="vertical-align: middle;">${prod.brand || 'No Brand'}</td>
@@ -3257,6 +3512,331 @@ async function toggleProductStock(prodId, currentStockState) {
     console.error("Stock toggle failed:", err);
     showAdminToast(`Unable to update stock status: ${err.message}`, "error");
   }
+}
+
+// ── PRODUCT SELECTION STATE ──
+let selectedProductIds = new Set();
+
+function toggleSelectAll(checked) {
+  selectedProductIds = new Set();
+  if (checked) {
+    productsList.forEach(p => selectedProductIds.add(p.id));
+  }
+  renderProductsTable();
+  updateSelectionBar();
+}
+
+function toggleProductSelection(prodId, checked) {
+  if (checked) {
+    selectedProductIds.add(prodId);
+  } else {
+    selectedProductIds.delete(prodId);
+  }
+  updateSelectionBar();
+  // Update header checkbox state
+  const allCheckbox = document.getElementById('selectAllCheckbox');
+  if (allCheckbox) {
+    const visible = getFilteredProducts();
+    allCheckbox.indeterminate = selectedProductIds.size > 0 && selectedProductIds.size < visible.length;
+    allCheckbox.checked = selectedProductIds.size === visible.length && visible.length > 0;
+  }
+}
+
+function updateSelectionBar() {
+  const bar = document.getElementById('selectionBar');
+  const label = document.getElementById('selectedCountLabel');
+  const scopeEl = document.getElementById('bulkPriceScope');
+  if (bar && label) {
+    if (selectedProductIds.size > 0) {
+      bar.classList.add('active');
+      label.textContent = `${selectedProductIds.size} item${selectedProductIds.size !== 1 ? 's' : ''} selected`;
+    } else {
+      bar.classList.remove('active');
+    }
+  }
+}
+
+function selectAllProducts() {
+  selectedProductIds = new Set(getFilteredProducts().map(p => p.id));
+  renderProductsTable();
+  updateSelectionBar();
+}
+
+function clearProductSelection() {
+  selectedProductIds = new Set();
+  renderProductsTable();
+  updateSelectionBar();
+  const allCheckbox = document.getElementById('selectAllCheckbox');
+  if (allCheckbox) { allCheckbox.checked = false; allCheckbox.indeterminate = false; }
+}
+
+function getFilteredProducts() {
+  const query = (document.getElementById('productSearch')?.value || '').toLowerCase().trim();
+  if (!query) return productsList;
+  return productsList.filter(p =>
+    (p.title || '').toLowerCase().includes(query) ||
+    (p.brand || '').toLowerCase().includes(query) ||
+    (p.id || '').toLowerCase().includes(query)
+  );
+}
+
+// ── BULK PRICE SCOPE HANDLER ──
+function handleBulkScopeChange() {
+  const scope = document.getElementById('bulkPriceScope').value;
+  const wrap = document.getElementById('bulkScopeValueWrap');
+  const placeholder = document.getElementById('bulkScopeValuePlaceholder');
+  if (scope === 'brand') {
+    wrap.style.display = 'block';
+    placeholder.style.display = 'none';
+    // Populate brands
+    const brands = [...new Set(productsList.map(p => p.brand).filter(Boolean))].sort();
+    const sel = document.getElementById('bulkScopeValue');
+    sel.innerHTML = '<option value="">Select brand...</option>';
+    brands.forEach(b => {
+      const opt = document.createElement('option');
+      opt.value = b; opt.textContent = b;
+      sel.appendChild(opt);
+    });
+  } else if (scope === 'selected') {
+    wrap.style.display = 'none';
+    placeholder.style.display = 'block';
+    // Auto-switch to 'Selected Items Only' note
+    updateSelectionBar();
+  } else {
+    wrap.style.display = 'none';
+    placeholder.style.display = 'block';
+  }
+}
+
+// ── BULK PRICE ADJUSTMENT ──
+async function applyBulkPriceAdjustment() {
+  const scope = document.getElementById('bulkPriceScope').value;
+  const adjType = document.getElementById('bulkAdjType').value;
+  const adjValueRaw = parseFloat(document.getElementById('bulkAdjValue').value);
+
+  if (isNaN(adjValueRaw) || adjValueRaw < 0) {
+    showAdminToast('Please enter a valid non-negative adjustment value.', 'error');
+    return;
+  }
+
+  // Determine target products
+  let targets = [];
+  if (scope === 'all') {
+    targets = [...productsList];
+  } else if (scope === 'brand') {
+    const brand = document.getElementById('bulkScopeValue').value;
+    if (!brand) { showAdminToast('Please select a brand to target.', 'error'); return; }
+    targets = productsList.filter(p => (p.brand || '').toLowerCase() === brand.toLowerCase());
+  } else if (scope === 'selected') {
+    if (selectedProductIds.size === 0) { showAdminToast('Please select at least one product from the table below.', 'error'); return; }
+    targets = productsList.filter(p => selectedProductIds.has(p.id));
+  }
+
+  if (targets.length === 0) {
+    showAdminToast('No products match the selected scope.', 'error');
+    return;
+  }
+
+  // Validate percentage constraints
+  if ((adjType === 'pct_increase' || adjType === 'pct_decrease') && adjValueRaw > 100) {
+    showAdminToast('Percentage adjustment cannot exceed 100%.', 'error');
+    return;
+  }
+
+  const scopeLabel = scope === 'all' ? 'ALL products' : scope === 'brand' ? `brand "${document.getElementById('bulkScopeValue').value}"` : `${targets.length} selected product(s)`;
+  const adjLabel = adjType === 'pct_increase' ? `+${adjValueRaw}%` : adjType === 'pct_decrease' ? `-${adjValueRaw}%` : adjType === 'flat_increase' ? `+৳${adjValueRaw}` : adjType === 'flat_decrease' ? `-৳${adjValueRaw}` : `set to ৳${adjValueRaw}`;
+
+  if (!confirm(`Confirm: Apply ${adjLabel} to ${scopeLabel} (${targets.length} product${targets.length !== 1 ? 's' : ''})?\n\nThis will directly update the selling price in the database.`)) return;
+
+  // Compute new prices
+  const updates = targets.map(p => {
+    const oldPrice = parseFloat(p.price || 0);
+    let newPrice;
+    if (adjType === 'pct_increase') newPrice = Math.round(oldPrice * (1 + adjValueRaw / 100));
+    else if (adjType === 'pct_decrease') newPrice = Math.max(0, Math.round(oldPrice * (1 - adjValueRaw / 100)));
+    else if (adjType === 'flat_increase') newPrice = Math.round(oldPrice + adjValueRaw);
+    else if (adjType === 'flat_decrease') newPrice = Math.max(0, Math.round(oldPrice - adjValueRaw));
+    else newPrice = Math.round(adjValueRaw); // set_exact
+    return { id: p.id, newPrice };
+  });
+
+  // Commit to Supabase one by one (batch upsert not always available in all plans)
+  let successCount = 0;
+  let failCount = 0;
+
+  showAdminToast(`Updating prices for ${updates.length} product(s)...`);
+
+  for (const u of updates) {
+    try {
+      const { error } = await supabaseClient
+        .from('products')
+        .update({ price: u.newPrice })
+        .eq('id', u.id);
+      if (error) throw error;
+      // Update local state
+      const idx = productsList.findIndex(p => p.id === u.id);
+      if (idx !== -1) productsList[idx].price = u.newPrice;
+      successCount++;
+    } catch (err) {
+      console.error(`Failed to update price for product ${u.id}:`, err);
+      failCount++;
+    }
+  }
+
+  renderProductsTable();
+
+  if (failCount === 0) {
+    showAdminToast(`✓ Price updated for ${successCount} product(s) successfully.`);
+  } else {
+    showAdminToast(`Updated ${successCount} product(s). ${failCount} failed — check console for details.`, 'error');
+  }
+
+  // Reset value input
+  document.getElementById('bulkAdjValue').value = '';
+}
+
+// ── INLINE PRODUCT PRICE SAVE ──
+async function updateProductPrice(prodId, newPriceRaw) {
+  const newPrice = parseFloat(newPriceRaw);
+  if (isNaN(newPrice) || newPrice < 0) {
+    showAdminToast('Invalid price value.', 'error');
+    renderProductsTable();
+    return;
+  }
+  const roundedPrice = Math.round(newPrice);
+  try {
+    const { data, error } = await supabaseClient
+      .from('products')
+      .update({ price: roundedPrice })
+      .eq('id', prodId)
+      .select();
+    if (error) throw error;
+    if (!data || data.length === 0) throw new Error('No records modified. Check Supabase RLS policies.');
+    const idx = productsList.findIndex(p => p.id === prodId);
+    if (idx !== -1) productsList[idx].price = roundedPrice;
+    showAdminToast(`Price updated to ৳${roundedPrice.toLocaleString()}`);
+    renderProductsTable();
+    if (activeTab === 'financials') renderFinancials();
+  } catch (err) {
+    console.error('Price update failed:', err);
+    showAdminToast(`Failed to update price: ${err.message}`, 'error');
+    renderProductsTable(); // Revert display
+  }
+}
+
+// ── DELIVERY SETTINGS ──
+let deliverySettings = { inside: 60, outside: 120 };
+
+async function loadDeliverySettings() {
+  // Try Supabase first, fall back to localStorage
+  try {
+    const { data, error } = await supabaseClient
+      .from('settings')
+      .select('*')
+      .in('key', ['delivery_inside', 'delivery_outside']);
+    if (!error && data && data.length > 0) {
+      data.forEach(row => {
+        if (row.key === 'delivery_inside') deliverySettings.inside = parseFloat(row.value) || 60;
+        if (row.key === 'delivery_outside') deliverySettings.outside = parseFloat(row.value) || 120;
+      });
+    } else {
+      // Fallback to localStorage
+      const local = localStorage.getItem('shuchi_delivery_settings');
+      if (local) {
+        const parsed = JSON.parse(local);
+        deliverySettings.inside = parsed.inside || 60;
+        deliverySettings.outside = parsed.outside || 120;
+      }
+    }
+  } catch (e) {
+    const local = localStorage.getItem('shuchi_delivery_settings');
+    if (local) {
+      try {
+        const parsed = JSON.parse(local);
+        deliverySettings.inside = parsed.inside || 60;
+        deliverySettings.outside = parsed.outside || 120;
+      } catch (_) {}
+    }
+  }
+  // Sync to localStorage so cart.js can read it
+  localStorage.setItem('shuchi_delivery_settings', JSON.stringify(deliverySettings));
+  // Populate UI
+  const insideEl = document.getElementById('deliveryInsideDhaka');
+  const outsideEl = document.getElementById('deliveryOutsideDhaka');
+  if (insideEl) insideEl.value = deliverySettings.inside;
+  if (outsideEl) outsideEl.value = deliverySettings.outside;
+  renderDeliveryCurrentRates();
+}
+
+function renderDeliveryCurrentRates() {
+  const el = document.getElementById('deliveryCurrentRates');
+  if (!el) return;
+  el.innerHTML = `
+    <span style="display:inline-flex; align-items:center; gap:0.4rem; background: rgba(107,143,107,0.08); border:1px solid var(--sage-pale); border-radius:4px; padding:0.3rem 0.65rem; font-weight:600; color:var(--dark-mid);">
+      <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      Inside Dhaka: ৳${deliverySettings.inside}
+    </span>
+    <span style="display:inline-flex; align-items:center; gap:0.4rem; background: rgba(184,151,90,0.08); border:1px solid rgba(184,151,90,0.25); border-radius:4px; padding:0.3rem 0.65rem; font-weight:600; color:var(--dark-mid);">
+      <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      Outside Dhaka: ৳${deliverySettings.outside}
+    </span>
+    <span style="font-size:0.72rem; color:var(--text-soft); opacity:0.8; align-self:center;">Last synced: ${new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'})}</span>
+  `;
+}
+
+async function saveDeliverySettings() {
+  const insideVal = parseFloat(document.getElementById('deliveryInsideDhaka').value);
+  const outsideVal = parseFloat(document.getElementById('deliveryOutsideDhaka').value);
+
+  if (isNaN(insideVal) || insideVal < 0 || isNaN(outsideVal) || outsideVal < 0) {
+    showAdminToast('Please enter valid non-negative delivery charges.', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('deliverySaveBtn');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+
+  // Try saving to Supabase settings table (upsert by key)
+  let savedToDB = false;
+  try {
+    const { error: e1 } = await supabaseClient
+      .from('settings')
+      .upsert({ key: 'delivery_inside', value: String(insideVal) }, { onConflict: 'key' });
+    const { error: e2 } = await supabaseClient
+      .from('settings')
+      .upsert({ key: 'delivery_outside', value: String(outsideVal) }, { onConflict: 'key' });
+    if (!e1 && !e2) savedToDB = true;
+  } catch (e) {
+    console.warn('Could not save delivery settings to Supabase settings table:', e);
+  }
+
+  // Always update localStorage as fallback/cache for storefront
+  deliverySettings.inside = insideVal;
+  deliverySettings.outside = outsideVal;
+  localStorage.setItem('shuchi_delivery_settings', JSON.stringify(deliverySettings));
+
+  btn.textContent = 'Save Delivery Rates';
+  btn.disabled = false;
+
+  if (savedToDB) {
+    showAdminToast(`Delivery rates saved — Inside: ৳${insideVal}, Outside: ৳${outsideVal}`);
+  } else {
+    showAdminToast(`Delivery rates saved locally (৳${insideVal} / ৳${outsideVal}). DB sync pending — ensure a "settings" table exists with "key" and "value" columns.`);
+  }
+
+  renderDeliveryCurrentRates();
+}
+
+// ── OVERRIDE getDeliveryCharge to use dynamic settings ──
+function getDeliveryCharge(order) {
+  const area = (order.area || '').toLowerCase();
+  if (area.includes('outside') || area.includes(String(deliverySettings.outside))) {
+    return deliverySettings.outside;
+  } else if (area.includes('inside') || area.includes(String(deliverySettings.inside))) {
+    return deliverySettings.inside;
+  }
+  return 0;
 }
 
 // Supplier Modal Controllers
