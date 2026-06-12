@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Skin Quiz — SHUCHI শুচি</title>
-<meta name="description" content="Take our Skin Quiz to find your perfect Korean skincare routine tailored for Bangladesh's climate.">
+<title>Routine Builder — SHUCHI শুচি</title>
+<meta name="description" content="Use our Routine Builder to find your perfect Korean skincare routine tailored for Bangladesh's climate.">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="stylesheet" href="cart.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -309,7 +309,7 @@
   <ul class="nav-links">
     <li><a href="index.html">Home</a></li>
     <li><a href="storefront.html">Storefront</a></li>
-    <li><a href="quiz.html" class="nav-cta" style="background:var(--sage)!important; color:white!important;">Take Quiz</a></li>
+    <li><a href="quiz.html" class="nav-cta" style="background:var(--sage)!important; color:white!important;">Routine Builder</a></li>
   </ul>
   <div class="hamburger" onclick="document.getElementById('mainNav').classList.toggle('mopen')">
     <span></span><span></span><span></span>
@@ -327,28 +327,28 @@
       <h2 class="q-title">How would you describe your skin type?</h2>
       <div class="options-grid" id="opts1">
         <div class="quiz-opt" onclick="selectOption(1, 'oily', this)">
-          <div class="opt-icon">💧</div>
+          <div class="opt-icon">A</div>
           <div class="opt-text">
             <div class="opt-title">Oily</div>
             <div class="opt-desc">Shiny all over, prone to enlarged pores.</div>
           </div>
         </div>
         <div class="quiz-opt" onclick="selectOption(1, 'dry', this)">
-          <div class="opt-icon">🏜️</div>
+          <div class="opt-icon">B</div>
           <div class="opt-text">
             <div class="opt-title">Dry</div>
             <div class="opt-desc">Often feels tight, flaky, or rough.</div>
           </div>
         </div>
         <div class="quiz-opt" onclick="selectOption(1, 'combo', this)">
-          <div class="opt-icon">⚖️</div>
+          <div class="opt-icon">C</div>
           <div class="opt-text">
             <div class="opt-title">Combination</div>
             <div class="opt-desc">Oily T-zone, but dry or normal cheeks.</div>
           </div>
         </div>
         <div class="quiz-opt" onclick="selectOption(1, 'normal', this)">
-          <div class="opt-icon">✨</div>
+          <div class="opt-icon">D</div>
           <div class="opt-text">
             <div class="opt-title">Normal / Balanced</div>
             <div class="opt-desc">Rarely breaks out, feels comfortable.</div>
@@ -365,28 +365,28 @@
       <h2 class="q-title">What is your primary skincare goal?</h2>
       <div class="options-grid" id="opts2">
         <div class="quiz-opt" onclick="selectOption(2, 'acne', this)">
-          <div class="opt-icon">🔴</div>
+          <div class="opt-icon">A</div>
           <div class="opt-text">
             <div class="opt-title">Clear Acne & Breakouts</div>
             <div class="opt-desc">Target active pimples and unclog pores.</div>
           </div>
         </div>
         <div class="quiz-opt" onclick="selectOption(2, 'pigmentation', this)">
-          <div class="opt-icon">☀️</div>
+          <div class="opt-icon">B</div>
           <div class="opt-text">
             <div class="opt-title">Fade Dark Spots</div>
             <div class="opt-desc">Brighten hyperpigmentation and acne scars.</div>
           </div>
         </div>
         <div class="quiz-opt" onclick="selectOption(2, 'sensitivity', this)">
-          <div class="opt-icon">🌿</div>
+          <div class="opt-icon">C</div>
           <div class="opt-text">
             <div class="opt-title">Soothe Redness</div>
             <div class="opt-desc">Calm irritation and repair skin barrier.</div>
           </div>
         </div>
         <div class="quiz-opt" onclick="selectOption(2, 'aging', this)">
-          <div class="opt-icon">⏳</div>
+          <div class="opt-icon">D</div>
           <div class="opt-text">
             <div class="opt-title">Anti-Aging & Texture</div>
             <div class="opt-desc">Smooth fine lines and firm up skin.</div>
@@ -403,14 +403,14 @@
       <h2 class="q-title">How many steps do you want in your routine?</h2>
       <div class="options-grid" id="opts3">
         <div class="quiz-opt" onclick="selectOption(3, 3, this)">
-          <div class="opt-icon">⏱️</div>
+          <div class="opt-icon">A</div>
           <div class="opt-text">
             <div class="opt-title">Minimalist (3 Steps)</div>
             <div class="opt-desc">Keep it simple: Cleanse, Moisturize, Protect.</div>
           </div>
         </div>
         <div class="quiz-opt" onclick="selectOption(3, 5, this)">
-          <div class="opt-icon">🧪</div>
+          <div class="opt-icon">B</div>
           <div class="opt-text">
             <div class="opt-title">Enthusiast (5 Steps)</div>
             <div class="opt-desc">Add targeted treatments like Toners & Serums.</div>
