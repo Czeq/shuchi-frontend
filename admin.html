@@ -2065,48 +2065,113 @@ function classifyProductType(title, desc) {
   const t = (title || '').toLowerCase();
   const d = (desc || '').toLowerCase();
   
-  if (t.includes('shampoo') || t.includes('conditioner') || t.includes('hair wash') || t.includes('hair treatment') || t.includes('scalp')) {
-    return 'Shampoo';
+  // Hair Care
+  if (t.includes('shampoo') || t.includes('conditioner') || t.includes('hair wash') || t.includes('hair treatment') || t.includes('scalp') || t.includes('hair mask') || t.includes('hair oil') || t.includes('hair serum')) {
+    return 'Hair Care';
   }
+  // Body Wash
   if (t.includes('body wash') || t.includes('shower gel') || t.includes('body cleanser') || t.includes('shower cream')) {
     return 'Body Wash';
   }
-  if (t.includes('body cream') || t.includes('body lotion') || t.includes('body milk') || t.includes('body butter') || t.includes('body moisturizer')) {
-    return 'Body Cream';
+  // Body Care
+  if (t.includes('body cream') || t.includes('body lotion') || t.includes('body milk') || t.includes('body butter') || t.includes('body moisturizer') || t.includes('hand cream') || t.includes('foot cream')) {
+    return 'Body Care';
   }
-  if (t.includes('sunscreen') || t.includes('sun cream') || t.includes('sunblock') || t.includes('sun gel') || t.includes('sun stick') || t.includes('sun fluid')) {
+  // Sunscreen
+  if (t.includes('sunscreen') || t.includes('sun cream') || t.includes('sunblock') || t.includes('sun gel') || t.includes('sun stick') || t.includes('sun fluid') || t.includes('uv defense') || t.includes('uv protection')) {
     return 'Sunscreen';
   }
-  if (t.includes('cleansing oil') || t.includes('oil cleanser') || t.includes('cleansing balm') || t.includes('micellar') || t.includes('makeup remover') || t.includes('remover')) {
+  // Oil Cleanser
+  if (t.includes('cleansing oil') || t.includes('oil cleanser') || t.includes('cleansing balm') || t.includes('micellar') || t.includes('makeup remover') || t.includes('remover') || t.includes('cleansing water')) {
+    return 'Oil Cleanser';
+  }
+  // Exfoliator
+  if (t.includes('exfoliat') || t.includes('scrub') || t.includes('peeling') || t.includes('peel gel') || t.includes('aha') || t.includes('bha') || t.includes('glycolic') || t.includes('dead skin')) {
+    return 'Exfoliator';
+  }
+  // Cleanser
+  if (t.includes('facewash') || t.includes('face wash') || t.includes('foam cleanser') || t.includes('cleansing foam') || t.includes('foaming') || t.includes('gel cleanser') || t.includes('gentle cleanser') || t.includes('cleansing gel') || (t.includes('cleanser') && !t.includes('oil') && !t.includes('balm'))) {
     return 'Cleanser';
   }
-  if (t.includes('facewash') || t.includes('face wash') || t.includes('foam cleanser') || t.includes('cleansing foam') || t.includes('foaming') || t.includes('gel cleanser') || t.includes('gentle cleanser') || t.includes('cleansing gel') || (t.includes('cleanser') && !t.includes('oil') && !t.includes('balm'))) {
-    return 'Facewash';
-  }
-  if (t.includes('toner') || t.includes('tonique') || t.includes('skin refiner') || t.includes('toning')) {
+  // Toner
+  if (t.includes('toner') || t.includes('tonique') || t.includes('skin refiner') || t.includes('toning') || t.includes('first treatment')) {
     return 'Toner';
   }
-  if (t.includes('essence') || t.includes('mucin') || t.includes('serum') || t.includes('ampoule') || t.includes('treatment essence') || t.includes('booster')) {
-    return 'Essence & Serum';
+  // Essence
+  if (t.includes('essence') || t.includes('first essence') || t.includes('treatment essence') || t.includes('mucin') || t.includes('snail')) {
+    return 'Essence';
   }
+  // Serum
+  if (t.includes('serum') || t.includes('ampoule') || t.includes('booster') || t.includes('concentrate')) {
+    return 'Serum';
+  }
+  // Eye Care
+  if (t.includes('eye cream') || t.includes('eye serum') || t.includes('eye treatment') || t.includes('eye patch') || t.includes('under eye') || t.includes('eye mask')) {
+    return 'Eye Care';
+  }
+  // Lip Care
+  if (t.includes('lip balm') || t.includes('lip mask') || t.includes('lip treatment') || t.includes('lip sleeping') || t.includes('lip care') || t.includes('lip butter')) {
+    return 'Lip Care';
+  }
+  // Spot Treatment
+  if (t.includes('pimple') || t.includes('acne patch') || t.includes('spot treatment') || t.includes('blemish') || t.includes('spot gel') || t.includes('cica patch') || t.includes('spot cream')) {
+    return 'Spot Treatment';
+  }
+  // Mist
+  if (t.includes('mist') || t.includes('face mist') || t.includes('facial spray') || t.includes('setting spray') || t.includes('hydrating spray')) {
+    return 'Mist';
+  }
+  // Sleeping Mask
+  if (t.includes('sleeping mask') || t.includes('sleeping pack') || t.includes('overnight mask') || t.includes('night mask') || t.includes('lip sleeping')) {
+    return 'Sleeping Mask';
+  }
+  // Sheet Mask
+  if (t.includes('sheet mask') || t.includes('face mask') || t.includes('facial mask') || t.includes('mask pack') || t.includes('bio cellulose')) {
+    return 'Sheet Mask';
+  }
+  // Wash-off Mask
+  if (t.includes('wash-off') || t.includes('wash off') || t.includes('clay mask') || t.includes('mud mask') || t.includes('peel-off') || t.includes('peel off')) {
+    return 'Wash-off Mask';
+  }
+  // BB & CC Cream
+  if (t.includes('bb cream') || t.includes('cc cream') || t.includes('cushion') || t.includes('foundation') || t.includes('tinted moisturizer') || t.includes('tone up')) {
+    return 'BB & CC Cream';
+  }
+  // Retinol
+  if (t.includes('retinol') || t.includes('retinal') || t.includes('retinoid') || t.includes('bakuchiol')) {
+    return 'Retinol';
+  }
+  // Lotion
   if (t.includes('lotion') || t.includes('emulsion') || t.includes('moisturizing lotion')) {
     return 'Lotion';
   }
-  if (t.includes('cream') || t.includes('gel cream') || t.includes('moisturizer') || t.includes('moisturising') || t.includes('soothing cream') || t.includes('balm') || t.includes('sleeping mask') || t.includes('sleeping pack') || t.includes('water gel')) {
-    return 'Cream';
+  // Moisturizer
+  if (t.includes('cream') || t.includes('gel cream') || t.includes('moisturizer') || t.includes('moisturising') || t.includes('soothing cream') || t.includes('water gel') || t.includes('balm') || t.includes('cica cream')) {
+    return 'Moisturizer';
   }
   
   // Fallbacks by analyzing description
-  if (d.includes('shampoo') || d.includes('hair')) return 'Shampoo';
+  if (d.includes('shampoo') || d.includes('conditioner') || d.includes('hair')) return 'Hair Care';
   if (d.includes('body wash') || d.includes('shower gel')) return 'Body Wash';
-  if (d.includes('body cream') || d.includes('body lotion')) return 'Body Cream';
-  if (d.includes('sunscreen') || d.includes('sun cream') || d.includes('sunblock')) return 'Sunscreen';
-  if (d.includes('cleansing oil') || d.includes('cleansing balm') || d.includes('makeup remover')) return 'Cleanser';
-  if (d.includes('facewash') || d.includes('face wash') || d.includes('cleansing foam') || d.includes('foaming cleanser')) return 'Facewash';
+  if (d.includes('body cream') || d.includes('body lotion') || d.includes('hand cream')) return 'Body Care';
+  if (d.includes('sunscreen') || d.includes('sun cream') || d.includes('sunblock') || d.includes('spf')) return 'Sunscreen';
+  if (d.includes('cleansing oil') || d.includes('cleansing balm') || d.includes('makeup remover') || d.includes('micellar')) return 'Oil Cleanser';
+  if (d.includes('exfoliat') || d.includes('scrub') || d.includes('peeling') || d.includes('aha') || d.includes('bha')) return 'Exfoliator';
+  if (d.includes('facewash') || d.includes('face wash') || d.includes('cleansing foam') || d.includes('foaming cleanser') || d.includes('cleanser')) return 'Cleanser';
   if (d.includes('toner') || d.includes('toning')) return 'Toner';
-  if (d.includes('essence') || d.includes('serum') || d.includes('ampoule')) return 'Essence & Serum';
+  if (d.includes('essence') || d.includes('mucin') || d.includes('snail')) return 'Essence';
+  if (d.includes('serum') || d.includes('ampoule') || d.includes('booster')) return 'Serum';
+  if (d.includes('eye cream') || d.includes('eye serum')) return 'Eye Care';
+  if (d.includes('lip balm') || d.includes('lip mask') || d.includes('lip treatment')) return 'Lip Care';
+  if (d.includes('pimple') || d.includes('acne patch') || d.includes('spot treatment') || d.includes('blemish')) return 'Spot Treatment';
+  if (d.includes('mist') || d.includes('facial spray')) return 'Mist';
+  if (d.includes('sleeping mask') || d.includes('sleeping pack') || d.includes('overnight')) return 'Sleeping Mask';
+  if (d.includes('sheet mask') || d.includes('face mask') || d.includes('mask pack')) return 'Sheet Mask';
+  if (d.includes('wash-off') || d.includes('clay mask') || d.includes('mud mask')) return 'Wash-off Mask';
+  if (d.includes('bb cream') || d.includes('cc cream') || d.includes('cushion') || d.includes('tone up')) return 'BB & CC Cream';
+  if (d.includes('retinol') || d.includes('retinal') || d.includes('bakuchiol')) return 'Retinol';
   if (d.includes('lotion') || d.includes('emulsion')) return 'Lotion';
-  if (d.includes('cream') || d.includes('moisturizer') || d.includes('gel cream')) return 'Cream';
+  if (d.includes('cream') || d.includes('moisturizer') || d.includes('gel cream')) return 'Moisturizer';
 
   return 'Other';
 }
@@ -2337,7 +2402,7 @@ function handleDiscountScopeChange() {
       }
     } else if (scope === 'category') {
       label.textContent = 'Target Product Type (Category)';
-      const categories = ['Shampoo', 'Body Wash', 'Body Cream', 'Sunscreen', 'Cleanser', 'Facewash', 'Toner', 'Essence & Serum', 'Lotion', 'Cream', 'Other'];
+      const categories = ['Hair Care', 'Body Wash', 'Body Care', 'Sunscreen', 'Oil Cleanser', 'Exfoliator', 'Cleanser', 'Toner', 'Essence', 'Serum', 'Eye Care', 'Lip Care', 'Spot Treatment', 'Mist', 'Sleeping Mask', 'Sheet Mask', 'Wash-off Mask', 'BB & CC Cream', 'Retinol', 'Lotion', 'Moisturizer', 'Other'];
       categories.forEach(c => {
         const opt = document.createElement('option');
         opt.value = c;
