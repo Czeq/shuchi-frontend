@@ -134,10 +134,14 @@
     background: var(--dark-mid);
     padding: 0.5rem;
     border-radius: 8px;
-    width: max-content;
     max-width: 100%;
     border: 1px solid rgba(168, 196, 162, 0.15);
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+  .filter-bar::-webkit-scrollbar { display: none; }
   .filter-btn {
     background: transparent;
     border: none;
@@ -150,6 +154,8 @@
     cursor: pointer;
     border-radius: 4px;
     transition: all 0.3s;
+    flex-shrink: 0;
+    white-space: nowrap;
   }
   .filter-btn:hover, .filter-btn.active {
     background: var(--cream);
