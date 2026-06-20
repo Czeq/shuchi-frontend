@@ -762,6 +762,9 @@
   </div>
 </div>
 
+<!-- APP WRAPPER (Hidden by default) -->
+<div id="appWrapper" style="display: none; width: 100%; min-height: 100vh;">
+
 <!-- SIDEBAR -->
 <aside>
   <div class="brand-header">
@@ -1867,6 +1870,8 @@ fetch('https://api.resend.com/emails', {
   </div>
 </div>
 
+</div> <!-- END APP WRAPPER -->
+
 <script>
 // Supabase connection client setup (reusing config from storefront/cart)
 const SUPABASE_URL = "https://okprwbzfsyvrkpygjkum.supabase.co";
@@ -1913,6 +1918,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (session) {
     document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('appWrapper').style.display = 'flex';
     refreshData();
   } else {
     document.getElementById('loginOverlay').style.display = 'flex';
@@ -1939,6 +1945,7 @@ async function handleLocalLogin(e) {
     document.getElementById('loginOverlay').style.opacity = 0;
     setTimeout(() => {
       document.getElementById('loginOverlay').style.display = 'none';
+      document.getElementById('appWrapper').style.display = 'flex';
       refreshData();
     }, 400);
   } catch (err) {
@@ -1951,6 +1958,7 @@ async function handleLocalLogin(e) {
 // Sign out handler
 async function handleLogout() {
   await supabaseClient.auth.signOut();
+  document.getElementById('appWrapper').style.display = 'none';
   document.getElementById('loginOverlay').style.display = 'flex';
   document.getElementById('loginOverlay').style.opacity = 1;
   
