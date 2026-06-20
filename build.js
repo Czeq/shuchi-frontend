@@ -272,6 +272,20 @@ function getBaseProductId(id) {
   return id.replace(/-\d+$/, '');
 }
 
+// Thumbnail helper — returns a compressed/resized URL for card previews
+function getThumbUrl(url, width = 400) {
+  if (!url) return '';
+  if (url.includes('.supabase.co/storage/')) {
+    const transformedUrl = url.replace(
+      '/storage/v1/object/public/',
+      '/storage/v1/render/image/public/'
+    );
+    const separator = transformedUrl.includes('?') ? '&' : '?';
+    return `${transformedUrl}${separator}width=${width}&quality=75&resize=contain`;
+  }
+  return url;
+}
+
 function runGenerator(products) {
   // --- A. GENERATE STATIC PRODUCT DETAILS PAGES ---
   const productTemplatePath = path.join(__dirname, 'product.html');
@@ -394,8 +408,9 @@ function runGenerator(products) {
       const pPrice = p.price || '';
       const pVolume = p.volume ? `${p.volume} ${p.volume_unit || ''}`.trim() : '';
 
+      const thumbImage = getThumbUrl(pImage, 400);
       const imgHTML = pImage ? 
-        `<img src="${pImage}" alt="${pTitle}" style="width: 100%; height: 100%; object-fit: contain; padding: 1.5rem; display: block;" onerror="handleImgError(this)">` :
+        `<img src="${thumbImage}" alt="${pTitle}" style="width: 100%; height: 100%; object-fit: contain; padding: 1.5rem; display: block;" loading="lazy" onerror="handleImgError(this)">` :
         `<svg width="50" height="76" viewBox="0 0 50 76" fill="none">
           <rect x="11" y="8" width="28" height="62" rx="4" fill="#A8C4A2" opacity="0.5"/>
           <rect x="16" y="3" width="18" height="8" rx="2" fill="#6B8F6B" opacity="0.4"/>

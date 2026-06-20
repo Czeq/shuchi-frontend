@@ -106,6 +106,23 @@ function deleteCookie(name) {
   document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax';
 }
 
+// Thumbnail helper — returns a compressed/resized URL for card previews
+// Works with Supabase Storage image transforms; passes through other URLs unchanged
+function getThumbUrl(url, width = 400) {
+  if (!url) return '';
+  // Supabase Storage public URLs support render/image/authenticated transforms
+  if (url.includes('.supabase.co/storage/')) {
+    // Use Supabase image transformation API
+    const transformedUrl = url.replace(
+      '/storage/v1/object/public/',
+      '/storage/v1/render/image/public/'
+    );
+    const separator = transformedUrl.includes('?') ? '&' : '?';
+    return `${transformedUrl}${separator}width=${width}&quality=75&resize=contain`;
+  }
+  return url;
+}
+
 // Image loading fallback helpers to prevent HTML attribute parsing quote conflicts
 function handleImgError(img) {
   img.outerHTML = `
@@ -2303,9 +2320,10 @@ async function injectStorefrontCatalogOnDetails() {
       const pDesc = p.desc || '';
       const pPrice = p.price || '';
       const pImage = p.image || p.img || p.imageurl || p.imgurl || p.photo || '';
+      const thumbImage = getThumbUrl(pImage, 400);
       
       const imgHTML = pImage ? 
-        `<img src="${pImage}" alt="${pTitle}" style="width: 100%; height: 100%; object-fit: contain; padding: 1.5rem; display: block;" onerror="handleImgError(this)">` :
+        `<img src="${thumbImage}" alt="${pTitle}" style="width: 100%; height: 100%; object-fit: contain; padding: 1.5rem; display: block;" loading="lazy" onerror="handleImgError(this)">` :
         `<svg width="50" height="76" viewBox="0 0 50 76" fill="none">
           <rect x="11" y="8" width="28" height="62" rx="4" fill="#A8C4A2" opacity="0.5"/>
           <rect x="16" y="3" width="18" height="8" rx="2" fill="#6B8F6B" opacity="0.4"/>
