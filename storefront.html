@@ -476,6 +476,125 @@
     display: flex;
   }
 
+  /* Search suggestions dropdown */
+  .search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    border: 1px solid var(--sage-light);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 12px 32px rgba(26,43,27,0.15);
+    z-index: 50;
+    display: none;
+    overflow: hidden;
+    max-height: 380px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .search-suggestions.active {
+    display: block;
+  }
+  .search-suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.65rem 1rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid var(--cream-deep);
+  }
+  .search-suggestion-item:last-child {
+    border-bottom: none;
+  }
+  .search-suggestion-item:hover,
+  .search-suggestion-item:active {
+    background: var(--cream);
+  }
+  .search-suggestion-img {
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, var(--sage-pale), var(--cream-deep));
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .search-suggestion-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 3px;
+  }
+  .search-suggestion-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .search-suggestion-brand {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sage);
+    line-height: 1.2;
+  }
+  .search-suggestion-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 0.85rem;
+    color: var(--dark);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .search-suggestion-price {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--dark);
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .search-suggestion-viewall {
+    display: block;
+    text-align: center;
+    padding: 0.7rem 1rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sage);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-top: 1px solid var(--cream-deep);
+  }
+  .search-suggestion-viewall:hover {
+    background: var(--cream);
+  }
+
+  @media (max-width: 600px) {
+    .search-suggestion-item {
+      padding: 0.75rem 1rem;
+      gap: 0.7rem;
+      min-height: 56px;
+    }
+    .search-suggestion-img {
+      width: 48px;
+      height: 48px;
+    }
+    .search-suggestion-title {
+      font-size: 0.82rem;
+    }
+    .search-suggestions {
+      max-height: 320px;
+    }
+  }
+
   /* Mobile filter toggle styles */
   .mobile-filter-toggle-container {
     display: none;
@@ -577,9 +696,10 @@
   </div>
 
   <div class="search-container fi vis" style="margin-top: 2rem;">
-    <input type="text" id="storefrontSearch" class="search-input" placeholder="Search by title, brand, ingredient, or concern..." oninput="handleSearch(this.value)">
+    <input type="text" id="storefrontSearch" class="search-input" placeholder="Search by title, brand, ingredient, or concern..." oninput="handleSearch(this.value)" onfocus="showSuggestions()" autocomplete="off">
     <svg class="search-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
     <button id="searchClearBtn" class="search-clear-btn" onclick="clearSearch()">×</button>
+    <div class="search-suggestions" id="searchSuggestions"></div>
   </div>
 
   <div class="mobile-filter-toggle-container fi vis">
@@ -955,6 +1075,7 @@ function filterType(type, btn, resetPage = true) {
 
 // Search Logic
 let searchTimeout;
+let suggestionsTimeout;
 function handleSearch(query) {
   currentSearchQuery = query;
   
@@ -967,17 +1088,117 @@ function handleSearch(query) {
     }
   }
 
+  // Update suggestions dropdown
+  clearTimeout(suggestionsTimeout);
+  suggestionsTimeout = setTimeout(() => {
+    renderSuggestions(query);
+  }, 120);
+
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
     applyFilters(true);
-  }, 200);
+  }, 300);
 }
+
+// Autocomplete suggestions
+function renderSuggestions(query) {
+  const container = document.getElementById('searchSuggestions');
+  if (!container) return;
+
+  if (!query || query.trim().length < 2) {
+    container.classList.remove('active');
+    container.innerHTML = '';
+    return;
+  }
+
+  const q = query.toLowerCase().trim();
+  const matches = allProducts.filter(product => {
+    const p = {};
+    Object.keys(product).forEach(k => { p[k.trim().toLowerCase()] = product[k]; });
+    const inStock = p.stock !== false && p.stock !== 'false';
+    if (!inStock) return false;
+    const title = (p.title || '').toLowerCase();
+    const brand = (p.brand || '').toLowerCase();
+    const desc = (p.desc || '').toLowerCase();
+    const skinType = (p.skintype || '').toLowerCase();
+    return title.includes(q) || brand.includes(q) || desc.includes(q) || skinType.includes(q);
+  }).slice(0, 5);
+
+  if (matches.length === 0) {
+    container.classList.remove('active');
+    container.innerHTML = '';
+    return;
+  }
+
+  let html = matches.map(product => {
+    const p = {};
+    Object.keys(product).forEach(k => { p[k.trim().toLowerCase()] = product[k]; });
+    const pTitle = p.title || '';
+    const pBrand = p.brand || '';
+    const pPrice = p.price || '';
+    const pImage = p.image || p.img || p.imageurl || p.imgurl || p.photo || '';
+    const thumbSrc = getThumbUrl(pImage, 100);
+    const imgContent = thumbSrc
+      ? `<img src="${thumbSrc}" alt="${pTitle}" onerror="this.parentElement.innerHTML='<svg width=20 height=30 viewBox=\&quot;0 0 50 76\&quot; fill=\&quot;none\&quot;><rect x=11 y=8 width=28 height=62 rx=4 fill=\&quot;#A8C4A2\&quot; opacity=\&quot;0.5\&quot;/></svg>'">`
+      : `<svg width="20" height="30" viewBox="0 0 50 76" fill="none"><rect x="11" y="8" width="28" height="62" rx="4" fill="#A8C4A2" opacity="0.5"/></svg>`;
+
+    return `<a class="search-suggestion-item" href="./${p.id}.html">
+      <div class="search-suggestion-img">${imgContent}</div>
+      <div class="search-suggestion-info">
+        <div class="search-suggestion-brand">${pBrand}</div>
+        <div class="search-suggestion-title">${pTitle}</div>
+      </div>
+      <div class="search-suggestion-price">৳ ${pPrice}</div>
+    </a>`;
+  }).join('');
+
+  // "View all results" link if there could be more
+  const totalMatches = allProducts.filter(product => {
+    const p = {};
+    Object.keys(product).forEach(k => { p[k.trim().toLowerCase()] = product[k]; });
+    const title = (p.title || '').toLowerCase();
+    const brand = (p.brand || '').toLowerCase();
+    const desc = (p.desc || '').toLowerCase();
+    return title.includes(q) || brand.includes(q) || desc.includes(q);
+  }).length;
+
+  if (totalMatches > 5) {
+    html += `<div class="search-suggestion-viewall" onclick="dismissSuggestions()">View all ${totalMatches} results ↓</div>`;
+  }
+
+  container.innerHTML = html;
+  container.classList.add('active');
+}
+
+function showSuggestions() {
+  const input = document.getElementById('storefrontSearch');
+  if (input && input.value.trim().length >= 2) {
+    renderSuggestions(input.value);
+  }
+}
+
+function dismissSuggestions() {
+  const container = document.getElementById('searchSuggestions');
+  if (container) {
+    container.classList.remove('active');
+    container.innerHTML = '';
+  }
+}
+
+// Close suggestions when clicking outside
+document.addEventListener('click', function(e) {
+  const searchContainer = document.querySelector('.search-container');
+  if (searchContainer && !searchContainer.contains(e.target)) {
+    dismissSuggestions();
+  }
+});
 
 function clearSearch() {
   const searchInput = document.getElementById('storefrontSearch');
   if (searchInput) {
     searchInput.value = '';
   }
+  dismissSuggestions();
   handleSearch('');
 }
 
