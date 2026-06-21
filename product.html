@@ -221,19 +221,41 @@
     .nav-links { display: none; }
     .hamburger { display: flex; }
     section { padding: 4.5rem 6vw; }
-    #product-hero { grid-template-columns: 1fr; padding-top: 100px; }
+    #product-hero { grid-template-columns: 1fr; padding-top: 80px; gap: 0; padding-left: 0; padding-right: 0; }
+    .phero-image-wrapper { padding: 0; border: none; background: transparent; }
+    .phero-content { padding: 2rem 6vw; }
     .footer-top { grid-template-columns: 1fr 1fr; gap: 2rem; }
   }
 
   @media (max-width: 600px) {
-    .p-title { font-size: 2.2rem; }
-    .p-price { font-size: 1.5rem; }
-    .phero-image-wrapper { padding: 2rem; }
-    .btn-primary { width: 100%; }
+    .p-title { font-size: 2rem; }
+    .p-price { font-size: 1.4rem; }
+    
+    /* Sticky bottom add to bag bar on mobile */
+    .p-actions {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--white);
+      padding: 1rem 5vw;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+      z-index: 90;
+      margin: 0;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .payment-note { justify-content: center; }
+    .phero-content { padding-bottom: 100px; } /* Prevent overlap */
+    
+    .btn-primary { width: 100%; padding: 1rem; }
     .ing-table, .ing-table tbody, .ing-table tr, .ing-table td { display: block; width: 100%; }
     .ing-table tr { padding: 1.5rem 0; border-bottom: 1px solid var(--cream-deep); }
     .ing-table td { padding: 0 0 0.5rem 0; border: none; }
-    .footer-top { grid-template-columns: 1fr; }
+    
+    /* Footer sync with storefront */
+    .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+    footer { padding: 3.5rem 5vw 2rem; }
+    .footer-bottom { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
+    
     /* 2-column product grid for discover section on mobile */
     .products-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
     .product-card-body { padding: 0.8rem; }
