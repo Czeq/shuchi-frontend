@@ -96,6 +96,9 @@
   
   .btn-primary { background: var(--dark); color: var(--cream); padding: 0.9rem 2.2rem; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; border: none; cursor: pointer; text-decoration: none; transition: all 0.35s; display: inline-block; text-align: center; }
   .btn-primary:hover { background: var(--sage); transform: translateY(-2px); }
+
+  .btn-secondary { background: var(--white); color: var(--dark); border: 1px solid var(--dark); padding: 0.9rem 2.2rem; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer; text-decoration: none; transition: all 0.35s; display: inline-block; text-align: center; }
+  .btn-secondary:hover { background: var(--dark); color: var(--cream); transform: translateY(-2px); }
   
   .fi { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
   .fi.vis { opacity: 1; transform: translateY(0); }
@@ -221,7 +224,7 @@
     .nav-links { display: none; }
     .hamburger { display: flex; }
     section { padding: 4.5rem 6vw; }
-    #product-hero { grid-template-columns: 1fr; padding-top: 80px; gap: 0; padding-left: 0; padding-right: 0; }
+    #product-hero { grid-template-columns: 1fr; padding-top: 80px; gap: 0; padding-left: 0; padding-right: 0; min-height: auto; }
     .phero-image-wrapper { padding: 0; border: none; background: transparent; }
     .phero-content { padding: 2rem 6vw; }
     .footer-top { grid-template-columns: 1fr 1fr; gap: 2rem; }
@@ -246,7 +249,9 @@
     .payment-note { justify-content: center; }
     .phero-content { padding-bottom: 100px; } /* Prevent overlap */
     
-    .btn-primary { width: 100%; padding: 1rem; }
+    .btn-primary, .btn-secondary { width: 100%; padding: 1rem; }
+    .btn-primary { font-size: 0.7rem; }
+    .btn-secondary { font-size: 0.7rem; padding: 0.9rem; }
     .ing-table, .ing-table tbody, .ing-table tr, .ing-table td { display: block; width: 100%; }
     .ing-table tr { padding: 1.5rem 0; border-bottom: 1px solid var(--cream-deep); }
     .ing-table td { padding: 0 0 0.5rem 0; border: none; }
@@ -332,7 +337,10 @@
     <div id="variantsContainer"></div>
 
     <div class="p-actions">
-      <button class="btn-primary">Add to Bag — [Price]</button>
+      <div style="display: flex; gap: 0.8rem; width: 100%;">
+        <button class="btn-secondary" id="btnBuyNow" style="flex: 1;">Buy Now</button>
+        <button class="btn-primary" id="btnAddToCart" style="flex: 1;">Add to Bag</button>
+      </div>
       <p class="payment-note">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         bKash and Cash on Delivery (COD) available
@@ -569,28 +577,45 @@ function hydrateHTML(rawProduct) {
   document.getElementById('pricePlaceholder').textContent = pPrice;
 
   // Update action button text with dynamic price and bind cart action
-  const buyBtn = document.querySelector('#product-hero .btn-primary');
+  const buyBtn = document.getElementById('btnAddToCart');
+  const buyNowBtn = document.getElementById('btnBuyNow');
   const stockNotice = document.getElementById('stockNoticePlaceholder');
   const inStock = product.stock !== false && product.stock !== 'false';
   
-  if (buyBtn) {
+  if (buyBtn && buyNowBtn) {
     if (inStock) {
       buyBtn.removeAttribute('disabled');
       buyBtn.style.background = 'var(--dark)';
       buyBtn.style.color = 'var(--cream)';
       buyBtn.style.cursor = 'pointer';
-      buyBtn.textContent = `Add to Bag — ${pPrice}`;
+      buyBtn.textContent = `Add to Bag`;
       buyBtn.onclick = function() {
         const pImage = product.image || product.img || product.imageurl || product.imgurl || product.photo || '';
         addToCart(product.id, pTitle, product.brand || '', product.price || 0, pImage);
+      };
+
+      buyNowBtn.removeAttribute('disabled');
+      buyNowBtn.style.background = 'var(--white)';
+      buyNowBtn.style.color = 'var(--dark)';
+      buyNowBtn.style.cursor = 'pointer';
+      buyNowBtn.onclick = function() {
+        const pImage = product.image || product.img || product.imageurl || product.imgurl || product.photo || '';
+        buyNow(product.id, pTitle, product.brand || '', product.price || 0, pImage);
       };
     } else {
       buyBtn.setAttribute('disabled', 'true');
       buyBtn.style.background = 'var(--cream-deep)';
       buyBtn.style.color = 'var(--text-soft)';
       buyBtn.style.cursor = 'not-allowed';
-      buyBtn.textContent = `Restocking Soon`;
+      buyBtn.textContent = `Restocking`;
       buyBtn.onclick = null;
+
+      buyNowBtn.setAttribute('disabled', 'true');
+      buyNowBtn.style.background = 'var(--cream-deep)';
+      buyNowBtn.style.color = 'var(--text-soft)';
+      buyNowBtn.style.borderColor = 'transparent';
+      buyNowBtn.style.cursor = 'not-allowed';
+      buyNowBtn.onclick = null;
     }
   }
 
