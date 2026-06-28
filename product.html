@@ -408,6 +408,11 @@
   <div class="reviews-grid" id="reviewsContainer">
     <p style="color: var(--text-soft); font-style: italic;">Loading reviews...</p>
   </div>
+  <div style="text-align: center; margin-top: 2.5rem;">
+    <button id="reviewsShowMore" onclick="renderReviewBatch()" style="display: none; background: transparent; border: 1.5px solid var(--sage); color: var(--sage); padding: 0.75rem 2.2rem; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; border-radius: 4px; transition: all 0.3s; font-family: inherit;">
+      Show More Reviews
+    </button>
+  </div>
 </section>
 
 <!-- REVIEW MODAL HTML -->
@@ -969,14 +974,43 @@ function renderStars(rating) {
   return stars;
 }
 
+let _allReviews = [];
+let _reviewsShown = 0;
+const REVIEWS_PER_PAGE = 3;
+
+function renderReviewBatch() {
+  const container = document.getElementById('reviewsContainer');
+  const showMoreBtn = document.getElementById('reviewsShowMore');
+  const batch = _allReviews.slice(_reviewsShown, _reviewsShown + REVIEWS_PER_PAGE);
+
+  batch.forEach(r => {
+    const date = new Date(r.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    const card = document.createElement('div');
+    card.className = 'review-card';
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(16px)';
+    card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    card.innerHTML = `
+      <div class="review-rating">${renderStars(r.rating)}</div>
+      <p class="review-text">"${r.review_text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}"</p>
+      <div class="review-author">${r.author_name.replace(/</g, '&lt;').replace(/>/g, '&gt;')} <span class="review-date">${date}</span></div>
+    `;
+    container.appendChild(card);
+    // Animate in
+    requestAnimationFrame(() => { card.style.opacity = '1'; card.style.transform = 'translateY(0)'; });
+  });
+
+  _reviewsShown += batch.length;
+
+  if (showMoreBtn) {
+    showMoreBtn.style.display = _reviewsShown >= _allReviews.length ? 'none' : 'inline-block';
+  }
+}
+
 async function loadReviews() {
   const container = document.getElementById('reviewsContainer');
-  // Wait for supabaseClient to be available (from cart.js)
-  if (typeof supabaseClient === 'undefined') {
-    setTimeout(loadReviews, 500);
-    return;
-  }
-  
+  if (typeof supabaseClient === 'undefined') { setTimeout(loadReviews, 500); return; }
+
   const currentId = document.body.dataset.productId || productId || '';
   if (!currentId) return;
 
@@ -992,19 +1026,15 @@ async function loadReviews() {
 
     if (!data || data.length === 0) {
       container.innerHTML = '<p style="color: var(--text-soft); font-style: italic;">No reviews yet. Be the first to review!</p>';
+      const btn = document.getElementById('reviewsShowMore');
+      if (btn) btn.style.display = 'none';
       return;
     }
 
-    container.innerHTML = data.map(r => {
-      const date = new Date(r.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-      return `
-        <div class="review-card">
-          <div class="review-rating">${renderStars(r.rating)}</div>
-          <p class="review-text">"${r.review_text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}"</p>
-          <div class="review-author">${r.author_name.replace(/</g, "&lt;").replace(/>/g, "&gt;")} <span class="review-date">${date}</span></div>
-        </div>
-      `;
-    }).join('');
+    _allReviews = data;
+    _reviewsShown = 0;
+    container.innerHTML = '';
+    renderReviewBatch();
   } catch (err) {
     console.error('Error loading reviews:', err);
     container.innerHTML = '<p style="color: var(--text-soft);">Unable to load reviews at this time.</p>';
