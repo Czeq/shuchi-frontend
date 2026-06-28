@@ -739,6 +739,9 @@ function hydrateHTML(rawProduct) {
 
   // Update page title
   document.title = `${pTitle} — SHUCHI শুচি`;
+
+  // Load reviews now that the product ID is confirmed on the page
+  loadReviews();
 }
 
 // 4. Fetch data and populate the page
@@ -1084,11 +1087,7 @@ async function submitReview(e) {
   }
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', loadReviews);
-} else {
-  loadReviews();
-}
+
 </script>
 </body>
 </html>
