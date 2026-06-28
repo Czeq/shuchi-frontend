@@ -189,6 +189,25 @@
   .ing-func { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sage); background: rgba(107,143,107,0.1); padding: 0.2rem 0.5rem; display: inline-block; }
   .ing-desc { font-size: 0.85rem; color: var(--text-soft); line-height: 1.6; }
 
+  /* REVIEWS SECTION */
+  #reviews-section { background: var(--cream-deep); padding: 5rem 8vw; }
+  .reviews-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; flex-wrap: wrap; gap: 1rem; }
+  .reviews-title { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(1.8rem, 3vw, 2.8rem); font-weight: 300; color: var(--dark); }
+  .reviews-title em { font-style: italic; color: var(--sage); }
+  .reviews-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
+  .review-card { background: var(--white); padding: 2rem; border-radius: 8px; border: 1px solid rgba(107,143,107,0.15); display: flex; flex-direction: column; gap: 1rem; transition: transform 0.3s; }
+  .review-card:hover { transform: translateY(-3px); }
+  .review-rating { color: var(--gold); font-size: 1.1rem; }
+  .review-text { font-size: 0.95rem; color: var(--text-soft); line-height: 1.6; flex-grow: 1; }
+  .review-author { font-size: 0.8rem; font-weight: 600; color: var(--dark); letter-spacing: 0.05em; text-transform: uppercase; }
+  .review-date { font-size: 0.7rem; color: rgba(90, 110, 91, 0.6); margin-left: 0.5rem; font-weight: 400; text-transform: none; }
+  
+  @media (max-width: 600px) {
+    #reviews-section { padding: 4rem 5vw; }
+    .reviews-header { flex-direction: column; align-items: flex-start; }
+    .reviews-grid { grid-template-columns: 1fr; }
+  }
+
   /* FOOTER */
   footer { background: var(--dark); color: rgba(245,239,228,0.55); padding: 5rem 8vw 3rem; }
   .footer-top { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 4rem; }
@@ -356,6 +375,35 @@
 </section>
 
 
+
+<!-- REVIEWS SECTION -->
+<section id="reviews-section" class="fi">
+  <div class="reviews-header">
+    <div>
+      <p class="section-label">Real Experiences</p>
+      <h2 class="reviews-title">Customer <em>Reviews</em></h2>
+    </div>
+    <button class="btn-secondary" style="padding: 0.7rem 1.5rem; font-size: 0.7rem;">Write a Review</button>
+  </div>
+  <div class="reviews-grid" id="reviewsContainer">
+    <!-- Static mock reviews for template -->
+    <div class="review-card">
+      <div class="review-rating">★★★★★</div>
+      <p class="review-text">"This completely changed my skin texture. It feels so much smoother and the redness is practically gone after just two weeks!"</p>
+      <div class="review-author">Sarah M. <span class="review-date">Oct 12, 2025</span></div>
+    </div>
+    <div class="review-card">
+      <div class="review-rating">★★★★★</div>
+      <p class="review-text">"I was hesitant because of my sensitive skin, but this is so gentle and hydrating. Will definitely repurchase."</p>
+      <div class="review-author">Nafisa A. <span class="review-date">Sep 28, 2025</span></div>
+    </div>
+    <div class="review-card">
+      <div class="review-rating">★★★★☆</div>
+      <p class="review-text">"Great product, absorbs very quickly without leaving any sticky residue. Perfect for the humid weather in Dhaka."</p>
+      <div class="review-author">Tariq H. <span class="review-date">Sep 15, 2025</span></div>
+    </div>
+  </div>
+</section>
 
 <!-- CONTINUE SHOPPING / YOU MAY ALSO LIKE -->
 <section id="continue-shopping" style="background: var(--white); padding: 4rem 8vw 5rem;">
