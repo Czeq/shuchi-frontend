@@ -208,6 +208,26 @@
     .reviews-grid { grid-template-columns: 1fr; }
   }
 
+  /* REVIEW MODAL */
+  .review-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(26,43,27,0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+  .review-modal-overlay.active { opacity: 1; pointer-events: auto; }
+  .review-modal { background: var(--cream); width: 90%; max-width: 500px; padding: 2.5rem; border-radius: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); transform: translateY(20px); transition: transform 0.3s ease; max-height: 90vh; overflow-y: auto; }
+  .review-modal-overlay.active .review-modal { transform: translateY(0); }
+  .modal-close { float: right; cursor: pointer; color: var(--text-soft); }
+  .modal-title { font-family: Georgia, 'Times New Roman', serif; font-size: 1.8rem; color: var(--dark); margin-bottom: 1.5rem; }
+  .form-group { margin-bottom: 1.2rem; }
+  .form-group label { display: block; font-size: 0.8rem; letter-spacing: 0.05em; color: var(--dark); font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase; }
+  .form-group input, .form-group textarea { width: 100%; padding: 0.8rem; border: 1px solid var(--sage); border-radius: 4px; background: var(--white); color: var(--dark); font-family: inherit; font-size: 0.95rem; }
+  .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--dark); }
+  /* Star Rating Slider */
+  .star-rating-widget { display: flex; gap: 0.4rem; flex-direction: row-reverse; justify-content: flex-end; }
+  .star-rating-widget input { display: none; }
+  .star-rating-widget label { font-size: 2rem; color: var(--cream-deep); cursor: pointer; transition: color 0.15s; line-height: 1; }
+  .star-rating-widget label:hover,
+  .star-rating-widget label:hover ~ label,
+  .star-rating-widget input:checked ~ label { color: var(--gold); }
+  @media (max-width: 600px) { .star-rating-widget label { font-size: 1.7rem; } }
+
   /* FOOTER */
   footer { background: var(--dark); color: rgba(245,239,228,0.55); padding: 5rem 8vw 3rem; }
   .footer-top { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 4rem; }
@@ -383,27 +403,42 @@
       <p class="section-label">Real Experiences</p>
       <h2 class="reviews-title">Customer <em>Reviews</em></h2>
     </div>
-    <button class="btn-secondary" style="padding: 0.7rem 1.5rem; font-size: 0.7rem;">Write a Review</button>
+    <button class="btn-secondary" style="padding: 0.7rem 1.5rem; font-size: 0.7rem;" onclick="openReviewModal()">Write a Review</button>
   </div>
   <div class="reviews-grid" id="reviewsContainer">
-    <!-- Static mock reviews for template -->
-    <div class="review-card">
-      <div class="review-rating">★★★★★</div>
-      <p class="review-text">"This completely changed my skin texture. It feels so much smoother and the redness is practically gone after just two weeks!"</p>
-      <div class="review-author">Sarah M. <span class="review-date">Oct 12, 2025</span></div>
-    </div>
-    <div class="review-card">
-      <div class="review-rating">★★★★★</div>
-      <p class="review-text">"I was hesitant because of my sensitive skin, but this is so gentle and hydrating. Will definitely repurchase."</p>
-      <div class="review-author">Nafisa A. <span class="review-date">Sep 28, 2025</span></div>
-    </div>
-    <div class="review-card">
-      <div class="review-rating">★★★★☆</div>
-      <p class="review-text">"Great product, absorbs very quickly without leaving any sticky residue. Perfect for the humid weather in Dhaka."</p>
-      <div class="review-author">Tariq H. <span class="review-date">Sep 15, 2025</span></div>
-    </div>
+    <p style="color: var(--text-soft); font-style: italic;">Loading reviews...</p>
   </div>
 </section>
+
+<!-- REVIEW MODAL HTML -->
+<div class="review-modal-overlay" id="reviewModalOverlay">
+  <div class="review-modal">
+    <svg class="modal-close" onclick="closeReviewModal()" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    <h3 class="modal-title">Share Your Experience</h3>
+    <form id="reviewForm" onsubmit="submitReview(event)">
+      <div class="form-group">
+        <label for="revName">Name</label>
+        <input type="text" id="revName" required placeholder="Your Name">
+      </div>
+      <div class="form-group">
+        <label>Rating</label>
+        <div class="star-rating-widget" id="starRatingWidget">
+          <input type="radio" name="revRating" id="star5" value="5"><label for="star5" title="5 stars">★</label>
+          <input type="radio" name="revRating" id="star4" value="4"><label for="star4" title="4 stars">★</label>
+          <input type="radio" name="revRating" id="star3" value="3" checked><label for="star3" title="3 stars">★</label>
+          <input type="radio" name="revRating" id="star2" value="2"><label for="star2" title="2 stars">★</label>
+          <input type="radio" name="revRating" id="star1" value="1"><label for="star1" title="1 star">★</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="revText">Review</label>
+        <textarea id="revText" rows="4" required placeholder="How did this product work for you?"></textarea>
+      </div>
+      <button type="submit" class="btn-primary" style="width: 100%;" id="submitReviewBtn">Submit Review</button>
+      <p id="reviewMsg" style="margin-top: 1rem; font-size: 0.85rem; text-align: center; display: none;"></p>
+    </form>
+  </div>
+</div>
 
 <!-- CONTINUE SHOPPING / YOU MAY ALSO LIKE -->
 <section id="continue-shopping" style="background: var(--white); padding: 4rem 8vw 5rem;">
@@ -911,6 +946,118 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', loadRelatedProducts);
 } else {
   loadRelatedProducts();
+}
+
+// ── REVIEWS FUNCTIONALITY ──
+function openReviewModal() {
+  document.getElementById('reviewModalOverlay').classList.add('active');
+  document.getElementById('reviewMsg').style.display = 'none';
+  document.getElementById('reviewForm').reset();
+}
+function closeReviewModal() {
+  document.getElementById('reviewModalOverlay').classList.remove('active');
+}
+document.getElementById('reviewModalOverlay').addEventListener('click', (e) => {
+  if (e.target.id === 'reviewModalOverlay') closeReviewModal();
+});
+
+function renderStars(rating) {
+  let stars = '';
+  for(let i = 1; i <= 5; i++) {
+    stars += i <= rating ? '★' : '☆';
+  }
+  return stars;
+}
+
+async function loadReviews() {
+  const container = document.getElementById('reviewsContainer');
+  // Wait for supabaseClient to be available (from cart.js)
+  if (typeof supabaseClient === 'undefined') {
+    setTimeout(loadReviews, 500);
+    return;
+  }
+  
+  const currentId = document.body.dataset.productId || productId || '';
+  if (!currentId) return;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('product_reviews')
+      .select('*')
+      .eq('product_id', currentId)
+      .eq('is_approved', true)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      container.innerHTML = '<p style="color: var(--text-soft); font-style: italic;">No reviews yet. Be the first to review!</p>';
+      return;
+    }
+
+    container.innerHTML = data.map(r => {
+      const date = new Date(r.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      return `
+        <div class="review-card">
+          <div class="review-rating">${renderStars(r.rating)}</div>
+          <p class="review-text">"${r.review_text.replace(/</g, "&lt;").replace(/>/g, "&gt;")}"</p>
+          <div class="review-author">${r.author_name.replace(/</g, "&lt;").replace(/>/g, "&gt;")} <span class="review-date">${date}</span></div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Error loading reviews:', err);
+    container.innerHTML = '<p style="color: var(--text-soft);">Unable to load reviews at this time.</p>';
+  }
+}
+
+async function submitReview(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitReviewBtn');
+  const msg = document.getElementById('reviewMsg');
+  
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+  msg.style.display = 'none';
+
+  const currentId = document.body.dataset.productId || productId || '';
+  
+  const selectedStar = document.querySelector('input[name="revRating"]:checked');
+  const rating = selectedStar ? parseInt(selectedStar.value) : 3;
+
+  const payload = {
+    product_id: currentId,
+    author_name: document.getElementById('revName').value,
+    rating: rating,
+    review_text: document.getElementById('revText').value,
+    is_approved: true
+  };
+
+  try {
+    const { error } = await supabaseClient.from('product_reviews').insert([payload]);
+    if (error) throw error;
+    
+    msg.style.display = 'block';
+    msg.style.color = 'var(--sage)';
+    msg.textContent = 'Thank you! Your review has been published.';
+    document.getElementById('reviewForm').reset();
+    document.querySelector('#star3').checked = true; // reset stars to default
+    setTimeout(() => { closeReviewModal(); loadReviews(); }, 1500);
+  } catch (err) {
+    console.error('Error submitting review:', err);
+    msg.style.display = 'block';
+    msg.style.color = '#d32f2f';
+    msg.textContent = 'Something went wrong. Please try again.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Submit Review';
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadReviews);
+} else {
+  loadReviews();
 }
 </script>
 </body>

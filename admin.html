@@ -824,6 +824,12 @@
         Website Functions
       </a>
     </li>
+    <li class="nav-item" id="navReviews" onclick="switchTab('reviews')">
+      <a>
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+        Reviews
+      </a>
+    </li>
   </ul>
   <div class="logout-btn" onclick="handleLogout()">
     <span>Sign Out</span>
@@ -1614,6 +1620,33 @@
   </div>
 
   <!-- TAB: WEBSITE FUNCTIONS -->
+  <div id="tabReviews" class="tab-content">
+    <div class="table-actions">
+      <h3 style="font-family: Georgia, serif; font-size: 1.25rem; font-weight: 400; color: var(--dark);">Customer Reviews</h3>
+      <button class="btn-refresh" onclick="loadAdminReviews()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17"/></svg>
+        Refresh
+      </button>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Author</th>
+            <th>Rating</th>
+            <th>Review</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="reviewsAdminBody">
+          <tr><td colspan="6" class="text-soft" style="text-align:center; padding: 2.5rem;">Loading reviews...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <div id="tabWebsiteFunctions" class="tab-content">
     <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--sage-pale); padding-bottom: 0.75rem;">
       <button class="filter-tab active" id="subTabVideosBtn" onclick="switchWebsiteSubTab('videos')">Watch &amp; Learn Videos</button>
@@ -3073,6 +3106,9 @@ function switchTab(tabName) {
   } else if (tabName === 'websiteFunctions') {
     document.getElementById('navWebsiteFunctions').classList.add('active');
     document.getElementById('tabWebsiteFunctions').classList.add('active');
+  } else if (tabName === 'reviews') {
+    document.getElementById('navReviews').classList.add('active');
+    document.getElementById('tabReviews').classList.add('active');
   }
 
   renderDashboard();
@@ -3098,6 +3134,8 @@ function renderDashboard() {
   } else if (activeTab === 'websiteFunctions') {
     loadVideos();
     loadFaqs();
+  } else if (activeTab === 'reviews') {
+    loadAdminReviews();
   }
 }
 
@@ -5162,6 +5200,70 @@ function switchWebsiteSubTab(subTab) {
     contentVideos.style.display = 'none';
     contentFaqs.style.display = 'grid';
     loadFaqs();
+  }
+}
+
+// ── REVIEWS ADMIN ──
+function renderAdminStars(rating) {
+  let s = '';
+  for (let i = 1; i <= 5; i++) s += i <= rating ? '★' : '☆';
+  return `<span style="color: var(--gold); font-size: 1rem;">${s}</span>`;
+}
+
+async function loadAdminReviews() {
+  const tbody = document.getElementById('reviewsAdminBody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" class="text-soft" style="text-align:center; padding: 2.5rem;">Loading...</td></tr>';
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('product_reviews')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-soft" style="text-align:center; padding: 2.5rem;">No reviews yet.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.map(r => {
+      const date = new Date(r.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      const reviewSnippet = (r.review_text || '').substring(0, 80) + ((r.review_text || '').length > 80 ? '…' : '');
+      const approvedBadge = r.is_approved
+        ? '<span class="badge status-sent">Live</span>'
+        : '<span class="badge status-processing">Pending</span>';
+      return `<tr>
+        <td style="font-size:0.8rem; max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${r.product_id || '—'}</td>
+        <td style="font-weight:600;">${r.author_name || '—'} ${approvedBadge}</td>
+        <td>${renderAdminStars(r.rating)}</td>
+        <td style="font-size:0.82rem; color:var(--text-soft); max-width:260px;">${reviewSnippet}</td>
+        <td style="font-size:0.78rem; color:var(--text-soft);">${date}</td>
+        <td>
+          <button class="btn-action" style="background: rgba(163,59,59,0.08); border-color: rgba(163,59,59,0.25); color: var(--status-cancelled);"
+            onclick="deleteReview('${r.id}')">
+            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v6M14 11v6"></path><path d="M9 6V4h6v2"></path></svg>
+            Delete
+          </button>
+        </td>
+      </tr>`;
+    }).join('');
+  } catch (err) {
+    console.error('Error loading reviews:', err);
+    tbody.innerHTML = '<tr><td colspan="6" class="text-soft" style="text-align:center; padding: 2.5rem;">Failed to load reviews.</td></tr>';
+  }
+}
+
+async function deleteReview(reviewId) {
+  if (!confirm('Are you sure you want to permanently delete this review?')) return;
+  try {
+    const { error } = await supabaseClient.from('product_reviews').delete().eq('id', reviewId);
+    if (error) throw error;
+    loadAdminReviews();
+  } catch (err) {
+    console.error('Error deleting review:', err);
+    alert('Could not delete review. Check your Supabase RLS policies allow DELETE on product_reviews.');
   }
 }
 
