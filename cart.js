@@ -1098,6 +1098,9 @@ function injectAuthUI() {
 
           <!-- Sign In Form -->
           <form id="signInForm" class="auth-panel active" onsubmit="submitSignIn(event)">
+            <h3 class="auth-form-heading" style="font-family: Georgia, serif; font-size: 1.35rem; color: var(--dark); margin: 0 0 0.4rem 0; font-weight: 600;">Welcome Back</h3>
+            <p style="font-size: 0.82rem; color: var(--text-soft); margin: 0 0 1.5rem 0; line-height: 1.5;">Enter your phone number to access your account, saved addresses, and live order tracking.</p>
+
             <div class="form-group">
               <label class="form-label" for="signInPhone">Phone Number</label>
               <input type="tel" id="signInPhone" class="form-input" required placeholder="017XXXXXXXX" pattern="[0-9]{11}">
@@ -1106,10 +1109,17 @@ function injectAuthUI() {
               <button type="button" class="checkout-cancel-btn" onclick="toggleAuthModal()">Cancel</button>
               <button type="submit" class="auth-submit-btn">Sign In</button>
             </div>
+
+            <div class="auth-switch-prompt" style="text-align: center; margin-top: 1.5rem; padding-top: 1.2rem; border-top: 1px solid var(--cream-deep); font-size: 0.83rem; color: var(--text-soft);">
+              Don't have an account? <a href="#" onclick="event.preventDefault(); switchAuthTab('signup');" style="color: var(--sage); font-weight: 600; text-decoration: none; border-bottom: 1.5px solid var(--sage-light); padding-bottom: 1px; margin-left: 0.3rem;">Sign up</a>
+            </div>
           </form>
 
           <!-- Sign Up Form -->
           <form id="signUpForm" class="auth-panel" onsubmit="submitSignUp(event)">
+            <h3 class="auth-form-heading" style="font-family: Georgia, serif; font-size: 1.35rem; color: var(--dark); margin: 0 0 0.4rem 0; font-weight: 600;">Create an Account</h3>
+            <p style="font-size: 0.82rem; color: var(--text-soft); margin: 0 0 1.5rem 0; line-height: 1.5;">Register your details once to breeze through checkout and track every order.</p>
+
             <div class="form-group">
               <label class="form-label" for="signUpName">Full Name</label>
               <input type="text" id="signUpName" class="form-input" required placeholder="Name">
@@ -1129,6 +1139,10 @@ function injectAuthUI() {
             <div class="auth-actions">
               <button type="button" class="checkout-cancel-btn" onclick="toggleAuthModal()">Cancel</button>
               <button type="submit" class="auth-submit-btn">Create Account</button>
+            </div>
+
+            <div class="auth-switch-prompt" style="text-align: center; margin-top: 1.5rem; padding-top: 1.2rem; border-top: 1px solid var(--cream-deep); font-size: 0.83rem; color: var(--text-soft);">
+              Already have an account? <a href="#" onclick="event.preventDefault(); switchAuthTab('signin');" style="color: var(--sage); font-weight: 600; text-decoration: none; border-bottom: 1.5px solid var(--sage-light); padding-bottom: 1px; margin-left: 0.3rem;">Sign in</a>
             </div>
           </form>
         </div>
@@ -2601,14 +2615,14 @@ function initRegistrationPrompt() {
     promptDiv.id = 'shuchiRegPrompt';
     promptDiv.innerHTML = `
       <div class="shuchi-reg-prompt-title">
-        <span>Create your Shuchi Account</span>
+        <span>Sign in to SHUCHI</span>
         <button class="shuchi-reg-prompt-close" onclick="dismissRegPrompt()">×</button>
       </div>
       <div class="shuchi-reg-prompt-desc">
-        Register in 10 seconds to save checkout time, track order history, and personalize your skincare routines.
+        Sign in to save checkout time, track live order status, and view your purchase history.
       </div>
       <div class="shuchi-reg-prompt-actions">
-        <button class="shuchi-reg-prompt-btn" onclick="triggerRegPromptSignUp()">Create Account</button>
+        <button class="shuchi-reg-prompt-btn" onclick="triggerRegPromptSignUp()">Sign In</button>
         <button class="shuchi-reg-prompt-btn-secondary" onclick="dismissRegPrompt()">Maybe Later</button>
       </div>
     `;
