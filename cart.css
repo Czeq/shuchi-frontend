@@ -1,4 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:ital@0;1&display=swap');
+
 /* ── CART, AUTH & CHECKOUT STYLES ── */
+
+/* Bangla Typography */
+.nav-logo span,
+.brand-logo span,
+.fbrand span,
+.header-brand span,
+.hero-bangla,
+.fcopy span,
+.bangla,
+.bangla-text,
+[lang="bn"],
+#why::before {
+  font-family: 'Tiro Bangla', Georgia, serif !important;
+  font-style: italic !important;
+}
 
 /* Floating Buttons in Navigation */
 .nav-cart-btn, .nav-auth-btn {
