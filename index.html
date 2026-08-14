@@ -1596,6 +1596,10 @@ async function loadHomepageProducts() {
     const topFour = uniqueProducts.slice(0, 4);
     renderHomepageCards(topFour, liveProducts);
 
+    // Pre-warm image cache for ALL products in the background
+    // so the shop page loads images instantly on next visit
+    prefetchProductImages(liveProducts);
+
   } catch (error) {
     console.error("Error loading homepage products:", error);
     if (!hasCache) {
@@ -1614,6 +1618,37 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', loadHomepageProducts);
 } else {
   loadHomepageProducts();
+}
+
+// ── BACKGROUND IMAGE PREFETCHER ──
+// Silently pre-downloads all product images into the browser cache
+// during idle time, so the shop page loads images instantly.
+function prefetchProductImages(products) {
+  if (!products || products.length === 0) return;
+
+  const prefetch = () => {
+    products.forEach(product => {
+      const p = {};
+      Object.keys(product).forEach(k => { p[k.trim().toLowerCase()] = product[k]; });
+      const imgUrl = p.image || p.img || p.imageurl || p.imgurl || p.photo || '';
+      if (!imgUrl) return;
+
+      // Use the same thumbnail transform as the shop (400px width)
+      const thumbUrl = typeof getThumbUrl === 'function' ? getThumbUrl(imgUrl, 400) : imgUrl;
+
+      // Create an off-screen Image object — browser caches it automatically
+      const img = new Image();
+      img.src = thumbUrl;
+    });
+  };
+
+  // Use idle time so prefetching never competes with the visible page
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(prefetch, { timeout: 3000 });
+  } else {
+    // Fallback for Safari — wait 2s then prefetch
+    setTimeout(prefetch, 2000);
+  }
 }
 
 // Existing Scroll Fade & Nav Scripts

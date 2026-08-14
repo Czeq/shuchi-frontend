@@ -265,6 +265,9 @@ async function initCartSystem() {
   // Initialize dynamic discount DOM observer
   initDiscountObserver();
 
+  // Show cookie notice on first visit
+  initCookieNotice();
+
   // Check if we need to auto-open the order tracking history dashboard
   try {
     if (sessionStorage.getItem('open_order_tracking') === 'true') {
@@ -276,6 +279,85 @@ async function initCartSystem() {
   } catch (e) {
     console.warn("Failed to check open_order_tracking flag:", e);
   }
+}
+
+// ── COOKIE NOTICE ──
+// Slim bottom bar shown once per browser — dismissed forever via localStorage
+function initCookieNotice() {
+  if (localStorage.getItem('shuchi_cookie_ok')) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'shuchiCookieBanner';
+  banner.innerHTML = `
+    <style>
+      #shuchiCookieBanner {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        z-index: 9999;
+        background: rgba(26, 43, 27, 0.97);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(168, 196, 162, 0.2);
+        padding: 1rem 4vw;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+        transform: translateY(100%);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        flex-wrap: wrap;
+      }
+      #shuchiCookieBanner.visible { transform: translateY(0); }
+      #shuchiCookieBanner p {
+        color: rgba(245, 239, 228, 0.75);
+        font-size: 0.78rem;
+        line-height: 1.5;
+        margin: 0;
+        flex: 1;
+        min-width: 200px;
+      }
+      #shuchiCookieBanner a {
+        color: #A8C4A2;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+      #shuchiCookieBanner button {
+        background: #6B8F6B;
+        color: #FAFAF7;
+        border: none;
+        padding: 0.5rem 1.4rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-radius: 3px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 0.2s;
+        flex-shrink: 0;
+      }
+      #shuchiCookieBanner button:hover { background: #5a7a5a; }
+    </style>
+    <p>
+      We use cookies to save your bag and account details, making your experience smoother.
+      <a href="data-handling.html">Learn more</a>
+    </p>
+    <button id="shuchiCookieOk" onclick="dismissCookieNotice()">Got it</button>
+  `;
+
+  document.body.appendChild(banner);
+
+  // Slide up after a short delay so it doesn't flash immediately on load
+  setTimeout(() => banner.classList.add('visible'), 800);
+}
+
+function dismissCookieNotice() {
+  const banner = document.getElementById('shuchiCookieBanner');
+  if (banner) {
+    banner.style.transform = 'translateY(100%)';
+    setTimeout(() => banner.remove(), 400);
+  }
+  localStorage.setItem('shuchi_cookie_ok', '1');
 }
 
 // ── DISCOUNT SYSTEM HELPERS & DYNAMIC DOM RENDERER ──
